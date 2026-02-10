@@ -92,7 +92,7 @@ export default function ProjectManagerDashboard({ user, invoices = [] }) {
                                             {inv.id.slice(-4)}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-800 text-sm">{inv.vendorName}</p>
+                                            <p className="font-semibold text-gray-800 text-sm">{inv.vendorName}{inv.vendorCode && <span className="text-indigo-600 font-mono text-xs ml-1.5">({inv.vendorCode})</span>}</p>
                                             <p className="text-xs text-gray-500">{inv.project || 'General Project'}</p>
                                         </div>
                                     </div>
@@ -136,7 +136,7 @@ export default function ProjectManagerDashboard({ user, invoices = [] }) {
                                             {inv.id.slice(-4)}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-800 text-sm">{inv.vendorName}</p>
+                                            <p className="font-semibold text-gray-800 text-sm">{inv.vendorName}{inv.vendorCode && <span className="text-indigo-600 font-mono text-xs ml-1.5">({inv.vendorCode})</span>}</p>
                                             <div className="flex items-center gap-1">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                                                 <p className="text-xs text-rose-600 font-medium">{inv.matching?.discrepancies?.length || 1} Issues</p>

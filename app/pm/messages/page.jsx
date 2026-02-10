@@ -243,7 +243,7 @@ export default function PMMessagesPage() {
                                         >
                                             <option value="">Select Vendor</option>
                                             {vendors.map(v => (
-                                                <option key={v.id} value={v.linkedUserId || v.id}>{v.name}</option>
+                                                <option key={v.id} value={v.linkedUserId || v.id}>{v.vendorCode ? `${v.vendorCode} · ${v.name}` : v.name}</option>
                                             ))}
                                         </select>
                                     </div>

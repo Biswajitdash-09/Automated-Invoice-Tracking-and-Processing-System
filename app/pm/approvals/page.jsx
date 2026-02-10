@@ -145,7 +145,10 @@ export default function PMApprovalsPage() {
                                         <h3 className="text-lg font-semibold text-white">
                                             {invoice.invoiceNumber || `Invoice ${invoice.id.slice(0, 8)}`}
                                         </h3>
-                                        <p className="text-gray-400">{invoice.vendorName}</p>
+                                        <p className="text-gray-400">
+                                            {invoice.vendorCode && <span className="font-mono text-purple-300 mr-1">{invoice.vendorCode}</span>}
+                                            {invoice.vendorName}
+                                        </p>
                                     </div>
                                     <span className="text-2xl font-bold text-white">
                                         ₹{invoice.amount?.toLocaleString() || '-'}
@@ -247,7 +250,7 @@ export default function PMApprovalsPage() {
                                     {actionModal.invoice.invoiceNumber || actionModal.invoice.id.slice(0, 8)}
                                     <br />
                                     <span className="text-white font-medium">
-                                        ₹{actionModal.invoice.amount?.toLocaleString()} - {actionModal.invoice.vendorName}
+                                        ₹{actionModal.invoice.amount?.toLocaleString()} - {actionModal.invoice.vendorCode && <span className="font-mono text-purple-300">{actionModal.invoice.vendorCode}</span>} {actionModal.invoice.vendorCode && '· '}{actionModal.invoice.vendorName}
                                     </span>
                                 </p>
                                 <div className="mb-6">
