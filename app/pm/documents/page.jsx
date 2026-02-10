@@ -22,6 +22,7 @@ export default function PMDocumentsPage() {
     const [uploading, setUploading] = useState(false);
     const [filterType, setFilterType] = useState('');
     const [filterProject, setFilterProject] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const fileInputRef = useRef(null);
 
     const [uploadData, setUploadData] = useState({
@@ -38,7 +39,7 @@ export default function PMDocumentsPage() {
     useEffect(() => {
         fetchDocuments();
         fetchProjects();
-    }, [filterType, filterProject]);
+    }, [filterType, filterProject, searchQuery]);
 
     const fetchDocuments = async () => {
         try {
@@ -238,70 +239,77 @@ export default function PMDocumentsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {documents.map((doc, idx) => (
-                            <motion.div
-                                key={doc.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                            >
-                                <Card className="h-full hover:shadow-md transition-all border-slate-200/60 p-6">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className="flex items-center gap-4 min-w-0">
-                                            <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                                                <Icon name="File" className="text-slate-400" size={24} />
+                        {documents
+                            .filter(doc =>
+                                !searchQuery ||
+                                doc.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                doc.metadata?.projectName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                doc.type.toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                            .map((doc, idx) => (
+                                <motion.div
+                                    key={doc.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                >
+                                    <Card className="h-full hover:shadow-md transition-all border-slate-200/60 p-6">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="flex items-center gap-4 min-w-0">
+                                                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                                                    <Icon name="File" className="text-slate-400" size={24} />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h3 className="text-sm font-bold text-slate-800 truncate" title={doc.fileName}>
+                                                        {doc.fileName}
+                                                    </h3>
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-0.5">
+                                                        {(doc.fileSize / 1024).toFixed(1)} KB
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0">
-                                                <h3 className="text-sm font-bold text-slate-800 truncate" title={doc.fileName}>
-                                                    {doc.fileName}
-                                                </h3>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-0.5">
-                                                    {(doc.fileSize / 1024).toFixed(1)} KB
-                                                </p>
-                                            </div>
+                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border shrink-0 ${getTypeClasses(doc.type)}`}>
+                                                {doc.type.replace('_', ' ')}
+                                            </span>
                                         </div>
-                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border shrink-0 ${getTypeClasses(doc.type)}`}>
-                                            {doc.type.replace('_', ' ')}
-                                        </span>
-                                    </div>
 
-                                    <div className="space-y-3 mb-6">
-                                        {doc.metadata?.projectName && (
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Project</span>
-                                                <span className="text-xs font-bold text-slate-700 truncate ml-4 text-right">{doc.metadata.projectName}</span>
-                                            </div>
-                                        )}
-                                        {doc.metadata?.billingMonth && (
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Month</span>
-                                                <span className="text-xs font-bold text-slate-700">{doc.metadata.billingMonth}</span>
-                                            </div>
-                                        )}
-                                        {doc.metadata?.ringiNumber && (
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ringi #</span>
-                                                <span className="text-xs font-bold text-slate-700">{doc.metadata.ringiNumber}</span>
-                                            </div>
-                                        )}
-                                    </div>
+                                        <div className="space-y-3 mb-6">
+                                            {doc.metadata?.projectName && (
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Project</span>
+                                                    <span className="text-xs font-bold text-slate-700 truncate ml-4 text-right">{doc.metadata.projectName}</span>
+                                                </div>
+                                            )}
+                                            {doc.metadata?.billingMonth && (
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Month</span>
+                                                    <span className="text-xs font-bold text-slate-700">{doc.metadata.billingMonth}</span>
+                                                </div>
+                                            )}
+                                            {doc.metadata?.ringiNumber && (
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ringi #</span>
+                                                    <span className="text-xs font-bold text-slate-700">{doc.metadata.ringiNumber}</span>
+                                                </div>
+                                            )}
+                                        </div>
 
-                                    <div className="flex justify-between items-center pt-6 border-t border-slate-100">
-                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${getStatusClasses(doc.status)}`}>
-                                            {doc.status}
-                                        </span>
-                                        <a
-                                            href={doc.fileUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 font-black text-[10px] uppercase tracking-widest transition-colors"
-                                        >
-                                            View <Icon name="ArrowRight" size={12} />
-                                        </a>
-                                    </div>
-                                </Card>
-                            </motion.div>
-                        ))}
+                                        <div className="flex justify-between items-center pt-6 border-t border-slate-100">
+                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${getStatusClasses(doc.status)}`}>
+                                                {doc.status}
+                                            </span>
+                                            <a
+                                                href={doc.fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 font-black text-[10px] uppercase tracking-widest transition-colors"
+                                            >
+                                                View <Icon name="ArrowRight" size={12} />
+                                            </a>
+                                        </div>
+                                    </Card>
+                                </motion.div>
+                            ))}
                     </div>
                 )}
 
