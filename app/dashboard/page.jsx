@@ -199,18 +199,18 @@ export default function DashboardPage() {
       {isAdmin && <RoleSwitcher />}
 
       {/* Search Bar - Global for Dashboard */}
-      <div className="flex items-center bg-white/40 border border-white/60 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all flex-1 md:flex-none min-w-[140px] md:min-w-0">
-        <Icon name="Search" size={14} className="text-slate-400" />
+      <div className="flex items-center bg-white/40 border border-white/60 rounded-xl px-2.5 sm:px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all flex-1 md:flex-none min-w-[120px] md:min-w-0">
+        <Icon name="Search" size={14} className="text-slate-400 shrink-0" />
         <input
           type="text"
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-transparent border-none outline-none text-xs ml-2 w-full md:w-32 xl:w-48 placeholder:text-slate-400 font-medium"
+          className="bg-transparent border-none outline-none text-[11px] sm:text-xs ml-2 w-full md:w-32 xl:w-48 placeholder:text-slate-400 font-medium"
         />
       </div>
 
-      <div className="flex items-center gap-1.5 bg-white/40 border border-white/60 rounded-xl p-1">
+      <div className="flex items-center gap-1 sm:gap-1.5 bg-white/40 border border-white/60 rounded-xl p-1 shrink-0">
         <button
           onClick={handleExportCSV}
           className="h-8 w-8 flex items-center justify-center text-slate-500 rounded-lg hover:bg-white hover:text-indigo-600 transition-all"
@@ -222,14 +222,14 @@ export default function DashboardPage() {
           <label tabIndex={0} className="h-8 w-8 flex items-center justify-center text-slate-500 rounded-lg hover:bg-white hover:text-indigo-600 transition-all cursor-pointer">
             <Icon name="Filter" size={15} />
           </label>
-          <ul tabIndex={0} className="dropdown-content z-60 menu p-2 shadow-2xl bg-white/90 backdrop-blur-xl rounded-2xl w-56 border border-white/60 mt-3">
+          <ul tabIndex={0} className="dropdown-content z-[60] menu p-2 shadow-2xl bg-white/90 backdrop-blur-xl rounded-2xl w-48 sm:w-56 border border-white/60 mt-3">
             <div className="px-4 py-2 border-b border-slate-50 mb-1">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Filter by Status</p>
             </div>
             <li><button onClick={() => setStatusFilter("ALL")} className={`text-xs font-bold py-2 rounded-xl hover:bg-slate-50 ${statusFilter === 'ALL' ? 'text-indigo-600' : 'text-slate-600'}`}>All Invoices</button></li>
-            <li><button onClick={() => setStatusFilter("PENDING_APPROVAL")} className={`text-xs font-bold py-2 rounded-xl hover:bg-slate-50 ${statusFilter === 'PENDING_APPROVAL' ? 'text-amber-600' : 'text-slate-600'}`}>Pending Approval</button></li>
+            <li><button onClick={() => setStatusFilter("PENDING_APPROVAL")} className={`text-xs font-bold py-2 rounded-xl hover:bg-slate-50 ${statusFilter === 'PENDING_APPROVAL' ? 'text-amber-600' : 'text-slate-600'}`}>Pending</button></li>
             <li><button onClick={() => setStatusFilter("PAID")} className={`text-xs font-bold py-2 rounded-xl hover:bg-slate-50 ${statusFilter === 'PAID' ? 'text-emerald-600' : 'text-slate-600'}`}>Paid</button></li>
-            <li><button onClick={() => setStatusFilter("MATCH_DISCREPANCY")} className={`text-xs font-bold py-2 rounded-xl hover:bg-slate-50 ${statusFilter === 'MATCH_DISCREPANCY' ? 'text-orange-600' : 'text-slate-600'}`}>Discrepancies</button></li>
+            <li><button onClick={() => setStatusFilter("MATCH_DISCREPANCY")} className={`text-xs font-bold py-2 rounded-xl hover:bg-slate-50 ${statusFilter === 'MATCH_DISCREPANCY' ? 'text-orange-600' : 'text-slate-600'}`}>Discrepancy</button></li>
           </ul>
         </div>
       </div>
@@ -238,9 +238,9 @@ export default function DashboardPage() {
       {!isPM && !isVendor && !isAdmin && (
         <button
           onClick={() => setIsUploadModalOpen(true)}
-          className="flex items-center justify-center gap-2 h-10 px-4 sm:px-6 bg-linear-to-br from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all whitespace-nowrap flex-1 sm:flex-none"
+          className="flex items-center justify-center gap-2 h-10 px-4 bg-linear-to-br from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all whitespace-nowrap"
         >
-          <Icon name="Plus" size={15} /> <span className="hidden sm:inline">New Invoice</span><span className="sm:hidden">New</span>
+          <Icon name="Plus" size={15} /> <span className="hidden xs:inline">New Invoice</span><span className="xs:hidden">New</span>
         </button>
       )}
     </div>

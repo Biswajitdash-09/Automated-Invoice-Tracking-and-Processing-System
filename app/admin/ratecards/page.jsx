@@ -158,26 +158,33 @@ export default function RateCardManagementPage() {
     };
 
     return (
-        <div className="pb-10 min-h-screen bg-slate-50/50">
+        <div className="px-4 sm:px-8 py-6 sm:py-8 min-h-screen">
             <PageHeader
-                title="Rate Card Management"
-                subtitle="Define standard service rates with your vendors"
+                title="Rate Management"
+                subtitle="Standardize vendor service rates"
                 icon="Layers"
                 accent="purple"
-                roleLabel="Administrator"
+                actions={
+                    <button
+                        onClick={() => { resetForm(); setShowCreateModal(true); }}
+                        className="flex items-center justify-center gap-2 h-10 px-4 sm:px-6 bg-linear-to-br from-purple-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-purple-500/20 active:scale-95 transition-all whitespace-nowrap"
+                    >
+                        <Icon name="Plus" size={16} /> <span className="hidden xs:inline">New Rate Card</span><span className="xs:hidden">New</span>
+                    </button>
+                }
             />
 
             <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
                 {/* Filters & Actions */}
-                <Card className="p-6">
-                    <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                        <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+                <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-lg p-3 sm:p-4 mb-6">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                             <div className="relative w-full sm:w-64">
                                 <Icon name="Building" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                 <select
                                     value={filterVendor}
                                     onChange={(e) => setFilterVendor(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-bold text-xs focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-hidden transition-all appearance-none"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-white/50 border border-slate-100 rounded-xl text-slate-700 font-bold text-xs focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all appearance-none"
                                 >
                                     <option value="">All Vendors</option>
                                     {vendors.map(v => (
@@ -190,7 +197,7 @@ export default function RateCardManagementPage() {
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-bold text-xs focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-hidden transition-all appearance-none"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-white/50 border border-slate-100 rounded-xl text-slate-700 font-bold text-xs focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all appearance-none"
                                 >
                                     <option value="">All Status</option>
                                     <option value="ACTIVE">Active</option>
@@ -201,12 +208,12 @@ export default function RateCardManagementPage() {
                         </div>
                         <button
                             onClick={() => { resetForm(); setShowCreateModal(true); }}
-                            className="w-full lg:w-auto px-8 py-3 bg-linear-to-br from-purple-600 to-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-6 py-3 bg-linear-to-br from-purple-600 to-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
-                            <Icon name="Plus" size={16} /> Create Rate Card
+                            <Icon name="Plus" size={14} /> <span className="hidden xs:inline">Create Rate Card</span><span className="xs:hidden">Create</span>
                         </button>
                     </div>
-                </Card>
+                </div>
 
                 {/* Error Display */}
                 <AnimatePresence>
@@ -225,12 +232,12 @@ export default function RateCardManagementPage() {
 
                 {/* Rate Cards Grid */}
                 {loading ? (
-                    <div className="text-center py-20">
-                        <span className="loading loading-spinner loading-lg text-purple-600"></span>
-                        <p className="mt-4 text-slate-500 font-bold text-xs uppercase tracking-widest">Fetching Rate Cards...</p>
+                    <div className="text-center py-20 bg-white/50 rounded-3xl border border-dashed border-slate-200">
+                        <span className="loading loading-spinner h-8 w-8 text-purple-600"></span>
+                        <p className="mt-4 text-slate-500 font-bold text-[10px] uppercase tracking-widest">Fetching Rates...</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {ratecards.map((card, idx) => (
                             <motion.div
                                 key={card.id}

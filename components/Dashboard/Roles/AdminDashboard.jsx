@@ -81,7 +81,7 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
     return (
         <div className="space-y-8 pb-10 px-4 sm:px-6 lg:px-0">
             {/* System Health - clean cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-2 gap-5">
                 <Card className="p-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40 shadow-sm hover:shadow-md transition-shadow">
                     <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Database</p>
                     <div className="flex items-center gap-3 mt-2">
@@ -205,16 +205,17 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
 
             {/* Quick Actions */}
             <div>
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <h2 className="text-lg font-bold text-gray-800 mb-4 px-1">Quick Actions</h2>
+                <div className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {quickActions.map((action) => (
                         <Link key={action.path} href={action.path}>
-                            <Card className="p-5 rounded-2xl border border-slate-100 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group shadow-sm">
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform`}>
-                                    <Icon name={action.icon} size={24} className="text-white" />
+                            <Card className="p-4 sm:p-5 rounded-2xl border border-slate-100 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group shadow-sm h-full flex flex-col items-center sm:items-start text-center sm:text-left">
+                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 sm:mb-4 shadow-md group-hover:scale-105 transition-transform shrink-0`}>
+                                    <Icon name={action.icon} size={20} className="text-white sm:hidden" />
+                                    <Icon name={action.icon} size={24} className="text-white hidden sm:block" />
                                 </div>
-                                <h3 className="font-bold text-gray-900">{action.name}</h3>
-                                <p className="text-sm text-slate-500 mt-1">{action.desc}</p>
+                                <h3 className="font-bold text-xs sm:text-base text-gray-900 leading-tight">{action.name}</h3>
+                                <p className="text-[10px] sm:text-sm text-slate-500 mt-1 line-clamp-2 hidden sm:block">{action.desc}</p>
                             </Card>
                         </Link>
                     ))}
@@ -267,51 +268,49 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
                             <thead>
                                 <tr className="bg-slate-50/50 border-b border-slate-100">
                                     <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Invoice</th>
-                                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Vendor ID & Name</th>
-                                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Assigned PM</th>
+                                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Vendor</th>
+                                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hidden sm:table-cell">Assigned PM</th>
                                     <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Decision</th>
-                                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Approved By</th>
+                                    <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right hidden md:table-cell">By</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {approvalHistory.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-4 py-8 text-center text-slate-400 text-sm">
-                                            No invoices have been approved or rejected yet.
+                                            No decisions yet.
                                         </td>
                                     </tr>
                                 ) : (
                                     approvalHistory.map((inv) => (
                                         <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-4 py-3 text-sm font-semibold text-slate-800">
+                                            <td className="px-4 py-3 text-xs sm:text-sm font-semibold text-slate-800">
                                                 {inv.invoiceNumber || `#${inv.id.slice(-6)}`}
                                             </td>
-                                            <td className="px-4 py-3 text-sm">
-                                                <div className="flex flex-col">
-                                                    <span className="font-mono text-xs text-indigo-600">
+                                            <td className="px-4 py-3">
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="font-mono text-[10px] text-indigo-600 truncate">
                                                         {inv.vendorCode || inv.vendorId || '—'}
                                                     </span>
-                                                    <span className="text-slate-700 font-semibold text-xs">
+                                                    <span className="text-slate-700 font-semibold text-[10px] sm:text-xs truncate">
                                                         {inv.vendorName || 'Unknown Vendor'}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-slate-600">
+                                            <td className="px-4 py-3 text-xs text-slate-600 hidden sm:table-cell truncate">
                                                 {inv.assignedPMName || inv.assignedPM || '—'}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest
+                                                <span className={`inline-flex px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest
                                                     ${inv.pmApproval?.status === 'APPROVED'
                                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                                                         : 'bg-rose-50 text-rose-700 border border-rose-100'
                                                     }`}>
-                                                    {inv.pmApproval?.status || '—'}
+                                                    {inv.pmApproval?.status?.slice(0, 3) || '—'}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 text-right text-xs text-slate-500">
-                                                {inv.pmApproval?.approvedByRole === 'Admin'
-                                                    ? `Admin · ${inv.pmApprovedByName || ''}`.trim()
-                                                    : `Project Manager · ${inv.pmApprovedByName || ''}`.trim()}
+                                            <td className="px-4 py-3 text-right text-[10px] text-slate-500 hidden md:table-cell">
+                                                {inv.pmApprovedByName || 'System'}
                                             </td>
                                         </tr>
                                     ))
