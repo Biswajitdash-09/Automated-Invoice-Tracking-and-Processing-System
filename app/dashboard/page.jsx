@@ -146,10 +146,13 @@ export default function DashboardPage() {
   // Show loading state while checking authentication or redirecting vendors
   if (authLoading || !user || user?.role === ROLES.VENDOR) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FC]/50 backdrop-blur-sm">
         <div className="text-center">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-          <p className="mt-4 text-gray-500">Loading...</p>
+          <div className="relative inline-flex items-center justify-center mb-4">
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+            <span className="loading loading-spinner loading-lg text-primary relative z-10 w-12 h-12"></span>
+          </div>
+          <p className="mt-4 text-xs font-black uppercase tracking-[0.2em] text-slate-400 animate-pulse">Initializing Data...</p>
         </div>
       </div>
     );
