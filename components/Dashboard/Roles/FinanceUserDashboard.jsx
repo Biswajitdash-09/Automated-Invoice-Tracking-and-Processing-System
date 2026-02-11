@@ -6,14 +6,33 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/Icon";
 import DropZone from "@/components/Dashboard/DropZone";
 
-const FinanceUserDashboard = ({ invoices, onUploadComplete }) => {
+const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL', searchQuery = '' }) => {
     const router = useRouter();
     const discrepancyCount = invoices.filter(inv => inv.status === 'MATCH_DISCREPANCY').length;
     const manualReview = invoices.filter(inv => inv.status === 'VALIDATION_REQUIRED').length;
     const readyForPayment = invoices.filter(inv => inv.status === 'APPROVED').length;
 
+    // Filter invoices based on props from parent Dashboard
+    const filteredInvoices = invoices.filter(inv => {
+        // 1. Search Filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            const matchesSearch =
+                inv.vendorName?.toLowerCase().includes(query) ||
+                inv.invoiceNumber?.toLowerCase().includes(query) ||
+                inv.id?.toLowerCase().includes(query) ||
+                inv.amount?.toString().includes(query);
+            if (!matchesSearch) return false;
+        }
+
+        // 2. Status Filter
+        if (statusFilter !== 'ALL' && inv.status !== statusFilter) return false;
+
+        return true;
+    });
+
     // Sort invoices by date descending for "Recent Activity"
-    const recentInvoices = [...invoices]
+    const recentInvoices = [...filteredInvoices]
         .sort((a, b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date))
         .slice(0, 10);
 
@@ -78,9 +97,6 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete }) => {
                             <div>
                                 <h3 className="font-bold text-lg text-slate-800">Recent Invoice Activity</h3>
                             </div>
-                            <button onClick={() => router.push('/digitization')} className="text-xs font-bold text-primary hover:underline">
-                                View All History
-                            </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="table w-full">
@@ -90,7 +106,6 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete }) => {
                                         <th className="font-semibold py-4">Amount</th>
                                         <th className="font-semibold py-4">Date</th>
                                         <th className="font-semibold py-4">Status</th>
-                                        <th className="font-semibold py-4 pr-6 text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="text-sm">
@@ -126,16 +141,11 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete }) => {
                                                         {inv.status.replace('_', ' ')}
                                                     </span>
                                                 </td>
-                                                <td className="text-right pr-6">
-                                                    <button className="btn btn-ghost btn-xs text-slate-400 hover:text-success hover:bg-success/5">
-                                                        <Icon name="ArrowRight" size={14} />
-                                                    </button>
-                                                </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="5" className="text-center py-10 text-slate-400 italic">
+                                            <td colSpan="4" className="text-center py-10 text-slate-400 italic">
                                                 No recent activity found. Upload an invoice to get started.
                                             </td>
                                         </tr>
