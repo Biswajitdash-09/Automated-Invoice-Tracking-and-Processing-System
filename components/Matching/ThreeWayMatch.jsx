@@ -10,6 +10,13 @@ import { useAuth } from "@/context/AuthContext";
 import { hasPermission } from "@/constants/roles";
 import clsx from "clsx";
 
+// Safely parse an amount value to a number
+const safeAmount = (val) => {
+  if (val == null || val === '') return 0;
+  const num = typeof val === 'string' ? parseFloat(val.replace(/[^0-9.-]/g, '')) : Number(val);
+  return isNaN(num) ? 0 : num;
+};
+
 const ThreeWayMatch = ({ invoice: initialInvoice }) => {
   const router = useRouter();
   const [invoice, setInvoice] = useState(initialInvoice);
@@ -210,7 +217,7 @@ const ThreeWayMatch = ({ invoice: initialInvoice }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="space-y-1">
               <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Invoice Date</p>
-              <p className="text-sm font-black text-slate-800">{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p className="text-sm font-black text-slate-800">{invoice.date ? new Date(invoice.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}</p>
             </div>
             <div className="space-y-1">
               <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Invoice Number</p>
@@ -367,7 +374,7 @@ const ThreeWayMatch = ({ invoice: initialInvoice }) => {
             <div className="space-y-4">
               <div className="flex justify-between items-center px-2">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Subtotal</span>
-                <span className="text-sm font-black text-slate-800">₹{(invoice.amount || 0).toLocaleString()}</span>
+                <span className="text-sm font-black text-slate-800">₹{safeAmount(invoice.amount).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center px-2">
                 <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Tax (GST 0%)</span>
@@ -376,7 +383,7 @@ const ThreeWayMatch = ({ invoice: initialInvoice }) => {
               <div className="flex justify-between items-center px-2 pt-4 border-t border-slate-100">
                 <span className="text-sm font-black text-slate-900 uppercase tracking-[0.2em]">Grand Total</span>
                 <div className="text-right">
-                  <span className="text-3xl font-black text-slate-900 tracking-tighter">₹{(invoice.amount || 0).toLocaleString()}</span>
+                  <span className="text-3xl font-black text-slate-900 tracking-tighter">₹{safeAmount(invoice.amount).toLocaleString()}</span>
                   <p className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.2em] mt-1">Verified Amount (INR)</p>
                 </div>
               </div>
