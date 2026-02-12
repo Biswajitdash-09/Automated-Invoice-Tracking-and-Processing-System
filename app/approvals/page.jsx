@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { ROLES } from "@/constants/roles";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 import { getAllInvoices } from "@/lib/api";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -33,8 +33,11 @@ function ApprovalsPageContent() {
     if (!authLoading) {
       if (!user) {
         router.push("/login");
-      } else if (![ROLES.ADMIN, ROLES.PROJECT_MANAGER].includes(user.role)) {
-        router.push("/dashboard");
+      } else {
+        const role = getNormalizedRole(user);
+        if (![ROLES.ADMIN, ROLES.PROJECT_MANAGER].includes(role)) {
+          router.push("/dashboard");
+        }
       }
     }
   }, [user, authLoading, router]);

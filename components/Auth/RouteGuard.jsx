@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { ROLES } from "@/constants/roles";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 
 const PUBLIC_PATHS = ["/login", "/signup", "/"];
 
@@ -29,7 +29,8 @@ export default function RouteGuard({ children }) {
         } else if (user && isPublicPath && path !== "/") {
             // User is logged in and trying to access login/signup -> redirect to app
             setAuthorized(true);
-            router.push(user.role === ROLES.VENDOR ? "/vendors" : "/dashboard");
+            const role = getNormalizedRole(user);
+            router.push(role === ROLES.VENDOR ? "/vendors" : "/dashboard");
         } else {
             setAuthorized(true);
         }

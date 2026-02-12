@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import Icon from "@/components/Icon";
 import { getAllInvoices, getVendorDashboardData } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { getNormalizedRole, ROLES } from "@/constants/roles";
 import DocumentViewer from "@/components/ui/DocumentViewer";
 import clsx from "clsx";
 import PageHeader from "@/components/Layout/PageHeader";
@@ -34,7 +35,7 @@ function VendorPortalContent() {
             const data = await getVendorDashboardData();
             // If component unmounted or new fetch started, ignore result
             if (thisFetchId !== fetchIdRef.current) return;
-            
+
             // Vendor API returns { stats: {...}, invoices: [...] }
             const invoiceList = Array.isArray(data) ? data : (data?.invoices || []);
             setAllSubmissions(invoiceList);
@@ -94,7 +95,7 @@ function VendorPortalContent() {
         if (user) {
             fetchAllPms();
             fetchFinanceUsers();
-            if (user.role === "Vendor") fetchVendorProfile();
+            if (getNormalizedRole(user) === ROLES.VENDOR) fetchVendorProfile();
         }
     }, [user, fetchAllPms, fetchFinanceUsers, fetchVendorProfile]);
 
@@ -248,7 +249,7 @@ function VendorPortalContent() {
                 roleLabel={vendorProfile?.vendorCode ? `Vendor · ${vendorProfile.vendorCode}` : "Vendor"}
                 actions={
                     <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-                        {user.role === "Vendor" && (
+                        {getNormalizedRole(user) === ROLES.VENDOR && (
                             <button
                                 onClick={() => setIsSubmissionModalOpen(true)}
                                 className="flex items-center justify-center gap-2 h-10 sm:h-11 px-4 sm:px-6 bg-teal-600 hover:bg-teal-700 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl sm:rounded-2xl shadow-lg shadow-teal-500/20 active:scale-95 transition-all whitespace-nowrap order-1 sm:order-none"

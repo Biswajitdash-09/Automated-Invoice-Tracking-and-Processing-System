@@ -5,11 +5,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Icon from "@/components/Icon";
 import { useAuth } from "@/context/AuthContext";
-import { ROLES } from "@/constants/roles";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 
 export default function LandingPage() {
   const { user, isLoading } = useAuth();
-  const isVendor = user?.role === ROLES.VENDOR;
+  const role = getNormalizedRole(user);
+  const isVendor = role === ROLES.VENDOR;
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-[#F8F9FC]">

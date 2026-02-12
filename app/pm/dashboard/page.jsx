@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { ROLES } from "@/constants/roles";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 import { getPMDashboardData } from "@/lib/api";
 import PageHeader from "@/components/Layout/PageHeader";
 import ProjectManagerDashboard from "@/components/Dashboard/Roles/ProjectManagerDashboard";
@@ -16,7 +16,8 @@ export default function PMDashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!authLoading && (!user || user.role !== ROLES.PROJECT_MANAGER)) {
+        const role = getNormalizedRole(user);
+        if (!authLoading && (!user || role !== ROLES.PROJECT_MANAGER)) {
             router.push("/dashboard");
         }
     }, [user, authLoading, router]);
@@ -34,12 +35,13 @@ export default function PMDashboardPage() {
     };
 
     useEffect(() => {
-        if (!authLoading && user?.role === ROLES.PROJECT_MANAGER) {
+        const role = getNormalizedRole(user);
+        if (!authLoading && role === ROLES.PROJECT_MANAGER) {
             fetchData();
         }
     }, [user, authLoading]);
 
-    if (authLoading || !user || user.role !== ROLES.PROJECT_MANAGER) {
+    if (authLoading || !user || getNormalizedRole(user) !== ROLES.PROJECT_MANAGER) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <span className="loading loading-spinner loading-lg text-primary"></span>

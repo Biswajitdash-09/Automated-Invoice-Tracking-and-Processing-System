@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { requireRole, checkPermission } from '@/lib/rbac';

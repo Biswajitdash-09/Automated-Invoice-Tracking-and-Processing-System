@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
-import { ROLES } from "@/constants/roles";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 import Icon from "@/components/Icon";
 import Card from "@/components/ui/Card";
 import PageHeader from "@/components/Layout/PageHeader";
@@ -21,7 +21,8 @@ export default function AdminDocumentsPage() {
     const [viewerLoading, setViewerLoading] = useState(true);
 
     useEffect(() => {
-        if (!authLoading && (!user || user.role !== ROLES.ADMIN)) {
+        const role = getNormalizedRole(user);
+        if (!authLoading && (!user || role !== ROLES.ADMIN)) {
             router.push("/dashboard");
         }
     }, [user, authLoading, router]);
@@ -99,7 +100,7 @@ export default function AdminDocumentsPage() {
         setViewerLoading(true);
     };
 
-    if (authLoading || !user || user.role !== ROLES.ADMIN) {
+    if (authLoading || !user || getNormalizedRole(user) !== ROLES.ADMIN) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <span className="loading loading-spinner loading-lg text-primary"></span>
@@ -243,104 +244,104 @@ export default function AdminDocumentsPage() {
             </Card>
 
             {/* Document viewer modal - matching vendor page implementation */}
-        <AnimatePresence>
-          {viewerDocumentId && (
-            <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-                onClick={() => setViewerDocumentId(null)}
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="relative bg-white w-full max-w-5xl rounded-3xl sm:rounded-[3rem] shadow-2xl overflow-hidden z-[151] flex flex-col max-h-[90vh] border border-white"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 bg-slate-50/50 gap-4">
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-200 shrink-0">
-                      <Icon name="FileText" size={20} />
+            <AnimatePresence>
+                {viewerDocumentId && (
+                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                            onClick={() => setViewerDocumentId(null)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="relative bg-white w-full max-w-5xl rounded-3xl sm:rounded-[3rem] shadow-2xl overflow-hidden z-[151] flex flex-col max-h-[90vh] border border-white"
+                        >
+                            <div className="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 bg-slate-50/50 gap-4">
+                                <div className="flex items-center gap-4 w-full sm:w-auto">
+                                    <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-200 shrink-0">
+                                        <Icon name="FileText" size={20} />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <h3 className="font-black text-slate-800 text-sm truncate max-w-[200px] sm:max-w-md">
+                                            {documents.find((doc) => doc.id === viewerDocumentId)?.fileName || `Document ${viewerDocumentId}`}
+                                        </h3>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Secure Document Access</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
+                                    <a
+                                        href={documents.find((doc) => doc.id === viewerDocumentId)?.source === 'invoice'
+                                            ? `/api/invoices/${viewerDocumentId}/file`
+                                            : `/api/documents/${viewerDocumentId}/file`}
+                                        download
+                                        className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                                    >
+                                        <Icon name="Download" size={14} /> <span className="hidden xs:inline">Download</span>
+                                    </a>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewerDocumentId(null)}
+                                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors bg-slate-100"
+                                    >
+                                        <Icon name="X" size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex-1 bg-slate-100 relative min-h-[60vh]">
+                                {viewerLoading && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10">
+                                        <span className="loading loading-spinner loading-lg text-purple-600 mb-4" />
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Retrieving Document...</p>
+                                    </div>
+                                )}
+                                {(() => {
+                                    const doc = documents.find(d => d.id === viewerDocumentId);
+                                    const fileName = doc?.fileName?.toLowerCase() || "";
+                                    const isOfficeDoc = fileName.endsWith('.doc') || fileName.endsWith('.docx') || fileName.endsWith('.xls') || fileName.endsWith('.xlsx');
+                                    const docUrl = doc?.source === 'invoice' ? `/api/invoices/${viewerDocumentId}/file` : `/api/documents/${viewerDocumentId}/file`;
+
+                                    if (isOfficeDoc) {
+                                        return (
+                                            <div className="flex flex-col items-center justify-center h-full p-20 text-center space-y-6">
+                                                <div className="w-24 h-24 rounded-[2.5rem] bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner">
+                                                    <Icon name="AlertCircle" size={48} />
+                                                </div>
+                                                <div className="max-w-md">
+                                                    <h4 className="text-xl font-black text-slate-800 uppercase tracking-tight">Preview Unavailable</h4>
+                                                    <p className="text-sm font-medium text-slate-500 mt-2 leading-relaxed">
+                                                        Office documents (.doc, .xls) cannot be rendered directly in the browser. Please download the file to view its contents.
+                                                    </p>
+                                                </div>
+                                                <a
+                                                    href={docUrl}
+                                                    download
+                                                    className="inline-flex items-center gap-3 h-14 px-8 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-purple-200 transition-all active:scale-95"
+                                                    onLoad={() => setViewerLoading(false)}
+                                                >
+                                                    <Icon name="Download" size={20} /> Download for Viewing
+                                                </a>
+                                            </div>
+                                        );
+                                    }
+
+                                    return (
+                                        <iframe
+                                            src={docUrl}
+                                            title="Document preview"
+                                            className="w-full h-full min-h-[60vh] border-0"
+                                            onLoad={() => setViewerLoading(false)}
+                                        />
+                                    );
+                                })()}
+                            </div>
+                        </motion.div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-black text-slate-800 text-sm truncate max-w-[200px] sm:max-w-md">
-                        {documents.find((doc) => doc.id === viewerDocumentId)?.fileName || `Document ${viewerDocumentId}`}
-                      </h3>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Secure Document Access</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
-                    <a
-                      href={documents.find((doc) => doc.id === viewerDocumentId)?.source === 'invoice'
-                        ? `/api/invoices/${viewerDocumentId}/file`
-                        : `/api/documents/${viewerDocumentId}/file`}
-                      download
-                      className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-                    >
-                      <Icon name="Download" size={14} /> <span className="hidden xs:inline">Download</span>
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => setViewerDocumentId(null)}
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors bg-slate-100"
-                    >
-                      <Icon name="X" size={18} />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 bg-slate-100 relative min-h-[60vh]">
-                  {viewerLoading && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10">
-                      <span className="loading loading-spinner loading-lg text-purple-600 mb-4" />
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Retrieving Document...</p>
-                    </div>
-                  )}
-                  {(() => {
-                    const doc = documents.find(d => d.id === viewerDocumentId);
-                    const fileName = doc?.fileName?.toLowerCase() || "";
-                    const isOfficeDoc = fileName.endsWith('.doc') || fileName.endsWith('.docx') || fileName.endsWith('.xls') || fileName.endsWith('.xlsx');
-                    const docUrl = doc?.source === 'invoice' ? `/api/invoices/${viewerDocumentId}/file` : `/api/documents/${viewerDocumentId}/file`;
-    
-                    if (isOfficeDoc) {
-                      return (
-                        <div className="flex flex-col items-center justify-center h-full p-20 text-center space-y-6">
-                          <div className="w-24 h-24 rounded-[2.5rem] bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner">
-                            <Icon name="AlertCircle" size={48} />
-                          </div>
-                          <div className="max-w-md">
-                            <h4 className="text-xl font-black text-slate-800 uppercase tracking-tight">Preview Unavailable</h4>
-                            <p className="text-sm font-medium text-slate-500 mt-2 leading-relaxed">
-                              Office documents (.doc, .xls) cannot be rendered directly in the browser. Please download the file to view its contents.
-                            </p>
-                          </div>
-                          <a
-                            href={docUrl}
-                            download
-                            className="inline-flex items-center gap-3 h-14 px-8 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-purple-200 transition-all active:scale-95"
-                            onLoad={() => setViewerLoading(false)}
-                          >
-                            <Icon name="Download" size={20} /> Download for Viewing
-                          </a>
-                        </div>
-                      );
-                    }
-    
-                    return (
-                      <iframe
-                        src={docUrl}
-                        title="Document preview"
-                        className="w-full h-full min-h-[60vh] border-0"
-                        onLoad={() => setViewerLoading(false)}
-                      />
-                    );
-                  })()}
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-    </div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 }

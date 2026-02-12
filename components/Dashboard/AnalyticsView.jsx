@@ -8,6 +8,7 @@ import {
 import Icon from "@/components/Icon";
 import Card from "@/components/ui/Card";
 import { getAnalytics } from "@/lib/api";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
@@ -45,7 +46,7 @@ const AnalyticsView = ({ user }) => {
     return (
         <div className="space-y-6">
             {/* PM Context Info */}
-            {user?.role === 'PROJECT_MANAGER' && (
+            {getNormalizedRole(user) === ROLES.PROJECT_MANAGER && (
                 <div className="bg-blue-50/50 border border-blue-100 p-3 rounded-xl flex items-center gap-2 text-xs text-blue-600 font-medium">
                     <Icon name="Info" size={14} />
                     Analytics are filtered to your {user.assignedProjects?.length || 0} assigned projects.

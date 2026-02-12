@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUser } from '@/lib/server-auth';
 import { ROLES } from '@/constants/roles';
 import connectDB from '@/lib/mongodb';

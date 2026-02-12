@@ -2,6 +2,7 @@
 
 import Icon from "@/components/Icon";
 import { useAuth } from "@/context/AuthContext";
+import { getNormalizedRole } from "@/constants/roles";
 import { useRouter } from "next/navigation";
 
 const accentMap = {
@@ -48,7 +49,8 @@ export default function PageHeader({
 
   const displayRole = (() => {
     if (roleLabel) return roleLabel;
-    const role = user?.role ? (typeof user.role === 'string' ? user.role : user.role[0]) : '';
+    const normalizedRole = getNormalizedRole(user);
+    const role = normalizedRole || '';
     if (['PM', 'Project Manager', 'projectmanager'].includes(role.toLowerCase().replace(/\s/g, ''))) return "Project Manager";
     if (role.toLowerCase() === 'admin') return "System Administrator";
     if (role.toLowerCase() === 'finance user') return "Finance Officer";

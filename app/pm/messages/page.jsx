@@ -6,7 +6,7 @@ import PageHeader from '@/components/Layout/PageHeader';
 import Card from '@/components/ui/Card';
 import Icon from '@/components/Icon';
 import { useAuth } from '@/context/AuthContext';
-import { ROLES } from '@/constants/roles';
+import { ROLES, getNormalizedRole } from '@/constants/roles';
 
 const MESSAGE_TYPES = [
     { value: 'GENERAL', label: 'General', color: 'gray' },
@@ -42,8 +42,9 @@ export default function PMMessagesPage() {
                 const data = await res.json();
                 const pmList = (data.pms || []).map(p => ({ ...p, type: 'PM' }));
 
+                const role = getNormalizedRole(user);
                 // If PM, also fetch vendors
-                if (user?.role === ROLES.PROJECT_MANAGER || user?.role === ROLES.ADMIN) {
+                if (role === ROLES.PROJECT_MANAGER || role === ROLES.ADMIN) {
                     const vRes = await fetch('/api/pm/vendors');
                     if (vRes.ok) {
                         const vData = await vRes.json();
@@ -285,7 +286,7 @@ export default function PMMessagesPage() {
                                 <form onSubmit={handleSendMessage} className="space-y-6">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Recipient ({user?.role === ROLES.VENDOR ? 'Project Manager' : 'Contact'})</label>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Recipient ({getNormalizedRole(user) === ROLES.VENDOR ? 'Project Manager' : 'Contact'})</label>
                                             <select
                                                 required
                                                 value={composeData.recipientId}
@@ -409,7 +410,7 @@ export default function PMMessagesPage() {
                                             </div>
                                         </div>
                                         <a
-                                            href={user?.role === ROLES.VENDOR
+                                            href={getNormalizedRole(user) === ROLES.VENDOR
                                                 ? `/vendors?invoiceId=${selectedMessage.invoiceId}`
                                                 : `/pm/approvals?invoiceId=${selectedMessage.invoiceId}`
                                             }

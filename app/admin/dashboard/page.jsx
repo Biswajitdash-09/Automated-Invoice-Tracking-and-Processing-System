@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { ROLES } from "@/constants/roles";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 import { getAdminDashboardData } from "@/lib/api";
 import PageHeader from "@/components/Layout/PageHeader";
 import AdminDashboard from "@/components/Dashboard/Roles/AdminDashboard";
@@ -17,7 +17,8 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!authLoading && (!user || user.role !== ROLES.ADMIN)) {
+        const role = getNormalizedRole(user);
+        if (!authLoading && (!user || role !== ROLES.ADMIN)) {
             router.push("/dashboard");
         }
     }, [user, authLoading, router]);
@@ -35,12 +36,13 @@ export default function AdminDashboardPage() {
     };
 
     useEffect(() => {
-        if (!authLoading && user?.role === ROLES.ADMIN) {
+        const role = getNormalizedRole(user);
+        if (!authLoading && role === ROLES.ADMIN) {
             fetchData();
         }
     }, [user, authLoading]);
 
-    if (authLoading || !user || user.role !== ROLES.ADMIN) {
+    if (authLoading || !user || getNormalizedRole(user) !== ROLES.ADMIN) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <span className="loading loading-spinner loading-lg text-primary"></span>

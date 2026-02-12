@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUser } from '@/lib/server-auth';
 import { db } from '@/lib/db';
 import { ROLES } from '@/constants/roles';
@@ -7,7 +9,7 @@ export async function GET() {
     try {
         // Get current user from session
         const user = await getCurrentUser();
-        
+
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

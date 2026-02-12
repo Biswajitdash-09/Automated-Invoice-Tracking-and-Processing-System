@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { ROLES } from "@/constants/roles";
+import { ROLES, getNormalizedRole } from "@/constants/roles";
 import { getInvoiceStatus, transitionWorkflow } from "@/lib/api";
 import ThreeWayMatch from "@/components/Matching/ThreeWayMatch";
 import AuditTrail from "@/components/Workflow/AuditTrail";
@@ -85,11 +85,14 @@ export default function ApprovalDetailPage() {
     if (!authLoading) {
       if (!user) {
         router.push("/login");
-      } else if (![ROLES.ADMIN, ROLES.PROJECT_MANAGER].includes(user.role)) {
-        router.push("/dashboard");
+      } else {
+        const role = getNormalizedRole(user);
+        if (![ROLES.ADMIN, ROLES.PROJECT_MANAGER].includes(role)) {
+          router.push("/dashboard");
+        }
       }
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, getNormalizedRole]);
 
   useEffect(() => {
     if (authLoading || !user) return; // Wait for auth
