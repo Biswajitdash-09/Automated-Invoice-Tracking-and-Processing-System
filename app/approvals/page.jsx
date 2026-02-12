@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ROLES } from "@/constants/roles";
@@ -11,6 +11,14 @@ import Icon from "@/components/Icon";
 import PageHeader from "@/components/Layout/PageHeader";
 
 export default function ApprovalsPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading approvals...</div>}>
+      <ApprovalsPageContent />
+    </Suspense>
+  );
+}
+
+function ApprovalsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
@@ -100,7 +108,7 @@ export default function ApprovalsPage() {
             Filter
             {localStatusFilter !== 'ALL' && <span className="badge badge-xs ml-1">1</span>}
           </button>
-          
+
           {filterDropdownOpen && (
             <div className="dropdown-menu dropdown-menu-end z-50 animate-in fade-in slide-in-from-top-2">
               <ul className="p-1 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 min-w-[200px]">
@@ -129,7 +137,7 @@ export default function ApprovalsPage() {
             </div>
           )}
         </div>
-        
+
         {/* Sort Button */}
         <button
           onClick={toggleSortOrder}
