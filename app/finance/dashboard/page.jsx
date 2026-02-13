@@ -68,14 +68,8 @@ export default function FinanceDashboardPage() {
         }
     };
 
-    // Filter invoices assigned to this finance user
-    const invoices = useMemo(() => {
-        if (!user) return allInvoices;
-        return allInvoices.filter(inv =>
-            inv.assignedFinanceUser === user.id ||
-            inv.assignedFinanceUser === user.email
-        );
-    }, [allInvoices, user]);
+    // Use all invoices - API already filters based on user role (assigned + finance queue + history)
+    const invoices = allInvoices;
 
     // Pending = invoices where finance has NOT yet approved or rejected
     const FINAL_FINANCE_STATUSES = ['APPROVED', 'REJECTED'];
