@@ -62,6 +62,7 @@ export async function POST(request, { params }) {
             'VERIFIED',
             'PENDING_APPROVAL',
             'MATCH_DISCREPANCY',
+            'Pending',
             INVOICE_STATUS.SUBMITTED,
             INVOICE_STATUS.PENDING_PM_APPROVAL
         ].includes(invoice.status) || !invoice.pmApproval?.status || invoice.pmApproval?.status === 'PENDING';
@@ -130,6 +131,11 @@ export async function POST(request, { params }) {
                 'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
             },
             [INVOICE_STATUS.SUBMITTED]: {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            'Pending': {
                 'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
                 'REJECT': INVOICE_STATUS.PM_REJECTED,
                 'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
@@ -278,6 +284,39 @@ export async function POST(request, { params }) {
             } catch (msgErr) {
                 console.error('[PM Reject] Failed to create rejection notification:', msgErr);
             }
+        }
+
+        // Notify Finance User about PM decision (approve or reject)
+        try {
+            await connectToDatabase();
+            const financeUserId = invoice.assignedFinanceUser;
+            if (financeUserId) {
+                const financeUser = await db.getUserById(financeUserId);
+                const invoiceLabel = updatedInvoice.invoiceNumber || updatedInvoice.id.slice(-6);
+                const msgId = uuidv4();
+                const isApproval = action === 'APPROVE';
+                await Message.create({
+                    id: msgId,
+                    invoiceId: updatedInvoice.id,
+                    projectId: updatedInvoice.project || null,
+                    senderId: session.user.id,
+                    senderName: session.user.name || session.user.email,
+                    senderRole: userRole,
+                    recipientId: financeUserId,
+                    recipientName: financeUser?.name || 'Finance User',
+                    subject: isApproval
+                        ? `PM Approved Invoice: ${invoiceLabel} — Ready for Finance Review`
+                        : `PM Rejected Invoice: ${invoiceLabel}`,
+                    content: isApproval
+                        ? `Invoice ${invoiceLabel} has been approved by PM and is now pending your finance review.${notes ? ' PM Notes: ' + notes : ''}`
+                        : `Invoice ${invoiceLabel} has been rejected by PM.${notes ? ' Reason: ' + notes : ''}`,
+                    messageType: isApproval ? 'STATUS_UPDATE' : 'REJECTION',
+                    threadId: msgId
+                });
+                console.log(`[PM Action] Finance notification sent to ${financeUserId} (${action})`);
+            }
+        } catch (msgErr) {
+            console.error('[PM Action] Failed to send finance notification:', msgErr);
         }
 
         // Determine notification type based on action

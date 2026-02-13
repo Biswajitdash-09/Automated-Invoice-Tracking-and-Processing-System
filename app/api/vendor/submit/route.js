@@ -147,6 +147,62 @@ export async function POST(request) {
             details: `Vendor submitted invoice${documentIds.length > 0 ? ` with ${documentIds.length} document(s)` : ''}${assignedPM ? ` routed to PM` : ''}`
         });
 
+        // Notify assigned PM that a new invoice needs review
+        if (assignedPM) {
+            try {
+                const pmUser = await db.getUserById(assignedPM);
+                const msgId = uuidv4();
+                const invoiceLabel = invoiceNumber || invoiceId.slice(0, 8);
+                await connectToDatabase();
+                const Message = (await import('@/models/Message')).default;
+                await Message.create({
+                    id: msgId,
+                    invoiceId: invoiceId,
+                    projectId: project || null,
+                    senderId: session.user.id,
+                    senderName: session.user.name || session.user.email,
+                    senderRole: 'Vendor',
+                    recipientId: assignedPM,
+                    recipientName: pmUser?.name || 'Project Manager',
+                    subject: `New Invoice for Review: ${invoiceLabel}`,
+                    content: `A new invoice (${invoiceLabel}) has been submitted by ${session.user.name || session.user.email} and assigned to you for review.${notes ? ' Notes: ' + notes : ''}`,
+                    messageType: 'STATUS_UPDATE',
+                    threadId: msgId
+                });
+                console.log(`[Vendor Submit] PM notification sent to ${assignedPM}`);
+            } catch (msgErr) {
+                console.error('[Vendor Submit] Failed to notify PM:', msgErr);
+            }
+        }
+
+        // Notify assigned Finance User about the new submission
+        if (assignedFinanceUser) {
+            try {
+                const finUser = await db.getUserById(assignedFinanceUser);
+                const msgId = uuidv4();
+                const invoiceLabel = invoiceNumber || invoiceId.slice(0, 8);
+                await connectToDatabase();
+                const Message = (await import('@/models/Message')).default;
+                await Message.create({
+                    id: msgId,
+                    invoiceId: invoiceId,
+                    projectId: project || null,
+                    senderId: session.user.id,
+                    senderName: session.user.name || session.user.email,
+                    senderRole: 'Vendor',
+                    recipientId: assignedFinanceUser,
+                    recipientName: finUser?.name || 'Finance User',
+                    subject: `New Invoice Submitted: ${invoiceLabel}`,
+                    content: `A new invoice (${invoiceLabel}) has been submitted by ${session.user.name || session.user.email}. It is currently pending PM review.${notes ? ' Notes: ' + notes : ''}`,
+                    messageType: 'STATUS_UPDATE',
+                    threadId: msgId
+                });
+                console.log(`[Vendor Submit] Finance notification sent to ${assignedFinanceUser}`);
+            } catch (msgErr) {
+                console.error('[Vendor Submit] Failed to notify Finance:', msgErr);
+            }
+        }
+
         return NextResponse.json({
             success: true,
             invoiceId,
