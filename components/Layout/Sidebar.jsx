@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { APP_VERSION } from "@/lib/version";
 import { useAuth } from "@/context/AuthContext";
-import { canSeeMenuItem } from "@/constants/roles";
+import { canSeeMenuItem, ROLES, getNormalizedRole } from "@/constants/roles";
 import { useRouter } from "next/navigation";
 
 const SIDEBAR_COLLAPSED_KEY = "invoiceflow-sidebar-collapsed";
@@ -53,7 +53,21 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
     });
   };
 
-  const filteredMenuItems = menuItems.filter(item => canSeeMenuItem(user, item.name));
+  // Dynamic menu path replacement for Dashboard based on role
+  // This ensures the "Dashboard" link points directly to the user's actual dashboard
+  // and stays highlighted because the path matches
+  const dynamicMenuItems = menuItems.map(item => {
+    if (item.name === 'Dashboard' && user) {
+      const role = getNormalizedRole(user);
+      if (role === ROLES.FINANCE_USER) return { ...item, path: '/finance/dashboard' };
+      if (role === ROLES.PROJECT_MANAGER) return { ...item, path: '/pm/dashboard' };
+      if (role === ROLES.ADMIN) return { ...item, path: '/admin/dashboard' };
+      if (role === ROLES.VENDOR) return { ...item, path: '/vendors' };
+    }
+    return item;
+  });
+
+  const filteredMenuItems = dynamicMenuItems.filter(item => canSeeMenuItem(user, item.name));
 
   return (
     <>
