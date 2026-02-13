@@ -62,9 +62,10 @@ export async function POST(request, { params }) {
             'VERIFIED',
             'PENDING_APPROVAL',
             'MATCH_DISCREPANCY',
+            INVOICE_STATUS.SUBMITTED,
             INVOICE_STATUS.PENDING_PM_APPROVAL
         ].includes(invoice.status) || !invoice.pmApproval?.status || invoice.pmApproval?.status === 'PENDING';
-        
+
         if (!allowPMReview) {
             return NextResponse.json(
                 { error: `Invalid workflow state: Invoice status '${invoice.status}' is not valid for PM review. Valid statuses: RECEIVED, DIGITIZING, VALIDATION_REQUIRED, VERIFIED, PENDING_APPROVAL, MATCH_DISCREPANCY, PENDING_PM_APPROVAL, or pmApproval.isEmpty()` },
@@ -127,6 +128,11 @@ export async function POST(request, { params }) {
                 'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
                 'REJECT': INVOICE_STATUS.PM_REJECTED,
                 'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            [INVOICE_STATUS.SUBMITTED]: {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
             }
         };
 
@@ -146,17 +152,20 @@ export async function POST(request, { params }) {
             );
         }
 
-        // Validate the transition is allowed
-        const transitionValidation = validateTransition(
-            invoice.status,
-            newStatus,
-            userRole
-        );
-        if (!transitionValidation.allowed) {
-            return NextResponse.json(
-                { error: transitionValidation.reason },
-                { status: 400 }
+        // Validate the transition is allowed (only for statuses in the workflow state machine)
+        const workflowStatuses = Object.values(INVOICE_STATUS);
+        if (workflowStatuses.includes(invoice.status)) {
+            const transitionValidation = validateTransition(
+                invoice.status,
+                newStatus,
+                userRole
             );
+            if (!transitionValidation.allowed) {
+                return NextResponse.json(
+                    { error: transitionValidation.reason },
+                    { status: 400 }
+                );
+            }
         }
 
         // Update PM approval
@@ -273,16 +282,16 @@ export async function POST(request, { params }) {
 
         // Determine notification type based on action
         const notificationType = action === 'REJECT' ? 'REJECTED' :
-                                action === 'REQUEST_INFO' ? 'AWAITING_INFO' :
-                                'PENDING_APPROVAL';
+            action === 'REQUEST_INFO' ? 'AWAITING_INFO' :
+                'PENDING_APPROVAL';
         await sendStatusNotification(updatedInvoice, notificationType).catch((err) =>
             console.error('[PM Approve] Notification failed:', err)
         );
 
         // Determine workflow message based on action
         const workflowMessage = action === 'APPROVE' ? 'Proceeding to Finance review' :
-                              action === 'REQUEST_INFO' ? 'Awaiting information from vendor' :
-                              'Workflow ended at PM stage';
+            action === 'REQUEST_INFO' ? 'Awaiting information from vendor' :
+                'Workflow ended at PM stage';
 
         return NextResponse.json({
             success: true,
