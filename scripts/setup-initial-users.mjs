@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
-    password_hash: { type: String, required: true },
+    passwordHash: { type: String, required: true },
     role: { type: String, required: true },
     assignedProjects: { type: [String], default: () => [] },
     vendorId: { type: String },
@@ -51,7 +51,7 @@ const VendorSchema = new mongoose.Schema({
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 // Create models
-const User = mongoose.model('users', UserSchema);
+const User = mongoose.model('User', UserSchema);
 const Vendor = mongoose.model('vendors', VendorSchema);
 
 const DEFAULT_PASSWORD = 'Password123!'; // Default password for all initial users
@@ -98,7 +98,7 @@ const users = [
 async function setupInitialUsers() {
     try {
         console.log('🔐 Setting up initial users...\n');
-        
+
         // Connect to MongoDB directly
         await mongoose.connect(MONGODB_URI);
         console.log('✅ Connected to MongoDB\n');
@@ -119,14 +119,14 @@ async function setupInitialUsers() {
             try {
                 // Find existing user
                 const existing = await User.findOne({ email: userData.email });
-                
+
                 if (existing) {
                     // Update existing user
                     await User.findOneAndUpdate(
                         { email: userData.email },
                         {
                             ...userData,
-                            password_hash: existing.password_hash || passwordHash
+                            passwordHash: existing.passwordHash || passwordHash
                         },
                         { upsert: true, new: true }
                     );
@@ -158,7 +158,7 @@ async function setupInitialUsers() {
                     // Create new user
                     await User.create({
                         ...userData,
-                        password_hash: passwordHash,
+                        passwordHash: passwordHash,
                         vendorId: vendorId || userData.vendorId
                     });
                     results.created.push({
@@ -184,7 +184,7 @@ async function setupInitialUsers() {
         console.log(`   ✅ Created: ${results.created.length}`);
         console.log(`   🔄 Updated: ${results.updated.length}`);
         console.log(`   ❌ Errors:   ${results.errors.length}`);
-        
+
         if (results.errors.length > 0) {
             console.log('\n❌ Errors encountered:');
             results.errors.forEach(err => {
@@ -201,16 +201,16 @@ async function setupInitialUsers() {
             console.log(`   ${u.role.padEnd(20)} | ${u.email.padEnd(28)} | ${DEFAULT_PASSWORD}`);
         });
         console.log('─'.repeat(70));
-        
+
         console.log('\n📝 Next Steps:');
         console.log('   1. Log in to the portal with each of the credentials above');
         console.log('   2. Verify that all users can access their respective dashboards');
         console.log('   3. Check the users collection in MongoDB to ensure records are correct');
         console.log('   4. ⚠️  Remember to change passwords in production!\n');
-        
+
         // Close connection
         await mongoose.connection.close();
-        
+
         if (results.errors.length === 0) {
             console.log('✅ Initial users setup completed successfully!\n');
             process.exit(0);
