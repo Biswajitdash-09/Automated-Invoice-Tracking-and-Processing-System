@@ -126,7 +126,7 @@ async function setupInitialUsers() {
                         { email: userData.email },
                         {
                             ...userData,
-                            passwordHash: existing.passwordHash || passwordHash
+                            passwordHash: passwordHash  // Always reset to default password
                         },
                         { upsert: true, new: true }
                     );
