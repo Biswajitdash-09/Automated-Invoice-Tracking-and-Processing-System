@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import Icon from "@/components/Icon";
-import { ROLES } from "@/constants/roles";
+import { ROLES, ROLES_LIST } from "@/constants/roles";
 import PageHeader from "@/components/Layout/PageHeader";
 
 export default function UserManagementPage() {
@@ -195,7 +195,7 @@ export default function UserManagementPage() {
                         className="px-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 font-medium shrink-0"
                     >
                         <option value="ALL">All Roles</option>
-                        {Object.values(ROLES).map(role => (
+                        {ROLES_LIST.map(role => (
                             <option key={role} value={role}>{role}</option>
                         ))}
                     </select>
@@ -360,7 +360,7 @@ export default function UserManagementPage() {
                                     value={formData.role}
                                     onChange={e => setFormData({ ...formData, role: e.target.value })}
                                 >
-                                    {Object.values(ROLES).map(role => (
+                                    {ROLES_LIST.map(role => (
                                         <option key={role} value={role}>{role}</option>
                                     ))}
                                 </select>

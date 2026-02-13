@@ -5,9 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@/components/Icon';
 import { useAuth } from '@/context/AuthContext';
 import DocumentViewer from '@/components/ui/DocumentViewer';
+import { INVOICE_STATUS } from '@/lib/invoice-workflow';
 
 const STATUS_STYLES = {
-    'Pending PM Approval': { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500', label: 'Pending Your Review' },
+    [INVOICE_STATUS.PENDING_PM_APPROVAL]: { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500', label: 'Pending Your Review' },
+    [INVOICE_STATUS.PENDING_FINANCE_REVIEW]: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'PM Approved' },
+    [INVOICE_STATUS.FINANCE_APPROVED]: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Fully Approved' },
+    [INVOICE_STATUS.PM_REJECTED]: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500', label: 'PM Rejected' },
+    [INVOICE_STATUS.FINANCE_REJECTED]: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500', label: 'Finance Rejected' },
+    [INVOICE_STATUS.MORE_INFO_NEEDED]: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', label: 'More Info Requested' },
     APPROVED: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Approved' },
     Approved: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Approved' },
     REJECTED: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500', label: 'Rejected' },
@@ -51,12 +57,16 @@ export default function PMApprovalQueuePage() {
         }
     };
 
-    // Filter invoices assigned to this PM (forwarded by finance)
+    // Filter invoices assigned to this PM (submitted by vendors)
     const myInvoices = useMemo(() => {
         if (!user) return [];
         return allInvoices.filter(inv =>
             (inv.assignedPM === user.id || inv.assignedPM === user.email) &&
-            inv.financeApproval?.status === 'APPROVED'
+            (inv.status === INVOICE_STATUS.PENDING_PM_APPROVAL ||
+             inv.status === INVOICE_STATUS.MORE_INFO_NEEDED ||
+             inv.pmApproval?.status === 'PENDING' ||
+             inv.pmApproval?.status === 'APPROVED' ||
+             inv.pmApproval?.status === 'REJECTED')
         );
     }, [allInvoices, user]);
 
@@ -125,7 +135,7 @@ export default function PMApprovalQueuePage() {
             if (!res.ok) throw new Error(data.error);
             setActionModal(null);
             setNotes('');
-            setSuccessMsg('Invoice rejected. Vendor and Finance User have been notified.');
+            setSuccessMsg('Invoice rejected. Vendor has been notified.');
             setTimeout(() => setSuccessMsg(null), 4000);
             fetchInvoices();
         } catch (err) {
@@ -154,7 +164,7 @@ export default function PMApprovalQueuePage() {
             {/* Page Header */}
             <div>
                 <h1 className="text-2xl font-black text-slate-800 tracking-tight">PM Approval Queue</h1>
-                <p className="text-sm text-slate-400 mt-1">Review invoices forwarded to you by Finance</p>
+                <p className="text-sm text-slate-400 mt-1">Review and approve invoices submitted by Vendors</p>
             </div>
 
             {/* Alerts */}
@@ -279,14 +289,19 @@ export default function PMApprovalQueuePage() {
 
                                     {/* Info Tags */}
                                     <div className="flex flex-wrap items-center gap-2 mt-3 pl-13 sm:pl-14">
-                                        {inv.financeApproval?.approvedBy && (
+                                        {inv.pmApproval?.status === 'APPROVED' && (
                                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">
-                                                <Icon name="ShieldCheck" size={10} /> Finance Approved
+                                                <Icon name="CheckCircle2" size={10} /> PM Approved
                                             </span>
                                         )}
-                                        {inv.financeApproval?.notes && (
-                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg max-w-xs truncate" title={inv.financeApproval.notes}>
-                                                <Icon name="MessageSquare" size={10} /> {inv.financeApproval.notes}
+                                        {(inv.status === INVOICE_STATUS.PENDING_FINANCE_REVIEW || inv.status === INVOICE_STATUS.FINANCE_APPROVED) && (
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">
+                                                <Icon name="ShieldCheck" size={10} /> {inv.status}
+                                            </span>
+                                        )}
+                                        {inv.pmApproval?.notes && (
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg max-w-xs truncate" title={inv.pmApproval.notes}>
+                                                <Icon name="MessageSquare" size={10} /> {inv.pmApproval.notes}
                                             </span>
                                         )}
                                         {inv.originalName && (
@@ -392,7 +407,7 @@ export default function PMApprovalQueuePage() {
                                     </div>
                                     <div>
                                         <h2 className="font-bold text-slate-800 text-lg">Approve Invoice</h2>
-                                        <p className="text-xs text-slate-400">This will mark the invoice as fully approved</p>
+                                        <p className="text-xs text-slate-400">Approved invoice will be forwarded to Finance for final review</p>
                                     </div>
                                 </div>
                             </div>
@@ -468,7 +483,7 @@ export default function PMApprovalQueuePage() {
                                     </div>
                                     <div>
                                         <h2 className="font-bold text-slate-800 text-lg">Reject Invoice</h2>
-                                        <p className="text-xs text-slate-400">Both the Vendor and Finance User will be notified</p>
+                                        <p className="text-xs text-slate-400">Vendor will be notified</p>
                                     </div>
                                 </div>
                             </div>
@@ -495,9 +510,6 @@ export default function PMApprovalQueuePage() {
                                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-md">
                                             <Icon name="Building" size={10} /> Vendor
                                         </span>
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-md">
-                                            <Icon name="Calculator" size={10} /> Finance User
-                                        </span>
                                     </div>
                                 </div>
 
@@ -513,7 +525,7 @@ export default function PMApprovalQueuePage() {
                                         className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-400 transition-all resize-none"
                                         placeholder="Explain why this invoice is being rejected..."
                                     />
-                                    <p className="text-[10px] text-slate-400 mt-1">This message will be visible to both the Vendor and Finance User.</p>
+                                    <p className="text-[10px] text-slate-400 mt-1">This message will be visible to the Vendor.</p>
                                 </div>
                             </div>
 

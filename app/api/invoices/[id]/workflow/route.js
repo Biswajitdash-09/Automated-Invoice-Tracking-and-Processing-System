@@ -10,6 +10,10 @@ export async function POST(request, { params }) {
     const { id } = await params;
     const { action, comments } = await request.json();
 
+    // Capture request metadata for audit trail early
+    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+
     // Strict Auth Check
     const user = await getCurrentUser();
     if (!user) {
@@ -24,6 +28,9 @@ export async function POST(request, { params }) {
         return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
+    // Capture previous status for audit
+    const previousStatus = invoice.status;
+    
     let nextStatus = invoice.status;
     const timestampUpdates = {};
     const auditLog = {
@@ -52,10 +59,25 @@ export async function POST(request, { params }) {
                 auditLog.details = `Matching Failed: ${matchResult.discrepancies.join(', ')}`;
             }
 
+            // Create comprehensive audit trail entry for match processing
+            const auditTrailEntry = {
+                action: 'PROCESS_MATCH',
+                actor: user.name || user.email || 'System',
+                actorId: user.id,
+                actorRole: userRole,
+                timestamp: new Date().toISOString(),
+                previousStatus: previousStatus,
+                newStatus: nextStatus,
+                notes: matchResult.status === 'MATCHED' ? 'Automated 3-Way Match Successful' : `Matching Failed: ${matchResult.discrepancies.join(', ')}`,
+                ipAddress: ipAddress,
+                userAgent: userAgent
+            };
+
             // Save match details to invoice
             await db.saveInvoice(id, {
                 status: nextStatus,
                 matching: matchResult,
+                auditTrailEntry: auditTrailEntry,
                 updatedAt: new Date().toISOString()
             });
 
@@ -69,27 +91,55 @@ export async function POST(request, { params }) {
         }
 
         if (action === 'APPROVE') {
+            // Admin approval for vendor submissions
             if (invoice.status === 'RECEIVED' || invoice.status === 'DIGITIZING') {
                 if (userRole !== ROLES.ADMIN) {
                     return NextResponse.json({ error: 'Only Admin can approve vendor submissions.' }, { status: 403 });
                 }
                 nextStatus = 'VERIFIED';
                 auditLog.details = `Admin approved vendor submission: ${comments || 'No comments'}`;
-                // Project Manager Approval
-                if (userRole === ROLES.PROJECT_MANAGER) {
-                    const isPmForProject = user.assignedProjects?.includes(invoice.project);
-                    const isPmForInvoice = invoice.assignedPM === user.id;
+                
+                // Create comprehensive audit trail entry for admin approval
+                const auditTrailEntry = {
+                    action: 'APPROVE',
+                    actor: user.name || user.email || 'System',
+                    actorId: user.id,
+                    actorRole: userRole,
+                    timestamp: new Date().toISOString(),
+                    previousStatus: previousStatus,
+                    newStatus: nextStatus,
+                    notes: comments || 'Workflow action: APPROVE',
+                    ipAddress: ipAddress,
+                    userAgent: userAgent
+                };
+                
+                await db.saveInvoice(id, {
+                    ...timestampUpdates,
+                    status: nextStatus,
+                    auditTrailEntry: auditTrailEntry,
+                    updatedAt: new Date().toISOString()
+                });
+                
+                await db.createAuditTrailEntry(auditLog);
+                await sendStatusNotification(await db.getInvoice(id), nextStatus);
+                
+                return NextResponse.json({
+                    message: `Invoice moved to ${nextStatus}`,
+                    invoice: await db.getInvoice(id)
+                });
+            }
+            // Project Manager Approval
+            else if (userRole === ROLES.PROJECT_MANAGER) {
+                const isPmForProject = user.assignedProjects?.includes(invoice.project);
+                const isPmForInvoice = invoice.assignedPM === user.id;
 
-                    if (!isPmForProject && !isPmForInvoice) {
-                        return NextResponse.json({ error: 'You are not authorized to approve this invoice (not assigned to this project/invoice).' }, { status: 403 });
-                    }
-                } else if (userRole !== ROLES.ADMIN) {
-                    return NextResponse.json({ error: 'Only a Project Manager can approve verified invoices.' }, { status: 403 });
+                if (!isPmForProject && !isPmForInvoice) {
+                    return NextResponse.json({ error: 'You are not authorized to approve this invoice (not assigned to this project/invoice).' }, { status: 403 });
                 }
-                nextStatus = 'PENDING_APPROVAL';
+                nextStatus = 'PENDING_FM_APPROVAL';
                 timestampUpdates.pmApprovedAt = new Date().toISOString();
                 auditLog.details = `PM Approved: ${comments || 'No comments'}`;
-            } else if (invoice.status === 'PENDING_APPROVAL') {
+            } else if (invoice.status === 'PENDING_FM_APPROVAL' || invoice.status === 'PENDING_APPROVAL') {
                 // Final Payment Release - Admin can release payment
                 if (userRole !== ROLES.ADMIN) {
                     return NextResponse.json({ error: 'Only Admin can release final payment.' }, { status: 403 });
@@ -129,14 +179,28 @@ export async function POST(request, { params }) {
             auditLog.details = `Invoice restored to review: ${comments || 'No comments'}`;
         }
 
+        // Create comprehensive audit trail entry for workflow action
+        const auditTrailEntry = {
+            action: action,
+            actor: user.name || user.email || 'System',
+            actorId: user.id,
+            actorRole: userRole,
+            timestamp: new Date().toISOString(),
+            previousStatus: previousStatus,
+            newStatus: nextStatus,
+            notes: comments || `Workflow action: ${action}`,
+            ipAddress: ipAddress,
+            userAgent: userAgent
+        };
+
         const updatedInvoice = await db.saveInvoice(id, {
             ...timestampUpdates,
             status: nextStatus,
+            auditTrailEntry: auditTrailEntry,
             updatedAt: new Date().toISOString()
         });
 
-        // Detailed Audit Trail entry
-        // The saveInvoice already inserts into audit_trail via our CDC, but this specific workflow log is high-level "Action"
+        // Legacy audit trail entry for backward compatibility
         await db.createAuditTrailEntry(auditLog);
 
         // Trigger simulated notification

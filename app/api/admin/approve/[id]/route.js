@@ -12,6 +12,10 @@ import { ROLES } from '@/constants/roles';
  */
 export async function POST(request, { params }) {
     try {
+        // Capture request metadata for audit trail early
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
+        const userAgent = request.headers.get('user-agent') || 'unknown';
+
         const session = await getSession();
         if (!session?.user) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -46,6 +50,9 @@ export async function POST(request, { params }) {
             );
         }
 
+        // Capture previous status for audit
+        const previousStatus = invoice.status;
+
         // Update admin approval
         const adminApproval = {
             status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
@@ -57,9 +64,24 @@ export async function POST(request, { params }) {
         // Update overall status to final "Approved" or "Rejected"
         const newStatus = action === 'APPROVE' ? 'Approved' : 'Rejected';
 
+        // Create comprehensive audit trail entry
+        const auditTrailEntry = {
+            action: `ADMIN_${action}`,
+            actor: session.user.name || session.user.email,
+            actorId: session.user.id,
+            actorRole: 'ADMIN',
+            timestamp: new Date().toISOString(),
+            previousStatus: previousStatus,
+            newStatus: newStatus,
+            notes: notes || `Admin ${action.toLowerCase()}ed invoice`,
+            ipAddress: ipAddress,
+            userAgent: userAgent
+        };
+
         const updatedInvoice = await db.saveInvoice(id, {
             adminApproval,
             status: newStatus,
+            auditTrailEntry: auditTrailEntry,
             auditUsername: session.user.name || session.user.email,
             auditAction: `ADMIN_${action}`,
             auditDetails: `Admin ${action.toLowerCase()}ed invoice${notes ? `: ${notes}` : ''}`

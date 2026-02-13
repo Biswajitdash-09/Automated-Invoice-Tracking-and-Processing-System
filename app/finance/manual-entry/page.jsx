@@ -4,9 +4,18 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Icon from '@/components/Icon';
+import PageHeader from '@/components/Layout/PageHeader';
+import { useAuth } from '@/context/AuthContext';
+import { ROLES, getNormalizedRole } from '@/constants/roles';
+
+const inputClass = 'w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 text-gray-900 placeholder:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed';
 
 const ManualInvoiceEntryPage = () => {
     const router = useRouter();
+    const { user, isLoading: authLoading } = useAuth();
+    const role = getNormalizedRole(user);
+
     const [formData, setFormData] = useState({
         vendorName: '',
         vendorEmail: '',
@@ -34,16 +43,18 @@ const ManualInvoiceEntryPage = () => {
         }));
     };
 
-    // Fetch PMs on component mount
+    useEffect(() => {
+        if (!authLoading && (!user || role !== ROLES.FINANCE_USER)) {
+            router.push('/dashboard');
+        }
+    }, [user, authLoading, role, router]);
+
     useEffect(() => {
         const fetchPMs = async () => {
             setPmsLoading(true);
             try {
                 const response = await fetch('/api/pms');
-                if (!response.ok) {
-                    console.error('Failed to fetch PMs');
-                    return;
-                }
+                if (!response.ok) return;
                 const data = await response.json();
                 setPms(data.pms || []);
             } catch (err) {
@@ -52,7 +63,6 @@ const ManualInvoiceEntryPage = () => {
                 setPmsLoading(false);
             }
         };
-
         fetchPMs();
     }, []);
 
@@ -62,13 +72,11 @@ const ManualInvoiceEntryPage = () => {
         setError('');
         setSuccess('');
 
-        // Validation
         if (!formData.vendorName || !formData.invoiceNumber || !formData.amount || !formData.date) {
             setError('Please fill in all required fields');
             setIsSubmitting(false);
             return;
         }
-
         if (formData.amount <= 0) {
             setError('Amount must be greater than 0');
             setIsSubmitting(false);
@@ -76,7 +84,6 @@ const ManualInvoiceEntryPage = () => {
         }
 
         try {
-            // Create FormData for file upload
             const submitData = new FormData();
             submitData.append('vendorName', formData.vendorName);
             submitData.append('vendorEmail', formData.vendorEmail);
@@ -89,26 +96,15 @@ const ManualInvoiceEntryPage = () => {
             submitData.append('project', formData.project);
             submitData.append('status', 'VERIFIED');
             submitData.append('assignedPM', formData.assignedPM);
-            // submitData.append('submittedByUserId', 'manual_finance_entry'); // Removed to allow backend to use session user ID
+            if (formData.document) submitData.append('document', formData.document);
 
-            if (formData.document) {
-                submitData.append('document', formData.document);
-            }
-
-            const response = await fetch('/api/invoices', {
-                method: 'POST',
-                body: submitData
-            });
-
+            const response = await fetch('/api/invoices', { method: 'POST', body: submitData });
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to submit invoice');
             }
 
-            const result = await response.json();
             setSuccess('Invoice submitted successfully!');
-
-            // Reset form
             setFormData({
                 vendorName: '',
                 vendorEmail: '',
@@ -122,12 +118,7 @@ const ManualInvoiceEntryPage = () => {
                 assignedPM: '',
                 document: null
             });
-
-            // Redirect to finance dashboard after 2 seconds
-            setTimeout(() => {
-                router.push('/finance/dashboard');
-            }, 2000);
-
+            setTimeout(() => router.push('/finance/dashboard'), 2000);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -135,284 +126,172 @@ const ManualInvoiceEntryPage = () => {
         }
     };
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
-        >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-purple-900/80 to-slate-900/80 backdrop-blur-xl border-b border-white/10 px-6 py-4">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white">Manual Invoice Entry</h1>
-                        <p className="text-purple-200 mt-1">Submit invoices manually for processing</p>
-                    </div>
-                    <Link href="/finance/dashboard">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-4 py-2 bg-purple-700/50 text-white rounded-lg hover:bg-purple-600/50 transition-all border border-purple-500/30"
-                        >
-                            Back to Dashboard
-                        </motion.button>
-                    </Link>
-                </div>
+    const labelClass = 'block text-sm font-medium text-slate-700 mb-2';
+    const requiredSpan = <span className="text-rose-500">*</span>;
+
+    if (authLoading || !user || role !== ROLES.FINANCE_USER) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
             </div>
+        );
+    }
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8"
-                >
-                    <h2 className="text-2xl font-bold text-white mb-6">Invoice Details</h2>
+    return (
+        <div className="space-y-6 sm:space-y-8 pb-10">
+            <PageHeader
+                title="Manual Invoice Entry"
+                subtitle="Submit invoices manually for processing"
+                icon="FilePlus"
+                accent="indigo"
+                roleLabel={role === ROLES.ADMIN ? undefined : 'Finance User'}
+                actions={
+                    <Link href="/finance/dashboard">
+                        <button className="flex items-center justify-center gap-2 h-10 px-4 sm:px-6 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap">
+                            <Icon name="ArrowLeft" size={16} /> Back to Dashboard
+                        </button>
+                    </Link>
+                }
+            />
 
-                    {/* Error/Success Messages */}
-                    <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden"
+            >
+                <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/70">
+                    <h2 className="text-lg font-bold text-slate-800">Invoice Details</h2>
+                    <p className="text-[10px] sm:text-xs font-medium text-slate-400 uppercase tracking-widest mt-0.5">Required fields marked with *</p>
+                </div>
+
+                <div className="p-6 sm:p-8">
+                    <AnimatePresence mode="wait">
                         {error && (
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
+                                initial={{ opacity: 0, y: -8 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-white"
+                                exit={{ opacity: 0 }}
+                                className="mb-6 flex items-center gap-3 p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-sm font-medium"
                             >
-                                {error}
+                                <Icon name="AlertCircle" size={18} />
+                                <span className="flex-1">{error}</span>
+                                <button type="button" onClick={() => setError('')} className="p-1.5 rounded-lg hover:bg-rose-100">
+                                    <Icon name="X" size={14} />
+                                </button>
                             </motion.div>
                         )}
                         {success && (
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
+                                initial={{ opacity: 0, y: -8 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-white"
+                                exit={{ opacity: 0 }}
+                                className="mb-6 flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-medium"
                             >
+                                <Icon name="CheckCircle" size={18} />
                                 {success}
                             </motion.div>
                         )}
                     </AnimatePresence>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Vendor Information */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-purple-200 text-sm font-medium mb-2">
-                                    Vendor Name <span className="text-red-400">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="vendorName"
-                                    value={formData.vendorName}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    placeholder="Enter vendor name"
-                                />
+                                <label className={labelClass}>Vendor Name {requiredSpan}</label>
+                                <input type="text" name="vendorName" value={formData.vendorName} onChange={handleChange} required placeholder="Enter vendor name" className={inputClass} />
                             </div>
                             <div>
-                                <label className="block text-purple-200 text-sm font-medium mb-2">
-                                    Vendor Email
-                                </label>
-                                <input
-                                    type="email"
-                                    name="vendorEmail"
-                                    value={formData.vendorEmail}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    placeholder="vendor@example.com"
-                                />
+                                <label className={labelClass}>Vendor Email</label>
+                                <input type="email" name="vendorEmail" value={formData.vendorEmail} onChange={handleChange} placeholder="vendor@example.com" className={inputClass} />
                             </div>
                         </div>
 
-                        {/* Invoice Details */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-purple-200 text-sm font-medium mb-2">
-                                    Invoice Number <span className="text-red-400">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="invoiceNumber"
-                                    value={formData.invoiceNumber}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    placeholder="INV-00123"
-                                />
+                                <label className={labelClass}>Invoice Number {requiredSpan}</label>
+                                <input type="text" name="invoiceNumber" value={formData.invoiceNumber} onChange={handleChange} required placeholder="INV-00123" className={inputClass} />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-purple-200 text-sm font-medium mb-2">
-                                        Amount <span className="text-red-400">*</span>
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="amount"
-                                        value={formData.amount}
-                                        onChange={handleChange}
-                                        required
-                                        min="0.01"
-                                        step="0.01"
-                                        className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        placeholder="0.00"
-                                    />
+                                    <label className={labelClass}>Amount {requiredSpan}</label>
+                                    <input type="number" name="amount" value={formData.amount} onChange={handleChange} required min="0.01" step="0.01" placeholder="0.00" className={inputClass} />
                                 </div>
                                 <div>
-                                    <label className="block text-purple-200 text-sm font-medium mb-2">
-                                        Currency
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="currency"
-                                        value={formData.currency}
-                                        readOnly
-                                        className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none opacity-80 cursor-default"
-                                    />
+                                    <label className={labelClass}>Currency</label>
+                                    <input type="text" name="currency" value={formData.currency} readOnly className={inputClass + ' bg-slate-50 cursor-default'} />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Date and PO Number */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-purple-200 text-sm font-medium mb-2">
-                                    Invoice Date <span className="text-red-400">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                />
+                                <label className={labelClass}>Invoice Date {requiredSpan}</label>
+                                <input type="date" name="date" value={formData.date} onChange={handleChange} required className={inputClass} />
                             </div>
                             <div>
-                                <label className="block text-purple-200 text-sm font-medium mb-2">
-                                    PO Number (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    name="poNumber"
-                                    value={formData.poNumber}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    placeholder="PO-001"
-                                />
+                                <label className={labelClass}>PO Number (Optional)</label>
+                                <input type="text" name="poNumber" value={formData.poNumber} onChange={handleChange} placeholder="PO-001" className={inputClass} />
                             </div>
                         </div>
 
-                        {/* Project */}
                         <div>
-                            <label className="block text-purple-200 text-sm font-medium mb-2">
-                                Project (Optional)
-                            </label>
-                            <input
-                                type="text"
-                                name="project"
-                                value={formData.project}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="Project name or code"
-                            />
+                            <label className={labelClass}>Project (Optional)</label>
+                            <input type="text" name="project" value={formData.project} onChange={handleChange} placeholder="Project name or code" className={inputClass} />
                         </div>
 
-                        {/* Assigned PM */}
                         <div>
-                            <label className="block text-purple-200 text-sm font-medium mb-2">
-                                Assigned PM (Optional)
-                            </label>
-                            <select
-                                name="assignedPM"
-                                value={formData.assignedPM}
-                                onChange={handleChange}
-                                disabled={pmsLoading}
-                                className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <option value="" className="text-black">Select a Project Manager (Optional)</option>
+                            <label className={labelClass}>Assigned PM (Optional)</label>
+                            <select name="assignedPM" value={formData.assignedPM} onChange={handleChange} disabled={pmsLoading} className={inputClass}>
+                                <option value="">Select a Project Manager (Optional)</option>
                                 {pms.map(pm => (
-                                    <option key={pm.id} value={pm.id} className="text-black">
-                                        {pm.name} ({pm.email})
-                                    </option>
+                                    <option key={pm.id} value={pm.id}>{pm.name} ({pm.email})</option>
                                 ))}
                             </select>
                         </div>
 
-                        {/* Description */}
                         <div>
-                            <label className="block text-purple-200 text-sm font-medium mb-2">
-                                Description
-                            </label>
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                rows="4"
-                                className="w-full px-4 py-3 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                                placeholder="Enter invoice description or notes"
-                            />
+                            <label className={labelClass}>Description</label>
+                            <textarea name="description" value={formData.description} onChange={handleChange} rows={4} placeholder="Enter invoice description or notes" className={inputClass + ' resize-none'} />
                         </div>
 
-                        {/* Document Upload */}
                         <div>
-                            <label className="block text-purple-200 text-sm font-medium mb-2">
-                                Invoice Document (Optional)
+                            <label className={labelClass}>Invoice Document (Optional)</label>
+                            <input type="file" name="document" onChange={handleChange} accept=".pdf,.doc,.docx,.csv,.xls,.xlsx,.jpg,.jpeg,.png" className="hidden" id="document-upload" />
+                            <label htmlFor="document-upload" className="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors">
+                                <div className="text-center">
+                                    <Icon name="Upload" size={40} className="mx-auto text-slate-400 mb-2" />
+                                    <p className="text-sm font-medium text-slate-600">
+                                        {formData.document ? formData.document.name : 'Click to upload or drag and drop'}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-400">PDF, Word, Excel, CSV, JPG, PNG (MAX. 10MB)</p>
+                                </div>
                             </label>
-                            <div className="mt-2">
-                                <input
-                                    type="file"
-                                    name="document"
-                                    onChange={handleChange}
-                                    accept=".pdf,.doc,.docx,.csv,.xls,.xlsx,.jpg,.jpeg,.png"
-                                    className="hidden"
-                                    id="document-upload"
-                                />
-                                <label
-                                    htmlFor="document-upload"
-                                    className="flex items-center justify-center w-full px-4 py-8 bg-white/5 border-2 border-dashed border-purple-500/30 rounded-lg cursor-pointer hover:bg-white/10 transition-all"
-                                >
-                                    <div className="text-center">
-                                        <svg className="mx-auto h-12 w-12 text-purple-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                        <p className="mt-2 text-sm text-purple-200">
-                                            {formData.document ? formData.document.name : 'Click to upload or drag and drop'}
-                                        </p>
-                                        <p className="mt-1 text-xs text-purple-300">PDF, Word, Excel, CSV, JPG, PNG (MAX. 10MB)</p>
-                                    </div>
-                                </label>
-                            </div>
                         </div>
 
-                        {/* Submit Button */}
-                        <div className="flex items-center justify-end gap-4">
+                        <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-slate-100">
                             <Link href="/finance/dashboard">
-                                <motion.button
-                                    type="button"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="px-6 py-3 bg-purple-700/50 text-white rounded-lg hover:bg-purple-600/50 transition-all border border-purple-500/30"
-                                >
+                                <button type="button" className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors">
                                     Cancel
-                                </motion.button>
+                                </button>
                             </Link>
-                            <motion.button
+                            <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
-                                whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
-                                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                                className="flex items-center justify-center gap-2 h-10 px-5 sm:px-6 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                             >
-                                {isSubmitting ? 'Submitting...' : 'Submit Invoice'}
-                            </motion.button>
+                                {isSubmitting ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        Submitting...
+                                    </>
+                                ) : (
+                                    <>Submit Invoice</>
+                                )}
+                            </button>
                         </div>
                     </form>
-                </motion.div>
-            </div>
-        </motion.div>
+                </div>
+            </motion.div>
+        </div>
     );
 };
 

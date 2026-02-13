@@ -360,25 +360,25 @@ function VendorPortalContent() {
                                     </tr>
                                 ) : (
                                     allSubmissions.slice(0, 30).map((inv, idx) => {
-                                        // Approval logic: Vendor -> Finance -> PM
+                                        // Approval logic: Vendor -> PM -> Finance (CORRECT ORDER)
                                         const financeStatus = inv.financeApproval?.status;
                                         const pmStatus = inv.pmApproval?.status;
 
-                                        let financeDisplay = { label: 'Waiting', color: 'orange', icon: 'Clock' };
                                         let pmDisplay = { label: 'Waiting', color: 'orange', icon: 'Clock' };
+                                        let financeDisplay = { label: 'Waiting', color: 'orange', icon: 'Clock' };
 
-                                        // Finance Step Logic
-                                        if (financeStatus === 'APPROVED' || pmStatus === 'APPROVED') {
+                                        // PM Step Logic (FIRST approval - comes before Finance)
+                                        if (pmStatus === 'APPROVED') {
+                                            pmDisplay = { label: 'Approved', color: 'emerald', icon: 'CheckCircle2' };
+                                        } else if (pmStatus === 'REJECTED') {
+                                            pmDisplay = { label: 'Rejected', color: 'rose', icon: 'XCircle' };
+                                        }
+
+                                        // Finance Step Logic (SECOND approval - only after PM approves)
+                                        if (financeStatus === 'APPROVED') {
                                             financeDisplay = { label: 'Approved', color: 'emerald', icon: 'CheckCircle2' };
                                         } else if (financeStatus === 'REJECTED') {
                                             financeDisplay = { label: 'Rejected', color: 'rose', icon: 'XCircle' };
-                                        }
-
-                                        // PM Step Logic
-                                        if (pmStatus === 'APPROVED') {
-                                            pmDisplay = { label: 'Approved', color: 'emerald', icon: 'CheckCircle2' };
-                                        } else if (pmStatus === 'REJECTED' || financeStatus === 'REJECTED') {
-                                            pmDisplay = { label: 'Rejected', color: 'rose', icon: 'XCircle' };
                                         }
 
                                         const getStepStyle = (cfg) => {
@@ -415,21 +415,21 @@ function VendorPortalContent() {
                                                 </td>
                                                 <td className="px-6 py-6">
                                                     <div className="flex flex-col gap-2">
-                                                        {/* Finance Step */}
-                                                        <div className={clsx(
-                                                            "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider w-fit transition-all",
-                                                            getStepStyle(financeDisplay)
-                                                        )}>
-                                                            <Icon name={financeDisplay.icon} size={14} className={financeDisplay.label === 'Waiting' ? 'animate-pulse' : ''} />
-                                                            Finance: {financeDisplay.label}
-                                                        </div>
-                                                        {/* PM Step */}
+                                                        {/* PM Step (FIRST approval) */}
                                                         <div className={clsx(
                                                             "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider w-fit transition-all",
                                                             getStepStyle(pmDisplay)
                                                         )}>
-                                                            <Icon name={pmDisplay.icon} size={14} className={pmDisplay.label === 'Waiting' && financeDisplay.label === 'Approved' ? 'animate-pulse' : ''} />
+                                                            <Icon name={pmDisplay.icon} size={14} className={pmDisplay.label === 'Waiting' ? 'animate-pulse' : ''} />
                                                             Project Mgr: {pmDisplay.label}
+                                                        </div>
+                                                        {/* Finance Step (SECOND approval) */}
+                                                        <div className={clsx(
+                                                            "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider w-fit transition-all",
+                                                            getStepStyle(financeDisplay)
+                                                        )}>
+                                                            <Icon name={financeDisplay.icon} size={14} className={financeDisplay.label === 'Waiting' && pmDisplay.label === 'Approved' ? 'animate-pulse' : ''} />
+                                                            Finance: {financeDisplay.label}
                                                         </div>
                                                     </div>
                                                 </td>
@@ -467,23 +467,25 @@ function VendorPortalContent() {
                                 </div>
                             ) : (
                                 allSubmissions.slice(0, 30).map((inv, idx) => {
-                                    // Same logic for mobile
+                                    // Same logic for mobile - Correct workflow: Vendor -> PM -> Finance
                                     const financeStatus = inv.financeApproval?.status;
                                     const pmStatus = inv.pmApproval?.status;
 
-                                    let financeDisplay = { label: 'Waiting', color: 'orange', icon: 'Clock' };
                                     let pmDisplay = { label: 'Waiting', color: 'orange', icon: 'Clock' };
+                                    let financeDisplay = { label: 'Waiting', color: 'orange', icon: 'Clock' };
 
-                                    if (financeStatus === 'APPROVED' || pmStatus === 'APPROVED') {
+                                    // PM Step Logic (FIRST approval - comes before Finance)
+                                    if (pmStatus === 'APPROVED') {
+                                        pmDisplay = { label: 'Approved', color: 'emerald', icon: 'CheckCircle2' };
+                                    } else if (pmStatus === 'REJECTED') {
+                                        pmDisplay = { label: 'Rejected', color: 'rose', icon: 'XCircle' };
+                                    }
+
+                                    // Finance Step Logic (SECOND approval - only after PM approves)
+                                    if (financeStatus === 'APPROVED') {
                                         financeDisplay = { label: 'Approved', color: 'emerald', icon: 'CheckCircle2' };
                                     } else if (financeStatus === 'REJECTED') {
                                         financeDisplay = { label: 'Rejected', color: 'rose', icon: 'XCircle' };
-                                    }
-
-                                    if (pmStatus === 'APPROVED') {
-                                        pmDisplay = { label: 'Approved', color: 'emerald', icon: 'CheckCircle2' };
-                                    } else if (pmStatus === 'REJECTED' || financeStatus === 'REJECTED') {
-                                        pmDisplay = { label: 'Rejected', color: 'rose', icon: 'XCircle' };
                                     }
 
                                     const getStepStyle = (cfg) => {
@@ -520,21 +522,21 @@ function VendorPortalContent() {
                                                 </button>
                                             </div>
 
-                                            {/* Approval Pipeline */}
+                                            {/* Approval Pipeline - Correct order: PM first, then Finance */}
                                             <div className="mt-5 grid grid-cols-2 gap-3">
-                                                <div className={clsx(
-                                                    "flex items-center gap-2 p-2 rounded-xl border text-[9px] font-black uppercase tracking-wider",
-                                                    getStepStyle(financeDisplay)
-                                                )}>
-                                                    <Icon name={financeDisplay.icon} size={12} />
-                                                    FINANCE: {financeDisplay.label}
-                                                </div>
                                                 <div className={clsx(
                                                     "flex items-center gap-2 p-2 rounded-xl border text-[9px] font-black uppercase tracking-wider",
                                                     getStepStyle(pmDisplay)
                                                 )}>
                                                     <Icon name={pmDisplay.icon} size={12} />
                                                     PM: {pmDisplay.label}
+                                                </div>
+                                                <div className={clsx(
+                                                    "flex items-center gap-2 p-2 rounded-xl border text-[9px] font-black uppercase tracking-wider",
+                                                    getStepStyle(financeDisplay)
+                                                )}>
+                                                    <Icon name={financeDisplay.icon} size={12} />
+                                                    FINANCE: {financeDisplay.label}
                                                 </div>
                                             </div>
 
@@ -598,11 +600,11 @@ function VendorPortalContent() {
                                     </div>
                                     <div className="flex items-start gap-4">
                                         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 font-black text-xs">2</div>
-                                        <p className="text-xs font-bold leading-relaxed opacity-90">Internal Finance Review</p>
+                                        <p className="text-xs font-bold leading-relaxed opacity-90">PM Approval Review</p>
                                     </div>
                                     <div className="flex items-start gap-4">
                                         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 font-black text-xs">3</div>
-                                        <p className="text-xs font-bold leading-relaxed opacity-90">Automated POV Matching</p>
+                                        <p className="text-xs font-bold leading-relaxed opacity-90">Finance Final Approval</p>
                                     </div>
                                 </div>
                             </div>
@@ -632,8 +634,8 @@ function VendorPortalContent() {
                                     const toastId = toast.loading("Uploading invoice...");
                                     try {
                                         const metadata = {
-                                            assignedPM: '',
-                                            assignedFinanceUser: selectedFinanceUser,
+                                            assignedPM: selectedPM,
+                                            assignedFinanceUser: null,
                                             invoiceNumber: formData.get('invoiceNumber'),
                                             date: formData.get('date'),
                                             amount: formData.get('amount'),
@@ -650,20 +652,19 @@ function VendorPortalContent() {
                                 }} className="space-y-6">
                                     <div className="space-y-5">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Assign to Finance User <span className="text-rose-500">*</span></label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Assign to Project Manager <span className="text-rose-500">*</span></label>
                                             <select
                                                 className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer"
-                                                value={selectedFinanceUser}
-                                                onChange={(e) => setSelectedFinanceUser(e.target.value)}
+                                                value={selectedPM}
+                                                onChange={(e) => setSelectedPM(e.target.value)}
                                                 required
                                             >
-                                                <option value="">Select Finance User</option>
-                                                {financeUsers.map(fu => (
-                                                    <option key={fu.id} value={fu.id}>{fu.name}</option>
+                                                <option value="">Select Project Manager</option>
+                                                {pms.map(pm => (
+                                                    <option key={pm.id} value={pm.id}>{pm.name}</option>
                                                 ))}
                                             </select>
                                         </div>
-                                        {/* PM Assignment removed - Invoices route to Finance by default */}
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div className="space-y-2">

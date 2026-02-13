@@ -22,7 +22,7 @@ const menuItems = [
   { name: "PM Approval Queue", icon: "ClipboardCheck", path: "/pm/approval-queue" },
   { name: "Documents", icon: "FileText", path: "/pm/documents" },
   { name: "Analytics", icon: "BarChart3", path: "/analytics" },
-  { name: "Finance Dashboard", icon: "LayoutPanelLine", path: "/finance/dashboard" },
+  { name: "Financial Dashboard", icon: "PieChart", path: "/finance/dashboard" },
   { name: "Finance Approval Queue", icon: "ListChecks", path: "/finance/approval-queue" },
   { name: "Manual Entry", icon: "FilePlus", path: "/finance/manual-entry" },
   { name: "Configuration", icon: "Settings", path: "/config" },

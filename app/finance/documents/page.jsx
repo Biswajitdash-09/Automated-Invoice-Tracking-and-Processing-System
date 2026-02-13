@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '@/components/Layout/PageHeader';
 import Card from '@/components/ui/Card';
@@ -26,10 +27,10 @@ const DOCUMENT_TYPES = [
     { value: 'TIMESHEET', label: 'Timesheet', description: 'Excel, PDF, or Word', color: 'green' }
 ];
 
-export default function PMDocumentsPage() {
-    const { user } = useAuth();
+export default function FinanceDocumentsPage() {
+    const { user, isLoading: authLoading } = useAuth();
+    const router = useRouter();
     const role = getNormalizedRole(user);
-    const isFinance = role === ROLES.FINANCE_USER;
     const canUploadDocuments = role !== ROLES.ADMIN;
 
     const [documents, setDocuments] = useState([]);
@@ -58,6 +59,13 @@ export default function PMDocumentsPage() {
     });
     const [validationResult, setValidationResult] = useState(null);
 
+    // Role-based access control
+    useEffect(() => {
+        if (!authLoading && (!user || role !== ROLES.FINANCE_USER)) {
+            router.push("/dashboard");
+        }
+    }, [user, authLoading, role, router]);
+
     useEffect(() => {
         fetchDocuments();
         fetchProjects();
@@ -70,7 +78,7 @@ export default function PMDocumentsPage() {
             if (filterType) params.append('type', filterType);
             if (filterProject) params.append('projectId', filterProject);
 
-            const res = await fetch(`/api/pm/documents?${params}`);
+            const res = await fetch(`/api/finance/documents?${params}`);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
             setDocuments(data.documents || []);
@@ -83,7 +91,7 @@ export default function PMDocumentsPage() {
 
     const fetchProjects = async () => {
         try {
-            const res = await fetch('/api/pm/projects');
+            const res = await fetch('/api/finance/projects');
             const data = await res.json();
             if (res.ok) setProjects(data.projects || []);
         } catch (err) {
@@ -137,7 +145,7 @@ export default function PMDocumentsPage() {
             if (uploadData.ringiNumber) formData.append('ringiNumber', uploadData.ringiNumber);
             if (uploadData.description) formData.append('description', uploadData.description);
 
-            const res = await fetch('/api/pm/documents', {
+            const res = await fetch('/api/finance/documents', {
                 method: 'POST',
                 body: formData
             });
@@ -214,14 +222,22 @@ export default function PMDocumentsPage() {
         { id: 'TIMESHEET', label: 'Timesheet', icon: 'Calendar' },
     ];
 
+    if (authLoading || !user || role !== ROLES.FINANCE_USER) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
+
     return (
         <div className="px-4 sm:px-8 py-6 sm:py-8 min-h-screen">
             <PageHeader
                 title="Document Repository"
-                subtitle="Central repository for project documents"
+                subtitle="Central repository for finance documents"
                 icon="Folder"
                 accent="indigo"
-                showSignout={false}
+                roleLabel="Finance User"
                 actions={canUploadDocuments ? (
                     <button
                         onClick={() => setShowUploadModal(true)}
@@ -256,18 +272,16 @@ export default function PMDocumentsPage() {
                                 <option key={t.value} value={t.value}>{t.label}</option>
                             ))}
                         </select>
-                        {!isFinance && (
-                            <select
-                                value={filterProject}
-                                onChange={(e) => setFilterProject(e.target.value)}
-                                className="px-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 font-medium sm:col-span-2 lg:col-span-1"
-                            >
-                                <option value="">All Projects</option>
-                                {projects.map(p => (
-                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                ))}
-                            </select>
-                        )}
+                        <select
+                            value={filterProject}
+                            onChange={(e) => setFilterProject(e.target.value)}
+                            className="px-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 font-medium"
+                        >
+                            <option value="">All Projects</option>
+                            {projects.map(p => (
+                                <option key={p.id} value={p.id}>{p.name}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
@@ -364,12 +378,6 @@ export default function PMDocumentsPage() {
                                             <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${getStatusClasses(doc.status)}`}>
                                                 {doc.status}
                                             </span>
-                                            <a
-                                                href={doc.fileUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="hidden"
-                                            />
                                             <button
                                                 onClick={(e) => handleViewDocument(e, doc.id)}
                                                 className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 font-black text-[10px] uppercase tracking-widest transition-colors bg-transparent border-0 p-0 cursor-pointer"
@@ -390,7 +398,7 @@ export default function PMDocumentsPage() {
                                 <Icon name="Inbox" size={32} />
                             </div>
                             <h3 className="text-lg font-bold text-slate-800">No documents found</h3>
-                            <p className="text-slate-500 mt-1">Start by uploading your first project document.</p>
+                            <p className="text-slate-500 mt-1">Start by uploading your first finance document.</p>
                         </div>
                     </Card>
                 )}
@@ -408,7 +416,7 @@ export default function PMDocumentsPage() {
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
                                         <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Upload Document</h2>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Repository Submission</p>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Finance Document Repository</p>
                                     </div>
                                     <button
                                         onClick={() => setShowUploadModal(false)}
@@ -630,7 +638,7 @@ export default function PMDocumentsPage() {
                                                     Billing Cycle: {formatBillingMonth(documents.find((doc) => doc.id === viewerDocumentId).metadata.billingMonth)}
                                                 </p>
                                             )}
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Secure Document Access</p>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Secure Document Access</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">

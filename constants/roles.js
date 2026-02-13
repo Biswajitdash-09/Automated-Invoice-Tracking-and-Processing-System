@@ -53,6 +53,9 @@ export const ROLES = {
     VENDOR: 'Vendor'
 };
 
+/** All role labels for admin dropdowns (User Management, filters). Ensures Finance User is always available. */
+export const ROLES_LIST = Object.values(ROLES);
+
 export const MENU_PERMISSIONS = {
     'Dashboard': [ROLES.ADMIN, ROLES.PROJECT_MANAGER, ROLES.FINANCE_USER, ROLES.VENDOR],
     'Digitization': [ROLES.FINANCE_USER],
@@ -62,9 +65,9 @@ export const MENU_PERMISSIONS = {
     'Documents': [ROLES.ADMIN, ROLES.FINANCE_USER, ROLES.PROJECT_MANAGER],
     'Messages': [ROLES.ADMIN, ROLES.PROJECT_MANAGER, ROLES.VENDOR],
     'Analytics': [ROLES.ADMIN, ROLES.FINANCE_USER],
-    'Finance Dashboard': [ROLES.ADMIN, ROLES.FINANCE_USER],
+    'Financial Dashboard': [ROLES.ADMIN, ROLES.FINANCE_USER],
     'Finance Approval Queue': [ROLES.FINANCE_USER],
-    'Manual Entry': [ROLES.ADMIN, ROLES.FINANCE_USER],
+    'Manual Entry': [ROLES.FINANCE_USER],
     'Configuration': [ROLES.ADMIN],
     'User Management': [ROLES.ADMIN],
     'Audit Logs': [ROLES.ADMIN, ROLES.FINANCE_USER]

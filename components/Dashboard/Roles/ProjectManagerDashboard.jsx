@@ -122,7 +122,7 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
                                     </div>
                                     <div className="text-right">
                                         <p className="font-bold text-sm text-gray-900">{formatCurrency(inv.amount)}</p>
-                                        <Link href={`/approvals/${inv.id}`}>
+                                        <Link href={`/pm/approvals?invoiceId=${inv.id}`}>
                                             <button className="text-xs font-medium text-amber-600 hover:text-amber-700 mt-1">Review</button>
                                         </Link>
                                     </div>

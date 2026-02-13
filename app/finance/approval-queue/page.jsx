@@ -6,17 +6,25 @@ import Link from 'next/link';
 import Icon from '@/components/Icon';
 import { useAuth } from '@/context/AuthContext';
 import DocumentViewer from '@/components/ui/DocumentViewer';
+import { INVOICE_STATUS } from '@/lib/invoice-workflow';
 
 const STATUS_STYLES = {
+    [INVOICE_STATUS.PENDING_FINANCE_REVIEW]: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'PM Approved' },
+    [INVOICE_STATUS.FINANCE_APPROVED]: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Finance Approved' },
+    [INVOICE_STATUS.FINANCE_REJECTED]: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500', label: 'Finance Rejected' },
+    [INVOICE_STATUS.PENDING_PM_APPROVAL]: { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500', label: 'Pending PM Review' },
+    [INVOICE_STATUS.PM_REJECTED]: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500', label: 'PM Rejected' },
+    [INVOICE_STATUS.MORE_INFO_NEEDED]: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', label: 'More Info Needed' },
     APPROVED: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Approved' },
-    VERIFIED: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Verified' },
+    Verified: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Verified' },
     PAID: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Paid' },
     PM_APPROVED: { bg: 'bg-teal-50', text: 'text-teal-700', dot: 'bg-teal-500', label: 'PM Approved' },
     REJECTED: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500', label: 'Rejected' },
     MATCH_DISCREPANCY: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', label: 'Discrepancy' },
     VALIDATION_REQUIRED: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500', label: 'Needs Validation' },
     PENDING: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500', label: 'Pending' },
-    'Pending PM Approval': { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500', label: 'Sent to PM' },
+    manually_submitted: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Manually Submitted' },
+    RECEIVED: { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400', label: 'Received' },
 };
 const getStatus = (s) => STATUS_STYLES[s] || { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400', label: s?.replace(/_/g, ' ') || '—' };
 
@@ -31,8 +39,6 @@ export default function FinanceApprovalQueuePage() {
     const [processingId, setProcessingId] = useState(null);
     const [actionModal, setActionModal] = useState(null); // { invoice, type: 'approve'|'reject' }
     const [notes, setNotes] = useState('');
-    const [selectedPM, setSelectedPM] = useState('');
-    const [pms, setPms] = useState([]);
 
     // Document viewer
     const [viewerInvoice, setViewerInvoice] = useState(null);
@@ -42,7 +48,6 @@ export default function FinanceApprovalQueuePage() {
 
     useEffect(() => {
         fetchInvoices();
-        fetchPMs();
     }, []);
 
     const fetchInvoices = async () => {
@@ -59,85 +64,62 @@ export default function FinanceApprovalQueuePage() {
         }
     };
 
-    const fetchPMs = async () => {
-        try {
-            const res = await fetch('/api/pms');
-            if (res.ok) {
-                const data = await res.json();
-                setPms(data.pms || []);
-            }
-        } catch (err) {
-            console.error('Failed to fetch PMs:', err);
-        }
-    };
-
-    // Filter invoices assigned to this finance user
-    const myInvoices = useMemo(() => {
-        if (!user) return [];
-        return allInvoices.filter(inv =>
-            inv.assignedFinanceUser === user.id ||
-            inv.assignedFinanceUser === user.email
-        );
-    }, [allInvoices, user]);
 
     // Tab-based filtering
     const filteredInvoices = useMemo(() => {
         switch (activeTab) {
             case 'pending':
-                return myInvoices.filter(inv =>
+                return allInvoices.filter(inv =>
                     !inv.financeApproval?.status ||
                     inv.financeApproval?.status === 'PENDING' ||
                     inv.status === 'PENDING' ||
+                    inv.status === INVOICE_STATUS.PENDING_FM_APPROVAL ||
                     inv.status === 'VERIFIED' ||
                     inv.status === 'RECEIVED'
                 );
             case 'approved':
-                return myInvoices.filter(inv =>
+                return allInvoices.filter(inv =>
                     inv.financeApproval?.status === 'APPROVED' ||
-                    inv.status === 'Pending PM Approval' ||
+                    inv.status === INVOICE_STATUS.PENDING_FM_APPROVAL ||
                     inv.status === 'APPROVED' ||
                     inv.status === 'PM_APPROVED' ||
                     inv.status === 'PAID'
                 );
             case 'rejected':
-                return myInvoices.filter(inv =>
+                return allInvoices.filter(inv =>
                     inv.financeApproval?.status === 'REJECTED' ||
                     inv.status === 'Rejected'
                 );
             default:
-                return myInvoices;
+                return allInvoices;
         }
-    }, [myInvoices, activeTab]);
+    }, [allInvoices, activeTab]);
 
-    const pendingCount = myInvoices.filter(inv =>
+    const pendingCount = allInvoices.filter(inv =>
         !inv.financeApproval?.status || inv.financeApproval?.status === 'PENDING' ||
-        inv.status === 'PENDING' || inv.status === 'VERIFIED' || inv.status === 'RECEIVED'
+        inv.status === 'PENDING' || inv.status === INVOICE_STATUS.PENDING_FM_APPROVAL ||
+        inv.status === 'VERIFIED' || inv.status === 'RECEIVED'
     ).length;
-    const approvedCount = myInvoices.filter(inv =>
+    const approvedCount = allInvoices.filter(inv =>
         inv.financeApproval?.status === 'APPROVED'
     ).length;
-    const rejectedCount = myInvoices.filter(inv =>
+    const rejectedCount = allInvoices.filter(inv =>
         inv.financeApproval?.status === 'REJECTED'
     ).length;
 
     const handleApprove = async (invoiceId) => {
-        if (!selectedPM) {
-            setError('Please select a Project Manager to forward the invoice to.');
-            return;
-        }
         try {
             setProcessingId(invoiceId);
             const res = await fetch(`/api/finance/approve/${invoiceId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'APPROVE', notes, assignedPM: selectedPM })
+                body: JSON.stringify({ action: 'APPROVE', notes })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
             setActionModal(null);
             setNotes('');
-            setSelectedPM('');
-            setSuccessMsg('Invoice approved and forwarded to PM successfully!');
+            setSuccessMsg('Invoice approved and ready for payment!');
             setTimeout(() => setSuccessMsg(null), 4000);
             fetchInvoices();
         } catch (err) {
@@ -184,7 +166,7 @@ export default function FinanceApprovalQueuePage() {
         { key: 'pending', label: 'Pending Review', count: pendingCount, icon: 'Clock' },
         { key: 'approved', label: 'Approved', count: approvedCount, icon: 'CheckCircle2' },
         { key: 'rejected', label: 'Rejected', count: rejectedCount, icon: 'XCircle' },
-        { key: 'all', label: 'All', count: myInvoices.length, icon: 'LayoutList' },
+        { key: 'all', label: 'All', count: allInvoices.length, icon: 'LayoutList' },
     ];
 
     return (
@@ -334,9 +316,9 @@ export default function FinanceApprovalQueuePage() {
                                                     <Icon name="MapPin" size={10} /> {inv.costCenter}
                                                 </span>
                                             )}
-                                            {inv.assignedPM && inv.financeApproval?.status === 'APPROVED' && (
-                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg">
-                                                    <Icon name="UserCheck" size={10} /> Forwarded to PM
+                                            {inv.financeApproval?.status === 'APPROVED' && inv.assignedFinanceUser && (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">
+                                                    <Icon name="CheckCircle2" size={10} /> Approved by Finance
                                                 </span>
                                             )}
                                             {inv.financeApproval?.status === 'REJECTED' && inv.financeApproval?.notes && (
@@ -415,7 +397,7 @@ export default function FinanceApprovalQueuePage() {
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                        onClick={() => { setActionModal(null); setNotes(''); setSelectedPM(''); setError(null); }}
+                        onClick={() => { setActionModal(null); setNotes(''); setError(null); }}
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
@@ -429,8 +411,8 @@ export default function FinanceApprovalQueuePage() {
                                         <Icon name="CheckCircle2" size={20} />
                                     </div>
                                     <div>
-                                        <h2 className="font-bold text-slate-800 text-lg">Accept & Forward to PM</h2>
-                                        <p className="text-xs text-slate-400">This invoice will be sent to the selected Project Manager for approval</p>
+                                        <h2 className="font-bold text-slate-800 text-lg">Approve Invoice for Payment</h2>
+                                        <p className="text-xs text-slate-400">This invoice has passed all reviews and is ready for payment processing</p>
                                     </div>
                                 </div>
                             </div>
@@ -447,28 +429,6 @@ export default function FinanceApprovalQueuePage() {
                                     </div>
                                 </div>
 
-                                {/* PM Selection */}
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
-                                        Select Project Manager <span className="text-rose-500">*</span>
-                                    </label>
-                                    <select
-                                        value={selectedPM}
-                                        onChange={(e) => setSelectedPM(e.target.value)}
-                                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all appearance-none cursor-pointer"
-                                    >
-                                        <option value="">Choose a PM to forward to...</option>
-                                        {pms.map((pm) => (
-                                            <option key={pm.id} value={pm.id}>
-                                                {pm.name} ({pm.email}){pm.department ? ` — ${pm.department}` : ''}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {pms.length === 0 && (
-                                        <p className="text-[10px] text-amber-600 mt-1 font-medium">No PMs found. Make sure at least one PM has signed up.</p>
-                                    )}
-                                </div>
-
                                 {/* Notes */}
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Notes (optional)</label>
@@ -477,7 +437,7 @@ export default function FinanceApprovalQueuePage() {
                                         onChange={(e) => setNotes(e.target.value)}
                                         rows={2}
                                         className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all resize-none"
-                                        placeholder="Add any notes for the PM..."
+                                        placeholder="Add any notes for the record..."
                                     />
                                 </div>
                             </div>
@@ -485,20 +445,20 @@ export default function FinanceApprovalQueuePage() {
                             {/* Actions */}
                             <div className="px-5 pb-5 flex gap-3">
                                 <button
-                                    onClick={() => { setActionModal(null); setNotes(''); setSelectedPM(''); setError(null); }}
+                                    onClick={() => { setActionModal(null); setNotes(''); setError(null); }}
                                     className="flex-1 px-4 py-3 border border-slate-200 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-50 transition-all"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={() => handleApprove(actionModal.invoice.id)}
-                                    disabled={processingId || !selectedPM}
+                                    disabled={processingId}
                                     className="flex-1 px-4 py-3 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {processingId ? (
                                         <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</>
                                     ) : (
-                                        <><Icon name="Send" size={16} /> Approve & Send to PM</>
+                                        <><Icon name="CheckCircle2" size={16} /> Approve for Payment</>
                                     )}
                                 </button>
                             </div>

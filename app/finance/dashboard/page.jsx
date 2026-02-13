@@ -7,6 +7,7 @@ import Icon from '@/components/Icon';
 import { useAuth } from '@/context/AuthContext';
 import { ROLES, getNormalizedRole } from '@/constants/roles';
 import { useRouter } from 'next/navigation';
+import PageHeader from '@/components/Layout/PageHeader';
 
 const fadeUp = {
     hidden: { opacity: 0, y: 14 },
@@ -32,25 +33,25 @@ const getStatus = (s) => STATUS_STYLES[s] || { bg: 'bg-slate-100', text: 'text-s
 
 export default function FinanceDashboardPage() {
     const router = useRouter();
-    const { user, isLoading: authLoading } = useAuth();
+    const { user, isLoading: authLoading, logout } = useAuth();
     const [allInvoices, setAllInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [tableOpen, setTableOpen] = useState(true);
 
-    useEffect(() => {
-        const role = getNormalizedRole(user);
-        if (!authLoading && (!user || role !== ROLES.FINANCE_USER && role !== ROLES.ADMIN)) {
-            router.push("/dashboard");
-        }
-    }, [user, authLoading, router]);
+    const role = getNormalizedRole(user);
 
     useEffect(() => {
-        const role = getNormalizedRole(user);
+        if (!authLoading && (!user || (role !== ROLES.FINANCE_USER && role !== ROLES.ADMIN))) {
+            router.push("/dashboard");
+        }
+    }, [user, authLoading, role, router]);
+
+    useEffect(() => {
         if (!authLoading && (role === ROLES.FINANCE_USER || role === ROLES.ADMIN)) {
             fetchInvoices();
         }
-    }, [user, authLoading]);
+    }, [user, authLoading, role]);
 
     const fetchInvoices = async () => {
         try {
@@ -136,10 +137,10 @@ export default function FinanceDashboardPage() {
             label: 'Approval Queue', icon: 'CheckCircle2', desc: 'Review pending invoices', link: '/finance/approval-queue',
             iconClasses: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white'
         },
-        {
+        ...(role === ROLES.FINANCE_USER ? [{
             label: 'Manual Entry', icon: 'FilePlus2', desc: 'Create invoice record', link: '/finance/manual-entry',
             iconClasses: 'bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white'
-        },
+        }] : []),
         {
             label: 'Discrepancies', icon: 'GitCompare', desc: 'Resolve match issues', link: '/matching',
             iconClasses: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
@@ -152,6 +153,15 @@ export default function FinanceDashboardPage() {
 
     return (
         <div className="space-y-6 sm:space-y-8 pb-10">
+            {/* Page Header with Signout - using PageHeader component like vendors page */}
+            <PageHeader
+                title="Finance Dashboard"
+                subtitle="Overview of invoice processing and approvals"
+                icon="BarChart3"
+                accent="indigo"
+                roleLabel="Finance User"
+            />
+
             {/* Error */}
             {error && (
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 text-sm font-medium">

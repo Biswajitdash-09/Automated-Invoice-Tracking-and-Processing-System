@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/server-auth';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getNormalizedRole, ROLES } from '@/constants/roles';
+import { INVOICE_STATUS } from '@/lib/invoice-workflow';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,9 @@ export async function POST(request) {
             );
         }
 
+        // Capture request metadata for comprehensive audit logging
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
+        const userAgent = request.headers.get('user-agent') || 'unknown';
         // Parse FormData
         const formData = await request.formData();
 
@@ -32,10 +36,10 @@ export async function POST(request) {
         const description = formData.get('description');
         const poNumber = formData.get('poNumber');
         const project = formData.get('project');
-        const status = formData.get('status') || 'manually_submitted';
         const submittedByUserId = formData.get('submittedByUserId');
         const assignedPM = formData.get('assignedPM');
         const document = formData.get('document');
+        const originatorRole = formData.get('originatorRole') || getNormalizedRole(user);
 
         // Validation
         if (!vendorName || !invoiceNumber || !amount || !date) {
@@ -44,6 +48,18 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
+
+        // Vendor submissions MUST have a PM assigned for workflow compliance
+        if (originatorRole === 'Vendor' && !assignedPM) {
+            return NextResponse.json(
+                { error: 'Missing required field: assignedPM is mandatory for vendor invoices' },
+                { status: 400 }
+            );
+        }
+
+        // Set status based on workflow - PM must review first
+        const defaultStatus = (originatorRole === 'Vendor') ? INVOICE_STATUS.PENDING_PM_APPROVAL : INVOICE_STATUS.PENDING_PM_APPROVAL;
+        const invoiceStatus = formData.get('status') || defaultStatus;
 
         // Validate amount is a positive number
         const numericAmount = parseFloat(amount);
@@ -128,7 +144,21 @@ export async function POST(request) {
             }
         }
 
-        // Create invoice with manually_submitted status
+        // Create comprehensive audit entry for invoice submission
+        const auditTrailEntry = {
+            action: 'submitted',
+            actor: user.name || user.email,
+            actorId: user.id,
+            actorRole: originatorRole,
+            timestamp: new Date().toISOString(),
+            previousStatus: null, // New invoice has no previous status
+            newStatus: invoiceStatus,
+            notes: `Invoice ${invoiceNumber} submitted by ${originatorRole} from ${vendorName}`,
+            ipAddress: ipAddress,
+            userAgent: userAgent
+        };
+
+        // Create invoice with proper workflow status
         const invoiceData = {
             vendorName,
             vendorId,
@@ -141,24 +171,29 @@ export async function POST(request) {
             poNumber,
             project,
             assignedPM,
-            status,
+            status: invoiceStatus,
+            originatorRole,
+            pmApproval: { status: 'PENDING' },  // Initialize PM approval field
+            financeApproval: { status: 'PENDING' },  // Initialize Finance approval field
             fileUrl,
             originalName,
             receivedAt: new Date(),
-            auditUsername: user.name || user.email || 'Finance User',
+            auditUsername: user.name || user.email,
             auditAction: 'CREATE',
-            auditDetails: `Manually submitted invoice: ${invoiceNumber} from ${vendorName}`
+            auditDetails: `Invoice ${invoiceNumber} submitted by ${originatorRole} from ${vendorName}`,
+            auditTrailEntry
         };
 
         // Save invoice
         await db.saveInvoice(invoiceId, invoiceData);
 
-        // Create audit trail entry
+        // Create audit trail entry with role-specific action
         await db.createAuditTrailEntry({
-            username: user.name || user.email || 'Finance User',
-            action: 'MANUAL_SUBMISSION',
-            details: `Invoice ${invoiceNumber} manually submitted with status: ${status}`,
-            invoice_id: invoiceId
+            username: user.name || user.email,
+            action: originatorRole === 'Vendor' ? 'VENDOR_SUBMISSION' : 'MANUAL_SUBMISSION',
+            details: `Invoice ${invoiceNumber} submitted by ${originatorRole} with status: ${invoiceStatus}`,
+            invoice_id: invoiceId,
+            role: originatorRole
         });
 
         // Return success response
@@ -171,7 +206,7 @@ export async function POST(request) {
                 vendorName,
                 amount: numericAmount,
                 currency,
-                status,
+                status: invoiceStatus,
                 fileUrl
             }
         }, { status: 201 });

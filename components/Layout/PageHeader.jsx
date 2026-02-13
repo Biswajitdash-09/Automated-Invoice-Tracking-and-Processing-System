@@ -39,6 +39,7 @@ export default function PageHeader({
   accent = "purple",
   roleLabel,
   actions,
+  showSignout = true,
 }) {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -135,8 +136,10 @@ export default function PageHeader({
                   </div>
                 </li>
 
-                {/* SIGN OUT */}
-                <li>
+                {showSignout && (
+                  <>
+                  {/* SIGN OUT */}
+                  <li>
                   <button
                     onClick={() => {
                       logout();
@@ -155,6 +158,8 @@ export default function PageHeader({
                     </span>
                   </button>
                 </li>
+                  </>
+                )}
               </ul>
             </div>
           )}

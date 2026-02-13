@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const ROLES = ['Admin', 'PM', 'Finance User', 'Vendor'];
+import { ROLES, ROLES_LIST } from '@/constants/roles';
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState([]);
@@ -18,7 +17,7 @@ export default function UserManagementPage() {
         name: '',
         email: '',
         password: '',
-        role: 'Finance User',
+        role: ROLES.FINANCE_USER,
         department: '',
         assignedProjects: []
     });
@@ -52,7 +51,7 @@ export default function UserManagementPage() {
             if (!res.ok) throw new Error(data.error);
 
             setShowCreateModal(false);
-            setFormData({ name: '', email: '', password: '', role: 'Finance User', department: '', assignedProjects: [] });
+            setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [] });
             fetchUsers();
         } catch (err) {
             setError(err.message);
@@ -145,7 +144,7 @@ export default function UserManagementPage() {
                                 className="px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
                                 <option value="">All Roles</option>
-                                {ROLES.map(role => (
+                                {ROLES_LIST.map(role => (
                                     <option key={role} value={role}>{role}</option>
                                 ))}
                             </select>
@@ -161,7 +160,7 @@ export default function UserManagementPage() {
                         </div>
                         <button
                             onClick={() => {
-                                setFormData({ name: '', email: '', password: '', role: 'Finance User', department: '', assignedProjects: [] });
+                                setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [] });
                                 setShowCreateModal(true);
                             }}
                             className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg shadow-purple-500/25"
@@ -319,9 +318,9 @@ export default function UserManagementPage() {
                                             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                             className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         >
-                                            {ROLES.map(role => (
-                                                <option key={role} value={role}>{role}</option>
-                                            ))}
+{ROLES_LIST.map(role => (
+                                            <option key={role} value={role}>{role}</option>
+                                        ))}
                                         </select>
                                     </div>
 

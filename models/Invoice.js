@@ -21,6 +21,20 @@ const InvoiceDocumentSchema = new mongoose.Schema({
     type: { type: String }
 }, { _id: false });
 
+// Enhanced audit trail for comprehensive workflow tracking
+const AuditLogSchema = new mongoose.Schema({
+    action: { type: String, required: true },           // Action performed (e.g., 'submitted', 'approved', 'rejected')
+    actor: { type: String, required: true },            // Full name of person who performed the action
+   	actorId: { type: String, required: true },          // User ID of person who performed the action
+    actorRole: { type: String, required: true },        // Role of person (Vendor, PM, Finance User, Admin)
+    timestamp: { type: Date, default: Date.now },       // When the action occurred
+    previousStatus: { type: String },                    // Invoice status before this action
+    newStatus: { type: String },                         // Invoice status after this action
+    notes: { type: String },                             // Optional notes/comments
+    ipAddress: { type: String },                         // IP address of requestor
+    userAgent: { type: String }                          // Browser/client information
+}, { _id: false });
+
 const InvoiceSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     vendorName: { type: String, required: true },
@@ -31,7 +45,27 @@ const InvoiceSchema = new mongoose.Schema({
     invoiceNumber: { type: String },
     date: { type: String },
     amount: { type: Number },
-    status: { type: String, required: true },
+    // Invoice workflow status - follows PRD workflow: Submitted → PM → Finance
+    status: {
+        type: String,
+        required: true,
+        enum: [
+            'Submitted',                    // Initial state when vendor submits
+            'Pending PM Approval',          // Awaiting PM review
+            'PM Approved',                  // PM approved, ready for Finance
+            'PM Rejected',                  // PM rejected
+            'More Info Needed',             // PM requests additional info
+            'Pending Finance Review',       // Awaiting Finance review after PM approval
+            'Finance Approved',             // Finance approved - final state
+            'Finance Rejected'              // Finance rejected - final state
+        ],
+        default: 'Submitted'
+    },
+    originatorRole: {
+        type: String,
+        enum: ['Admin', 'PM', 'Finance User', 'Vendor'],
+        default: 'Vendor'
+    }, // Role that initiated the invoice
     category: { type: String },
     dueDate: { type: String },
     costCenter: { type: String },
@@ -42,13 +76,14 @@ const InvoiceSchema = new mongoose.Schema({
     project: { type: String },
     matching: { type: mongoose.Schema.Types.Mixed },
     // New RBAC fields
-    assignedPM: { type: String },  // PM user ID for this invoice
-    assignedFinanceUser: { type: String }, // Specific Finance User ID for early-stage review
+    assignedPM: { type: String },  // PM user ID for this invoice - MANDATORY for workflow
+    assignedFinanceUser: { type: String }, // Will be auto-assigned by Finance when reviewing
     financeApproval: { type: ApprovalSchema, default: () => ({}) },
     pmApproval: { type: ApprovalSchema, default: () => ({}) },
     adminApproval: { type: ApprovalSchema, default: () => ({}) },
     hilReview: { type: HILReviewSchema, default: () => ({}) },
     documents: [InvoiceDocumentSchema],
+    auditTrail: [AuditLogSchema],  // Comprehensive audit trail for all workflow actions
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 // Indexes for efficient queries
@@ -61,6 +96,10 @@ InvoiceSchema.index({ 'financeApproval.status': 1 });
 InvoiceSchema.index({ 'pmApproval.status': 1 });
 InvoiceSchema.index({ 'adminApproval.status': 1 });
 InvoiceSchema.index({ 'hilReview.status': 1 });
+
+// Index for efficient audit trail queries
+InvoiceSchema.index({ 'auditTrail.timestamp': -1 });
+InvoiceSchema.index({ 'auditTrail.actorId': 1 });
 
 export default mongoose.models.Invoice || mongoose.model('Invoice', InvoiceSchema);
 

@@ -7,6 +7,11 @@ import { ROLES } from '@/constants/roles';
 import Message from '@/models/Message';
 import { v4 as uuidv4 } from 'uuid';
 import connectToDatabase from '@/lib/mongodb';
+import {
+    INVOICE_STATUS,
+    validateTransition,
+    generateAuditMessage
+} from '@/lib/invoice-workflow';
 
 /**
  * POST /api/pm/approve/:id - PM approval for invoice
@@ -36,15 +41,41 @@ export async function POST(request, { params }) {
             );
         }
 
+        // Capture request metadata for comprehensive audit logging
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
+        const userAgent = request.headers.get('user-agent') || 'unknown';
+
         const invoice = await db.getInvoice(id);
         if (!invoice) {
             return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
         }
 
-        // Check Finance approval first (Step: FM -> PM)
-        if (invoice.financeApproval?.status !== 'APPROVED') {
+        // Capture previous status for audit
+        const previousStatus = invoice.status;
+
+        // Validate workflow state - PM can review invoices in various statuses
+        // This matches the filter logic in app/pm/approval-queue/page.jsx
+        const allowPMReview = [
+            'RECEIVED',
+            'DIGITIZING',
+            'VALIDATION_REQUIRED',
+            'VERIFIED',
+            'PENDING_APPROVAL',
+            'MATCH_DISCREPANCY',
+            INVOICE_STATUS.PENDING_PM_APPROVAL
+        ].includes(invoice.status) || !invoice.pmApproval?.status || invoice.pmApproval?.status === 'PENDING';
+        
+        if (!allowPMReview) {
             return NextResponse.json(
-                { error: 'Finance approval required before PM approval' },
+                { error: `Invalid workflow state: Invoice status '${invoice.status}' is not valid for PM review. Valid statuses: RECEIVED, DIGITIZING, VALIDATION_REQUIRED, VERIFIED, PENDING_APPROVAL, MATCH_DISCREPANCY, PENDING_PM_APPROVAL, or pmApproval.isEmpty()` },
+                { status: 400 }
+            );
+        }
+
+        // Prevent workflow issues - Finance should not have reviewed yet
+        if (invoice.financeApproval?.status && invoice.financeApproval?.status !== 'PENDING') {
+            return NextResponse.json(
+                { error: 'Invalid workflow: Finance already reviewed this invoice before PM' },
                 { status: 400 }
             );
         }
@@ -57,6 +88,75 @@ export async function POST(request, { params }) {
                     { status: 403 }
                 );
             }
+        }
+
+        // Define status transitions for PM actions using constants
+        const statusTransitions = {
+            [INVOICE_STATUS.PENDING_PM_APPROVAL]: {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            // Support old system statuses - transition through pm approval workflow
+            'RECEIVED': {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            'DIGITIZING': {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            'VALIDATION_REQUIRED': {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            'VERIFIED': {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            'PENDING_APPROVAL': {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            },
+            'MATCH_DISCREPANCY': {
+                'APPROVE': INVOICE_STATUS.PENDING_FINANCE_REVIEW,
+                'REJECT': INVOICE_STATUS.PM_REJECTED,
+                'REQUEST_INFO': INVOICE_STATUS.MORE_INFO_NEEDED
+            }
+        };
+
+        // Determine new status based on action
+        const newStatus = statusTransitions[invoice.status]?.[action];
+        console.log('[PM Approve] Status mapping:', {
+            invoiceStatus: invoice.status,
+            action: action,
+            newStatus: newStatus,
+            statusTransitionsKeys: Object.keys(statusTransitions),
+            hasMapping: !!statusTransitions[invoice.status]
+        });
+        if (!newStatus) {
+            return NextResponse.json(
+                { error: `Invalid action '${action}' for invoice status '${invoice.status}'` },
+                { status: 400 }
+            );
+        }
+
+        // Validate the transition is allowed
+        const transitionValidation = validateTransition(
+            invoice.status,
+            newStatus,
+            userRole
+        );
+        if (!transitionValidation.allowed) {
+            return NextResponse.json(
+                { error: transitionValidation.reason },
+                { status: 400 }
+            );
         }
 
         // Update PM approval
@@ -74,51 +174,47 @@ export async function POST(request, { params }) {
             notes: notes || null
         };
 
-        // Update invoice status based on action
-        let newStatus = invoice.status;
-        if (action === 'APPROVE') {
-            newStatus = 'Approved';
-        } else if (action === 'REJECT') {
-            newStatus = 'Rejected';
-        } else if (action === 'REQUEST_INFO') {
-            newStatus = 'Info Requested';
-        }
+        // Generate audit message using workflow function
+        const roleName = getNormalizedRole(session.user);
+        const auditDetails = generateAuditMessage(
+            action,
+            roleName,
+            invoice.invoiceNumber,
+            invoice.status,
+            newStatus,
+            notes
+        );
+
+        // Create comprehensive audit entry
+        const auditTrailEntry = {
+            action: action.toLowerCase() === 'request_info' ? 'requested_info' : action.toLowerCase(),
+            actor: session.user.name || session.user.email,
+            actorId: session.user.id,
+            actorRole: userRole,
+            timestamp: new Date().toISOString(),
+            previousStatus: previousStatus,
+            newStatus: newStatus,
+            notes: notes || `PM ${action.toLowerCase().replace('_', ' ')} this invoice`,
+            ipAddress: ipAddress,
+            userAgent: userAgent
+        };
 
         const updatedInvoice = await db.saveInvoice(id, {
             pmApproval,
             status: newStatus,
             auditUsername: session.user.name || session.user.email,
             auditAction: `PM_${action}`,
-            auditDetails: `PM ${action.toLowerCase().replace('_', ' ')}${notes ? `: ${notes}` : ''}`
+            auditDetails,
+            auditTrailEntry
         });
 
-        // Automated Messaging for Info Request
+        // Automated Messaging for Info Request - notifies Vendor
         if (action === 'REQUEST_INFO') {
             try {
                 await connectToDatabase();
-                const recipientRole = body.recipientRole || ROLES.VENDOR;
-                let recipientId = null;
-                let recipientName = null;
-
-                if (recipientRole === ROLES.VENDOR) {
-                    recipientId = updatedInvoice.submittedByUserId;
-                    const vendor = await db.getUserById(recipientId);
-                    recipientName = vendor?.name || 'Vendor';
-                } else if (recipientRole === ROLES.FINANCE_USER) {
-                    recipientId = updatedInvoice.financeApproval?.approvedBy;
-                    if (recipientId) {
-                        const fm = await db.getUserById(recipientId);
-                        recipientName = fm?.name || 'Finance Manager';
-                    }
-                } else if (recipientRole === ROLES.PROJECT_MANAGER) {
-                    recipientId = updatedInvoice.assignedPM;
-                    if (recipientId) {
-                        const pm = await db.getUserById(recipientId);
-                        recipientName = pm?.name || 'Project Manager';
-                    }
-                }
-
+                const recipientId = updatedInvoice.submittedByUserId;
                 if (recipientId) {
+                    const vendor = await db.getUserById(recipientId);
                     const messageId = uuidv4();
                     await Message.create({
                         id: messageId,
@@ -128,22 +224,22 @@ export async function POST(request, { params }) {
                         senderName: session.user.name || session.user.email,
                         senderRole: userRole,
                         recipientId: recipientId,
-                        recipientName: recipientName,
-                        subject: `Info Request: Invoice ${updatedInvoice.invoiceNumber || updatedInvoice.id.slice(-6)}`,
-                        content: notes || `${userRole} requested more information regarding this invoice.`,
+                        recipientName: vendor?.name || 'Vendor',
+                        subject: `PM Info Required: Invoice ${updatedInvoice.invoiceNumber || updatedInvoice.id.slice(-6)}`,
+                        content: notes || 'The Project Manager has requested additional information for your invoice.',
                         messageType: 'INFO_REQUEST',
                         threadId: messageId
                     });
-                    console.log(`[PM Action] Automated message created for ${recipientRole} (${recipientId})`);
+                    console.log(`[PM Action] Info request sent to vendor (${recipientId})`);
                 } else {
-                    console.warn(`[PM Action] No recipient found for role ${recipientRole}, skipping automated message.`);
+                    console.warn(`[PM Action] No vendor found for invoice ${id}, skipping message.`);
                 }
             } catch (msgErr) {
-                console.error('[PM Action] Failed to create automated message:', msgErr);
+                console.error('[PM Action] Failed to create info request message:', msgErr);
             }
         }
 
-        // Notify both Vendor and Finance User on rejection
+        // Notify Vendor on PM rejection (Finance hasn't seen it yet)
         if (action === 'REJECT') {
             try {
                 await connectToDatabase();
@@ -153,9 +249,9 @@ export async function POST(request, { params }) {
                 const vendorId = updatedInvoice.submittedByUserId;
                 if (vendorId) {
                     const vendor = await db.getUserById(vendorId);
-                    const msgId1 = uuidv4();
+                    const msgId = uuidv4();
                     await Message.create({
-                        id: msgId1,
+                        id: msgId,
                         invoiceId: updatedInvoice.id,
                         projectId: updatedInvoice.project || null,
                         senderId: session.user.id,
@@ -163,49 +259,36 @@ export async function POST(request, { params }) {
                         senderRole: userRole,
                         recipientId: vendorId,
                         recipientName: vendor?.name || 'Vendor',
-                        subject: `Invoice Rejected: ${invoiceLabel}`,
+                        subject: `PM Rejected Invoice: ${invoiceLabel}`,
                         content: notes || 'Your invoice has been rejected by the Project Manager.',
                         messageType: 'REJECTION',
-                        threadId: msgId1
+                        threadId: msgId
                     });
-                    console.log(`[PM Reject] Notification sent to vendor (${vendorId})`);
-                }
-
-                // Notify Finance User who approved it
-                const financeUserId = updatedInvoice.financeApproval?.approvedBy;
-                if (financeUserId) {
-                    const financeUser = await db.getUserById(financeUserId);
-                    const msgId2 = uuidv4();
-                    await Message.create({
-                        id: msgId2,
-                        invoiceId: updatedInvoice.id,
-                        projectId: updatedInvoice.project || null,
-                        senderId: session.user.id,
-                        senderName: session.user.name || session.user.email,
-                        senderRole: userRole,
-                        recipientId: financeUserId,
-                        recipientName: financeUser?.name || 'Finance User',
-                        subject: `PM Rejected Invoice: ${invoiceLabel}`,
-                        content: notes || 'The Project Manager has rejected this invoice that you previously approved.',
-                        messageType: 'REJECTION',
-                        threadId: msgId2
-                    });
-                    console.log(`[PM Reject] Notification sent to finance user (${financeUserId})`);
+                    console.log(`[PM Reject] Rejection notification sent to vendor (${vendorId})`);
                 }
             } catch (msgErr) {
-                console.error('[PM Reject] Failed to create rejection notifications:', msgErr);
+                console.error('[PM Reject] Failed to create rejection notification:', msgErr);
             }
         }
 
-        const notificationType = action === 'REJECT' ? 'REJECTED' : action === 'REQUEST_INFO' ? 'AWAITING_INFO' : 'PENDING_APPROVAL';
+        // Determine notification type based on action
+        const notificationType = action === 'REJECT' ? 'REJECTED' :
+                                action === 'REQUEST_INFO' ? 'AWAITING_INFO' :
+                                'PENDING_APPROVAL';
         await sendStatusNotification(updatedInvoice, notificationType).catch((err) =>
             console.error('[PM Approve] Notification failed:', err)
         );
 
+        // Determine workflow message based on action
+        const workflowMessage = action === 'APPROVE' ? 'Proceeding to Finance review' :
+                              action === 'REQUEST_INFO' ? 'Awaiting information from vendor' :
+                              'Workflow ended at PM stage';
+
         return NextResponse.json({
             success: true,
-            message: `Invoice ${action.toLowerCase().replace('_', ' ')}`,
-            newStatus
+            message: `PM ${action.toLowerCase().replace('_', ' ')} invoice successfully`,
+            newStatus,
+            workflow: workflowMessage
         });
     } catch (error) {
         console.error('Error processing PM approval:', error);

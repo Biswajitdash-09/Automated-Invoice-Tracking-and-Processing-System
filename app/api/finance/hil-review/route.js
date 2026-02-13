@@ -59,6 +59,10 @@ export async function GET(request) {
  */
 export async function POST(request) {
     try {
+        // Capture request metadata for audit trail early
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
+        const userAgent = request.headers.get('user-agent') || 'unknown';
+
         const session = await getSession();
         if (!session?.user) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -91,6 +95,9 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
         }
 
+        // Capture previous status for audit
+        const previousStatus = invoice.status;
+
         // Update invoice with HIL review
         const hilReview = {
             status,
@@ -115,7 +122,24 @@ export async function POST(request) {
             if (corrections.vendorName) updateData.vendorName = corrections.vendorName;
         }
 
-        await db.saveInvoice(invoiceId, updateData);
+        // Create comprehensive audit trail entry
+        const auditTrailEntry = {
+            action: 'HIL_REVIEW',
+            actor: session.user.name || session.user.email,
+            actorId: session.user.id,
+            actorRole: 'FINANCE_USER',
+            timestamp: new Date().toISOString(),
+            previousStatus: previousStatus,
+            newStatus: invoice.status, // HIL review doesn't change the main status
+            notes: notes || `HIL review ${status}`,
+            ipAddress: ipAddress,
+            userAgent: userAgent
+        };
+
+        await db.saveInvoice(invoiceId, {
+            ...updateData,
+            auditTrailEntry: auditTrailEntry
+        });
 
         return NextResponse.json({ success: true, message: `Invoice ${status.toLowerCase()}` });
     } catch (error) {
