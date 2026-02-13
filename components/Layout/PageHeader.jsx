@@ -145,17 +145,16 @@ export default function PageHeader({
                       logout();
                       router.push("/login");
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors hover:bg-slate-50 active:bg-slate-100"
+                    className="w-full flex items-center justify-between gap-3 px-3 py-3 rounded-xl transition-colors hover:bg-slate-50 active:bg-slate-100"
                   >
+                    <span className="text-xs font-black text-rose-600 uppercase tracking-widest leading-none">
+                      Sign Out
+                    </span>
                     <div
                       className={`w-8 h-8 rounded-lg bg-linear-to-br ${gradientClass} flex items-center justify-center shrink-0`}
                     >
                       <Icon name="LogOut" size={16} className="text-white" />
                     </div>
-
-                    <span className="text-xs font-black text-rose-600 uppercase tracking-widest leading-none">
-                      Sign Out
-                    </span>
                   </button>
                 </li>
                   </>

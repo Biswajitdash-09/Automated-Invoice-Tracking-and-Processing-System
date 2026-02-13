@@ -21,13 +21,10 @@ export async function POST(request) {
         // Check if user exists (Strict RBAC: Only registered users can login)
         const user = await User.findOne({ email: email.trim().toLowerCase() });
         if (!user) {
-            // Security: Don't reveal if user exists, but don't send OTP
-            // Return success to prevent enumeration, or specific error if internal policy allows
-            // For this internal app, we'll be helpful but secure-ish.
+            // User does not exist - do not send OTP
             return NextResponse.json({
-                success: true,
-                message: 'If your email is registered, you will receive an OTP shortly.'
-            });
+                error: 'No account found with this email address. Please sign up first.'
+            }, { status: 404 });
         }
 
         if (!user.isActive) {
