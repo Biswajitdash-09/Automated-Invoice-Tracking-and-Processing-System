@@ -263,21 +263,10 @@ export default function PMMessagesPage() {
                                 exit={{ scale: 0.95, opacity: 0 }}
                                 className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto custom-scrollbar"
                             >
-                                <div className="flex justify-between items-start mb-8">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-1">To (Project Manager)</label>
-                                        <select
-                                            value={composeData.recipientId}
-                                            onChange={(e) => setComposeData({ ...composeData, recipientId: e.target.value })}
-                                            required
-                                            className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        >
-                                            <option value="">Select PM</option>
-                                            {pms.map(p => (
-                                                <option key={p.id} value={p.id}>{p.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+
+
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-xl font-bold text-slate-800">Compose Message</h3>
                                     <button onClick={() => setShowComposeModal(false)} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
                                         <Icon name="X" size={20} className="text-slate-400" />
                                     </button>
@@ -286,7 +275,7 @@ export default function PMMessagesPage() {
                                 <form onSubmit={handleSendMessage} className="space-y-6">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Recipient ({getNormalizedRole(user) === ROLES.VENDOR ? 'Project Manager' : 'Contact'})</label>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Recipient (Vendor / Contact)</label>
                                             <select
                                                 required
                                                 value={composeData.recipientId}
@@ -295,7 +284,7 @@ export default function PMMessagesPage() {
                                             >
                                                 <option value="">Select Recipient</option>
                                                 {recipients.map(r => (
-                                                    <option key={r.id} value={r.id}>{r.name} {r.type ? `(${r.type})` : ''}</option>
+                                                    <option key={r.id} value={r.id || r.linkedUserId || r._id}>{r.name} {r.type ? `(${r.type})` : ''}</option>
                                                 ))}
                                             </select>
                                         </div>
