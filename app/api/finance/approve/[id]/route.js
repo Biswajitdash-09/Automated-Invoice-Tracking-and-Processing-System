@@ -114,18 +114,21 @@ export async function POST(request, { params }) {
             );
         }
 
-        // Validate the transition is allowed
-        const role = requireRole([ROLES.FINANCE_USER, ROLES.ADMIN]).role || ROLES.FINANCE_USER;
-        const transitionValidation = validateTransition(
-            invoice.status,
-            newStatus,
-            role
-        );
-        if (!transitionValidation.allowed) {
-            return NextResponse.json(
-                { error: transitionValidation.reason },
-                { status: 400 }
+        // Validate the transition is allowed (only for standard workflow)
+        // Manual entries or legacy invoices bypass strict transition validation
+        if (invoice.status === INVOICE_STATUS.PENDING_FINANCE_REVIEW) {
+            const role = requireRole([ROLES.FINANCE_USER, ROLES.ADMIN]).role || ROLES.FINANCE_USER;
+            const transitionValidation = validateTransition(
+                invoice.status,
+                newStatus,
+                role
             );
+            if (!transitionValidation.allowed) {
+                return NextResponse.json(
+                    { error: transitionValidation.reason },
+                    { status: 400 }
+                );
+            }
         }
 
         // Update finance approval (SECOND approval step)
@@ -135,6 +138,7 @@ export async function POST(request, { params }) {
             'REQUEST_INFO': 'INFO_REQUESTED'
         };
 
+        const role = requireRole([ROLES.FINANCE_USER, ROLES.ADMIN]).role || ROLES.FINANCE_USER;
         const financeApproval = {
             status: statusMap[action],
             approvedBy: session.user.id,
