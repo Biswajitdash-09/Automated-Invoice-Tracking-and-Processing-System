@@ -13,6 +13,12 @@ import { useRouter } from "next/navigation";
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'];
 
+const STATUS_COLORS = {
+  'Finance Approved': '#10b981',
+  'Finance Rejected': '#ef4444',
+  'Pending Finance Review': '#f59e0b'
+};
+
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -290,7 +296,7 @@ const AnalyticsDashboard = () => {
                   dataKey="value"
                 >
                   {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} strokeWidth={0} />
+                    <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.name] || COLORS[index % COLORS.length]} strokeWidth={0} />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -304,8 +310,8 @@ const AnalyticsDashboard = () => {
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center Text Overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pr-24 lg:pr-32">
+            {/* Center Text Overlay - Positioned in donut hole center */}
+            <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center pointer-events-none">
               <span className="text-3xl font-bold text-gray-800">{invoices.length}</span>
               <span className="text-xs text-gray-500 uppercase font-semibold">Total</span>
             </div>
