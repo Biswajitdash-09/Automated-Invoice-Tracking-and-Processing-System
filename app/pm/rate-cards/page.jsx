@@ -164,14 +164,6 @@ export default function RateCardPage() {
                 subtitle="Manage and standardize vendor service rates for your projects"
                 icon="Layers"
                 accent="indigo"
-                actions={
-                    <button
-                        onClick={() => { resetForm(); setShowCreateModal(true); }}
-                        className="flex items-center justify-center gap-2 h-10 px-4 sm:px-6 bg-linear-to-br from-indigo-600 to-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all whitespace-nowrap"
-                    >
-                        <Icon name="Plus" size={16} /> <span className="hidden xs:inline">New Rate Card</span><span className="xs:hidden">New</span>
-                    </button>
-                }
             />
 
             <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6">
