@@ -1,6 +1,6 @@
 {
   "name": "0236120b-6d4d-4c10-8833-99940f850c0e",
-  "version": "1.0.69",
+  "version": "1.0.71",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -38,7 +38,8 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.0.1",
     "tesseract.js": "^7.0.0",
-    "uuid": "^11.0.0"
+    "uuid": "^11.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
