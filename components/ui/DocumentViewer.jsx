@@ -37,11 +37,13 @@ const DocumentViewer = ({
     invoiceId,
     fileName = "",
     spreadsheetData = null,
+    customFileUrl = null,
     onLoadingComplete = () => { }
 }) => {
     const [wordHtml, setWordHtml] = useState(null);
     const [wordLoading, setWordLoading] = useState(false);
     const [wordError, setWordError] = useState(false);
+    const [localSpreadsheetData, setLocalSpreadsheetData] = useState(null);
     const mammothReady = useMammoth();
 
     const name = (fileName || "").toLowerCase();
@@ -51,11 +53,38 @@ const DocumentViewer = ({
     const isDocLegacy = name.endsWith('.doc') && !isDocx;
     const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/.test(name);
 
-    const fileUrl = `/api/invoices/${invoiceId}/file`;
+    const fileUrl = customFileUrl || `/api/invoices/${invoiceId}/file`;
+
+    // Self-fetch spreadsheet preview for additional documents
+    useEffect(() => {
+        if (!isSpreadsheet || !customFileUrl) return;
+        // Extract document ID from URL like /api/documents/{id}/file
+        const match = customFileUrl.match(/\/api\/documents\/([^/]+)\/file/);
+        if (!match) return;
+
+        let cancelled = false;
+        setLocalSpreadsheetData(null);
+
+        (async () => {
+            try {
+                const res = await fetch(`/api/documents/${match[1]}/preview`);
+                if (!res.ok) throw new Error(`Preview fetch failed: ${res.status}`);
+                const json = await res.json();
+                if (!cancelled && Array.isArray(json.data)) {
+                    setLocalSpreadsheetData(json.data);
+                    onLoadingComplete();
+                }
+            } catch (err) {
+                console.error("Document spreadsheet preview error:", err);
+            }
+        })();
+
+        return () => { cancelled = true; };
+    }, [isSpreadsheet, customFileUrl]);
 
     // Convert .docx to HTML once mammoth is loaded
     useEffect(() => {
-        if (!isDocx || !invoiceId || !mammothReady) return;
+        if (!isDocx || (!invoiceId && !customFileUrl) || !mammothReady) return;
         if (typeof window === 'undefined' || !window.mammoth) return;
 
         let cancelled = false;
@@ -82,17 +111,18 @@ const DocumentViewer = ({
         })();
 
         return () => { cancelled = true; };
-    }, [isDocx, invoiceId, mammothReady]);
+    }, [isDocx, invoiceId, customFileUrl, mammothReady]);
 
     // ── 1. Spreadsheet ──
-    if (isSpreadsheet && Array.isArray(spreadsheetData) && spreadsheetData.length > 0) {
+    const effectiveSpreadsheetData = spreadsheetData || localSpreadsheetData;
+    if (isSpreadsheet && Array.isArray(effectiveSpreadsheetData) && effectiveSpreadsheetData.length > 0) {
         return (
             <div className="bg-white p-6 min-h-full">
                 <div className="overflow-x-auto border rounded-xl shadow-sm">
                     <table className="table table-compact w-full text-xs">
                         <thead className="bg-gray-50">
                             <tr className="border-b border-gray-200">
-                                {spreadsheetData[0]?.map((cell, i) => (
+                                {effectiveSpreadsheetData[0]?.map((cell, i) => (
                                     <th key={i} className="font-black text-gray-500 uppercase tracking-widest border-r border-gray-200 last:border-0 py-3 px-4">
                                         {cell || `Col ${i + 1}`}
                                     </th>
@@ -100,7 +130,7 @@ const DocumentViewer = ({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {spreadsheetData.slice(1).map((row, i) => (
+                            {effectiveSpreadsheetData.slice(1).map((row, i) => (
                                 <tr key={i} className="hover:bg-gray-50 transition-colors">
                                     {row.map((cell, j) => (
                                         <td key={j} className="border-r border-gray-100 last:border-0 whitespace-nowrap px-4 py-2 text-gray-600">
@@ -112,7 +142,7 @@ const DocumentViewer = ({
                         </tbody>
                     </table>
                 </div>
-                {spreadsheetData.length >= 100 && (
+                {effectiveSpreadsheetData.length >= 100 && (
                     <p className="mt-4 text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest">
                         Showing first 100 rows
                     </p>
