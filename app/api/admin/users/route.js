@@ -71,7 +71,7 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { name, email, password, role, assignedProjects, vendorId, department } = body;
+        const { name, email, password, role, assignedProjects, vendorId, department, managedBy } = body;
 
         // Validation
         if (!name || !email || !password || !role) {
@@ -111,6 +111,7 @@ export async function POST(request) {
             assignedProjects: assignedProjects || [],
             vendorId: vendorId || null,
             department: department || null,
+            managedBy: managedBy || null,
             isActive: true,
             permissions: []
         });

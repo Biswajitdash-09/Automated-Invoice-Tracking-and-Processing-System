@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Invoice from '@/models/Invoice';
 import DocumentUpload from '@/models/DocumentUpload';
+import RateCard from '@/models/RateCard';
 import { getSession } from '@/lib/auth';
 import { requireRole } from '@/lib/rbac';
 import { ROLES } from '@/constants/roles';
@@ -26,7 +27,27 @@ export async function POST(request) {
         await connectToDatabase();
 
         const formData = await request.formData();
+        const body = Object.fromEntries(formData);
         const invoiceFile = formData.get('invoice');
+        const lineItems = formData.get('lineItems') ? JSON.parse(formData.get('lineItems')) : [];
+        
+        // Calculate total amount from line items if present, otherwise use provided amount
+        // But for this phase, we trust the Vendor's provided Amount for the header, 
+        // and Validate the Line Items total = Header Amount.
+        
+        let calculatedTotal = 0;
+        if (lineItems.length > 0) {
+             calculatedTotal = lineItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+        }
+
+        // Validate: Header Amount should match Line Items Total (approx)
+        if (lineItems.length > 0 && Math.abs(calculatedTotal - Number(body.amount)) > 1.0) {
+             return NextResponse.json(
+                { error: `Invoice Amount (${body.amount}) does not match Line Items Total (${calculatedTotal})` },
+                { status: 400 }
+            );
+        }
+
         const billingMonth = formData.get('billingMonth');
         const assignedPM = formData.get('assignedPM');
         const project = formData.get('project');
@@ -45,6 +66,59 @@ export async function POST(request) {
                 { error: 'Invoice file is required' },
                 { status: 400 }
             );
+        }
+        
+        // Validate Line Items against Rate Card
+        if (lineItems.length > 0) {
+            // Find applicable rate cards
+            // Priority: Project-specific > Global
+            const rateQuery = {
+                vendorId: session.user.id, // Assuming vendor user ID is the link
+                status: 'ACTIVE',
+                $or: [
+                    { effectiveTo: { $exists: false } },
+                    { effectiveTo: { $gte: new Date() } }
+                ]
+            };
+            
+            if (project) {
+                 rateQuery.$or.push({ projectId: project });
+                 rateQuery.$or.push({ projectId: null });
+            } else {
+                 rateQuery.projectId = null;
+            }
+
+            const rateCards = await RateCard.find(rateQuery).sort({ projectId: -1, effectiveFrom: -1 }); // Project specific first
+            
+            // Flatten rates for easier lookup
+            const availableRates = [];
+            rateCards.forEach(card => {
+                if (card.rates) {
+                    card.rates.forEach(r => {
+                         // Add only if not already present (respecting priority)
+                         if (!availableRates.find(ar => ar.role === r.role && ar.experienceRange === r.experienceRange)) {
+                             availableRates.push(r);
+                         }
+                    });
+                }
+            });
+
+            // Validate each item
+            lineItems.forEach(item => {
+                const match = availableRates.find(r => r.role === item.role && r.experienceRange === item.experienceRange);
+                if (match) {
+                    // Check rate, allow for minor floating point diff? strict for now.
+                    if (Math.abs(match.rate - Number(item.rate)) < 0.01) {
+                        item.status = 'MATCH';
+                    } else {
+                        item.status = 'MISMATCH';
+                        item.description = (item.description || '') + ` [Rate Mismatch: Expected ${match.rate}, Got ${item.rate}]`;
+                    }
+                } else {
+                    item.status = 'MANUAL'; // No rate card found for this role
+                    item.description = (item.description || '') + ` [No Rate Card Found]`;
+                }
+            });
         }
 
         // Vercel Fix: Store as Base64 Data URI instead of writing to filesystem
@@ -73,6 +147,7 @@ export async function POST(request) {
             pmApproval: { status: 'PENDING' },
             financeApproval: { status: 'PENDING' },
             hilReview: { status: 'PENDING' },
+            lineItems: lineItems, // Store validated line items
             documents: []
         });
 

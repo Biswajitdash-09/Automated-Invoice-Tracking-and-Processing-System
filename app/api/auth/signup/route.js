@@ -6,7 +6,7 @@ import { login } from '@/lib/auth';
 
 export async function POST(request) {
     try {
-        const { name, email, password, role } = await request.json();
+        const { name, email, password, role, pmId } = await request.json();
 
         if (!name || !email || !password || !role) {
             return NextResponse.json(
@@ -56,6 +56,7 @@ export async function POST(request) {
             passwordHash,
             role,
             vendorId,
+            managedBy: (role === 'Vendor' && pmId) ? pmId : null,
         };
 
         const savedUser = await db.createUser(newUser);

@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card';
 import Icon from '@/components/Icon';
 
 const UNITS = ['HOUR', 'DAY', 'FIXED', 'MONTHLY'];
+const EXPERIENCE_RANGES = ['0-2 Years', '3-5 Years', '5-8 Years', '8+ Years'];
 
 export default function RateCardManagementPage() {
     const [ratecards, setRatecards] = useState([]);
@@ -23,7 +24,7 @@ export default function RateCardManagementPage() {
         effectiveFrom: '',
         effectiveTo: '',
         notes: '',
-        rates: [{ description: '', unit: 'HOUR', rate: '', currency: 'INR' }]
+        rates: [{ role: '', experienceRange: '3-5 Years', unit: 'HOUR', rate: '', currency: 'INR' }]
     });
 
     useEffect(() => {
@@ -67,7 +68,7 @@ export default function RateCardManagementPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
-                    rates: formData.rates.filter(r => r.description && r.rate)
+                    rates: formData.rates.filter(r => r.role && r.rate)
                 })
             });
             const data = await res.json();
@@ -89,7 +90,7 @@ export default function RateCardManagementPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
-                    rates: formData.rates.filter(r => r.description && r.rate)
+                    rates: formData.rates.filter(r => r.role && r.rate)
                 })
             });
             const data = await res.json();
@@ -121,7 +122,7 @@ export default function RateCardManagementPage() {
             effectiveFrom: '',
             effectiveTo: '',
             notes: '',
-            rates: [{ description: '', unit: 'HOUR', rate: '', currency: 'INR' }]
+            rates: [{ role: '', experienceRange: '3-5 Years', unit: 'HOUR', rate: '', currency: 'INR' }]
         });
     };
 
@@ -132,7 +133,7 @@ export default function RateCardManagementPage() {
             effectiveFrom: card.effectiveFrom ? card.effectiveFrom.split('T')[0] : '',
             effectiveTo: card.effectiveTo ? card.effectiveTo.split('T')[0] : '',
             notes: card.notes || '',
-            rates: card.rates.length ? [...card.rates] : [{ description: '', unit: 'HOUR', rate: '', currency: 'INR' }]
+            rates: card.rates.length ? [...card.rates] : [{ role: '', experienceRange: '3-5 Years', unit: 'HOUR', rate: '', currency: 'INR' }]
         });
         setEditingCard(card);
     };
@@ -140,7 +141,7 @@ export default function RateCardManagementPage() {
     const addRateRow = () => {
         setFormData({
             ...formData,
-            rates: [...formData.rates, { description: '', unit: 'HOUR', rate: '', currency: 'INR' }]
+            rates: [...formData.rates, { role: '', experienceRange: '3-5 Years', unit: 'HOUR', rate: '', currency: 'INR' }]
         });
     };
 
@@ -256,29 +257,25 @@ export default function RateCardManagementPage() {
                                     </div>
 
                                     <div className="space-y-4 flex-1">
-                                        <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-50">
-                                            <div>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Effective From</p>
-                                                <p className="text-xs font-bold text-slate-700">{new Date(card.effectiveFrom).toLocaleDateString()}</p>
+                                        <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-50">
+                                            <div className="col-span-1">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Role</p>
                                             </div>
-                                            {card.effectiveTo && (
-                                                <div>
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Valid Until</p>
-                                                    <p className="text-xs font-bold text-slate-700">{new Date(card.effectiveTo).toLocaleDateString()}</p>
-                                                </div>
-                                            )}
+                                            <div className="col-span-1">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Exp. Range</p>
+                                            </div>
+                                            <div className="col-span-1 text-right">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Rate</p>
+                                            </div>
                                         </div>
-
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Rate Definitions ({card.rates.length})</p>
-                                            <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-1">
-                                                {card.rates.map((rate, i) => (
-                                                    <div key={i} className="flex justify-between items-center p-2 rounded-lg bg-slate-50/50 border border-slate-100/50">
-                                                        <span className="text-xs font-bold text-slate-600 truncate mr-2" title={rate.description}>{rate.description}</span>
-                                                        <span className="text-xs font-black text-purple-600 shrink-0">₹ {rate.rate}/{rate.unit}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                        <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-1">
+                                            {card.rates.map((rate, i) => (
+                                                <div key={i} className="grid grid-cols-3 gap-4 py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
+                                                    <span className="text-xs font-bold text-slate-600 truncate" title={rate.role}>{rate.role}</span>
+                                                    <span className="text-xs font-medium text-slate-500 truncate">{rate.experienceRange}</span>
+                                                    <span className="text-xs font-black text-purple-600 text-right">₹ {rate.rate}/{rate.unit}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
 
@@ -425,17 +422,30 @@ export default function RateCardManagementPage() {
                                         </button>
                                     </div>
 
+
                                     <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
                                         {formData.rates.map((rate, idx) => (
                                             <div key={idx} className="flex gap-3 items-center group">
                                                 <div className="flex-1 relative">
                                                     <input
                                                         type="text"
-                                                        placeholder="Description (e.g. Senior Developer)"
-                                                        value={rate.description}
-                                                        onChange={(e) => updateRate(idx, 'description', e.target.value)}
+                                                        placeholder="Role (e.g. Senior Developer)"
+                                                        value={rate.role}
+                                                        onChange={(e) => updateRate(idx, 'role', e.target.value)}
                                                         className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-xs focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-hidden transition-all"
                                                     />
+                                                </div>
+                                                <div className="w-40 relative">
+                                                    <select
+                                                        value={rate.experienceRange}
+                                                        onChange={(e) => updateRate(idx, 'experienceRange', e.target.value)}
+                                                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-xs focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-hidden transition-all appearance-none"
+                                                    >
+                                                        {EXPERIENCE_RANGES.map(range => (
+                                                            <option key={range} value={range}>{range}</option>
+                                                        ))}
+                                                    </select>
+                                                    <Icon name="ChevronDown" size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                                 </div>
                                                 <div className="w-32 relative">
                                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-mono">₹</span>

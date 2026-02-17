@@ -93,14 +93,14 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const signup = async (name, email, password, role = ROLES.FINANCE_USER) => {
+    const signup = async (name, email, password, role = ROLES.FINANCE_USER, pmId = null) => {
         setIsLoading(true);
         try {
             const res = await fetch('/api/auth/signup', {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, role }),
+                body: JSON.stringify({ name, email, password, role, pmId }),
             });
 
             const data = await res.json();

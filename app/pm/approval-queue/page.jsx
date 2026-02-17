@@ -363,6 +363,49 @@ export default function PMApprovalQueuePage() {
                                             </span>
                                         )}
                                     </div>
+                                    
+                                    {/* Line Items Display */}
+                                    {inv.lineItems && inv.lineItems.length > 0 && (
+                                        <div className="mt-4 pl-13 sm:pl-14 border-t border-slate-100 pt-3">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Line Items & Validation</p>
+                                            <div className="space-y-2">
+                                                {inv.lineItems.map((item, i) => (
+                                                    <div key={i} className="flex items-center justify-between text-xs bg-slate-50/50 p-2 rounded-lg border border-slate-100">
+                                                        <div className="flex items-center gap-2">
+                                                            {item.status === 'MATCH' ? (
+                                                                <Icon name="CheckCircle2" size={14} className="text-emerald-500 shrink-0" />
+                                                            ) : item.status === 'MISMATCH' ? (
+                                                                <Icon name="AlertTriangle" size={14} className="text-amber-500 shrink-0" />
+                                                            ) : (
+                                                                <Icon name="HelpCircle" size={14} className="text-slate-400 shrink-0" />
+                                                            )}
+                                                            <div>
+                                                                <p className="font-medium text-slate-700">{item.role} <span className="text-slate-400">({item.experienceRange})</span></p>
+                                                                {item.status !== 'MATCH' && (
+                                                                    <p className="text-[10px] text-amber-600 font-medium">{item.description || 'Rate mismatch or manual validation needed'}</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-slate-700">₹{Number(item.rate).toLocaleString()}</p>
+                                                            <p className="text-[10px] text-slate-400">{item.quantity} {item.unit} · ₹{Number(item.amount).toLocaleString()}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            
+                                            {/* Validation Summary Alert */}
+                                            {inv.lineItems.some(i => i.status === 'MISMATCH') && (
+                                                <div className="mt-3 bg-red-50 border border-red-100 rounded-lg p-2.5 flex items-center gap-2 text-xs text-red-700">
+                                                    <Icon name="AlertTriangle" size={16} />
+                                                    <div>
+                                                        <span className="font-bold block">Rate Mismatch Detected!</span>
+                                                        Submitted rates do not match the Master Rate Card.
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Action Bar */}

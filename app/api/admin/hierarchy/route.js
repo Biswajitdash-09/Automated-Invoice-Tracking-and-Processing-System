@@ -1,0 +1,145 @@
+import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
+
+import { db } from '@/lib/db';
+import { getSession } from '@/lib/auth';
+import { requireRole } from '@/lib/rbac';
+import { ROLES } from '@/constants/roles';
+
+/**
+ * GET /api/admin/hierarchy - Get all users structured as a hierarchy tree
+ * Tree: Admin -> Finance User -> PM -> Vendor
+ */
+export async function GET(request) {
+    try {
+        const session = await getSession();
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+        }
+
+        const roleCheck = requireRole([ROLES.ADMIN])(session.user);
+        if (!roleCheck.allowed) {
+            return NextResponse.json({ error: roleCheck.reason }, { status: 403 });
+        }
+
+        const allUsers = await db.getAllUsers();
+
+        // Build a tree structure
+        // Root: Admin users
+        // Children of Admin: Finance Users (managedBy = admin.id)
+        // Children of FU: PMs (managedBy = fu.id)
+        // Children of PM: Vendors (managedBy = pm.id)
+
+        const userMap = {};
+        allUsers.forEach(u => { userMap[u.id] = { ...u, children: [] }; });
+
+        const roots = []; // Admin users (top of the tree)
+        const unassigned = []; // Users with no managedBy
+
+        allUsers.forEach(u => {
+            const node = userMap[u.id];
+            if (u.role === ROLES.ADMIN) {
+                roots.push(node);
+            } else if (u.managedBy && userMap[u.managedBy]) {
+                userMap[u.managedBy].children.push(node);
+            } else {
+                unassigned.push(node);
+            }
+        });
+
+        return NextResponse.json({
+            tree: roots,
+            unassigned,
+            allUsers: allUsers.map(u => ({
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                role: u.role,
+                managedBy: u.managedBy,
+                isActive: u.isActive
+            }))
+        });
+    } catch (error) {
+        console.error('Error fetching hierarchy:', error);
+        return NextResponse.json({ error: 'Failed to fetch hierarchy' }, { status: 500 });
+    }
+}
+
+/**
+ * PUT /api/admin/hierarchy - Assign a user to a manager
+ * Body: { userId, managedBy }
+ */
+export async function PUT(request) {
+    try {
+        const session = await getSession();
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+        }
+
+        const roleCheck = requireRole([ROLES.ADMIN])(session.user);
+        if (!roleCheck.allowed) {
+            return NextResponse.json({ error: roleCheck.reason }, { status: 403 });
+        }
+
+        const { userId, managedBy, children } = await request.json();
+
+        if (!userId) {
+            return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+        }
+
+        const user = await db.getUserById(userId);
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        // Validate the hierarchy rules:
+        // FU can only be managed by Admin
+        // PM can only be managed by FU
+        // Vendor can only be managed by PM
+        if (managedBy) {
+            const manager = await db.getUserById(managedBy);
+            if (!manager) {
+                return NextResponse.json({ error: 'Manager not found' }, { status: 404 });
+            }
+
+            const validHierarchy = {
+                [ROLES.FINANCE_USER]: [ROLES.ADMIN],
+                [ROLES.PROJECT_MANAGER]: [ROLES.FINANCE_USER],
+                [ROLES.VENDOR]: [ROLES.PROJECT_MANAGER]
+            };
+
+            const allowedManagerRoles = validHierarchy[user.role];
+            if (!allowedManagerRoles || !allowedManagerRoles.includes(manager.role)) {
+                return NextResponse.json({
+                    error: `A ${user.role} can only be managed by: ${allowedManagerRoles?.join(', ') || 'nobody'}`
+                }, { status: 400 });
+            }
+        }
+
+        // Update parent (managedBy)
+        if (managedBy !== undefined) {
+            await db.updateUserManagedBy(userId, managedBy || null);
+        }
+
+        // Update children (bulk)
+        if (Array.isArray(children)) {
+            // Update each child's managedBy to point to this user
+            for (const childId of children) {
+                await db.updateUserManagedBy(childId, userId);
+            }
+        }
+
+        // Audit trail
+        await db.createAuditTrailEntry({
+            invoice_id: null,
+            username: session.user.name || session.user.email,
+            action: 'HIERARCHY_UPDATED',
+            details: `Updated hierarchy for ${user.name} (${user.role}). Parent: ${managedBy || 'None'}, Children updated: ${children?.length || 0}`
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error updating hierarchy:', error);
+        return NextResponse.json({ error: 'Failed to update hierarchy' }, { status: 500 });
+    }
+}

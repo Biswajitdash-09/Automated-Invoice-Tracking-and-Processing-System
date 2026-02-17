@@ -89,9 +89,9 @@ export async function POST(request) {
 
         // Validate rates structure
         for (const rate of rates) {
-            if (!rate.description || !rate.unit || rate.rate === undefined) {
+            if (!rate.role || !rate.experienceRange || !rate.unit || rate.rate === undefined) {
                 return NextResponse.json(
-                    { error: 'Each rate must have description, unit, and rate' },
+                    { error: 'Each rate must have role, experienceRange, unit, and rate' },
                     { status: 400 }
                 );
             }

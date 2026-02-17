@@ -28,6 +28,7 @@ const menuItems = [
   { name: "User Management", icon: "Shield", path: "/users" },
   { name: "Audit Logs", icon: "FileText", path: "/audit" },
   { name: "Rate Cards", icon: "Layers", path: "/admin/ratecards" },
+  { name: "Hierarchy", icon: "GitBranch", path: "/admin/hierarchy" },
 ];
 
 const Sidebar = ({ mobileOpen, setMobileOpen }) => {
@@ -77,6 +78,10 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
 
       if (item.name === 'Rate Cards') {
         if (role === ROLES.PROJECT_MANAGER) return { ...item, path: '/pm/rate-cards' };
+      }
+
+      if (item.name === 'Hierarchy') {
+        return { ...item, path: '/admin/hierarchy' };
       }
     }
 

@@ -75,6 +75,17 @@ const InvoiceSchema = new mongoose.Schema({
     poNumber: { type: String },
     project: { type: String },
     matching: { type: mongoose.Schema.Types.Mixed },
+    // Detailed Line Items for Rate Validation
+    lineItems: [{
+        role: { type: String, required: true }, // e.g. "Developer"
+        experienceRange: { type: String, required: true }, // e.g. "3-5 Years"
+        description: { type: String }, // Optional details
+        quantity: { type: Number, required: true }, // Hours or Days
+        unit: { type: String, required: true }, // "HOUR", "DAY"
+        rate: { type: Number, required: true }, // Submitted Rate
+        amount: { type: Number, required: true }, // Calculated (Qty * Rate)
+        status: { type: String, enum: ['MATCH', 'MISMATCH', 'MANUAL'], default: 'MATCH' } // System validation status
+    }],
     // New RBAC fields
     assignedPM: { type: String },  // PM user ID for this invoice - MANDATORY for workflow
     assignedFinanceUser: { type: String }, // Will be auto-assigned by Finance when reviewing

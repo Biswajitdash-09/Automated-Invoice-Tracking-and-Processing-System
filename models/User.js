@@ -14,6 +14,8 @@ const UserSchema = new mongoose.Schema({
     lastLogin: { type: Date },
     profileImage: { type: String },
     department: { type: String },
+    // Hierarchy
+    managedBy: { type: String }, // User ID of the manager (Admin->FU->PM->Vendor)
     // Delegation
     delegatedTo: { type: String }, // User ID of the delegate
     delegationExpiresAt: { type: Date },
@@ -21,6 +23,7 @@ const UserSchema = new mongoose.Schema({
 
 // Indexes for efficient queries (email already indexed via unique: true)
 UserSchema.index({ role: 1, isActive: 1 });
+UserSchema.index({ managedBy: 1 });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
 

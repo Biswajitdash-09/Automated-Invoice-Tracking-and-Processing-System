@@ -53,7 +53,7 @@ export async function PUT(request, { params }) {
 
         const { id } = await params;
         const body = await request.json();
-        const { name, role, assignedProjects, vendorId, department, isActive, permissions, password } = body;
+        const { name, role, assignedProjects, vendorId, department, isActive, permissions, password, managedBy } = body;
 
         const existingUser = await db.getUserById(id);
         if (!existingUser) {
@@ -78,6 +78,7 @@ export async function PUT(request, { params }) {
             assignedProjects: assignedProjects ?? existingUser.assignedProjects,
             vendorId: vendorId ?? existingUser.vendorId,
             department: department ?? existingUser.department,
+            managedBy: managedBy !== undefined ? managedBy : existingUser.managedBy,
             isActive: isActive ?? existingUser.isActive,
             permissions: permissions ?? existingUser.permissions
         };

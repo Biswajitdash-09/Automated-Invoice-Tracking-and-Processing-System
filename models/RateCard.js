@@ -1,13 +1,18 @@
 import mongoose from 'mongoose';
 
 const RateItemSchema = new mongoose.Schema({
-    description: { type: String, required: true },
+    role: { type: String, required: true }, // e.g., "Developer", "Tester"
+    experienceRange: { 
+        type: String, 
+        required: true,
+        enum: ['0-2 Years', '3-5 Years', '5-8 Years', '8+ Years'] 
+    },
+    rate: { type: Number, required: true },
     unit: {
         type: String,
         enum: ['HOUR', 'DAY', 'FIXED', 'MONTHLY'],
         required: true
     },
-    rate: { type: Number, required: true },
     currency: { type: String, default: 'INR' }
 }, { _id: false });
 

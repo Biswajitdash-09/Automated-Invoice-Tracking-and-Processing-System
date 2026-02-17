@@ -19,15 +19,33 @@ export default function UserManagementPage() {
         password: '',
         role: ROLES.FINANCE_USER,
         department: '',
-        assignedProjects: []
+        assignedProjects: [],
+        managedBy: ''
     });
 
     const [projects, setProjects] = useState([]);
+    const [managers, setManagers] = useState([]); // Potential managers for the selected role
 
     useEffect(() => {
         fetchUsers();
         fetchProjects();
     }, [filterRole, filterStatus, searchTerm]);
+
+    // Fetch potential managers when role changes
+    useEffect(() => {
+        const managerRoleMap = {
+            [ROLES.FINANCE_USER]: ROLES.ADMIN,
+            [ROLES.PROJECT_MANAGER]: ROLES.FINANCE_USER,
+            [ROLES.VENDOR]: ROLES.PROJECT_MANAGER
+        };
+        const managerRole = managerRoleMap[formData.role];
+        if (managerRole && (showCreateModal || editingUser)) {
+            const filtered = users.filter(u => u.role === managerRole && u.isActive !== false);
+            setManagers(filtered);
+        } else {
+            setManagers([]);
+        }
+    }, [formData.role, users, showCreateModal, editingUser]);
 
     const fetchProjects = async () => {
         try {
@@ -36,6 +54,27 @@ export default function UserManagementPage() {
             if (res.ok) setProjects(data.projects || []);
         } catch (err) {
             console.error('Error fetching projects:', err);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const params = new URLSearchParams();
+            if (filterRole) params.set('role', filterRole);
+            if (filterStatus) params.set('status', filterStatus);
+            if (searchTerm) params.set('search', searchTerm);
+            const res = await fetch(`/api/admin/users?${params.toString()}`, { cache: 'no-store' });
+            const data = await res.json();
+            if (res.ok) {
+                setUsers(data.users || []);
+            } else {
+                setError(data.error || 'Failed to fetch users');
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -51,7 +90,7 @@ export default function UserManagementPage() {
             if (!res.ok) throw new Error(data.error);
 
             setShowCreateModal(false);
-            setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [] });
+            setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [], managedBy: '' });
             fetchUsers();
         } catch (err) {
             setError(err.message);
@@ -105,9 +144,17 @@ export default function UserManagementPage() {
             password: '',
             role: user.role,
             department: user.department || '',
-            assignedProjects: user.assignedProjects || []
+            assignedProjects: user.assignedProjects || [],
+            managedBy: user.managedBy || ''
         });
         setEditingUser(user);
+    };
+
+    // Helper to find manager name
+    const getManagerName = (managedById) => {
+        if (!managedById) return null;
+        const manager = users.find(u => u.id === managedById);
+        return manager ? manager.name : null;
     };
 
     return (
@@ -160,7 +207,7 @@ export default function UserManagementPage() {
                         </div>
                         <button
                             onClick={() => {
-                                setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [] });
+                                setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [], managedBy: '' });
                                 setShowCreateModal(true);
                             }}
                             className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg shadow-purple-500/25"
@@ -200,6 +247,7 @@ export default function UserManagementPage() {
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase">Name</th>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase">Email</th>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase">Role</th>
+                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase">Managed By</th>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase">Status</th>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase">Actions</th>
                                 </tr>
@@ -223,6 +271,9 @@ export default function UserManagementPage() {
                                                 }`}>
                                                 {user.role}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-300 text-sm">
+                                            {getManagerName(user.managedBy) || <span className="text-gray-500 italic">—</span>}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${user.isActive !== false ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
@@ -348,6 +399,28 @@ export default function UserManagementPage() {
                                                 )}
                                             </div>
                                             <p className="text-[10px] text-gray-400 mt-1 italic">Click to toggle multiple project assignments</p>
+                                        </div>
+                                    )}
+
+                                    {/* Manager dropdown (for non-Admin roles) */}
+                                    {formData.role !== ROLES.ADMIN && managers.length > 0 && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-1">Manager</label>
+                                            <select
+                                                value={formData.managedBy}
+                                                onChange={(e) => setFormData({ ...formData, managedBy: e.target.value })}
+                                                className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            >
+                                                <option value="">-- No manager --</option>
+                                                {managers.map(m => (
+                                                    <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
+                                                ))}
+                                            </select>
+                                            <p className="text-[10px] text-gray-400 mt-1 italic">
+                                                {formData.role === ROLES.FINANCE_USER && 'Finance Users are managed by Admins'}
+                                                {formData.role === ROLES.PROJECT_MANAGER && 'PMs are managed by Finance Users'}
+                                                {formData.role === ROLES.VENDOR && 'Vendors are managed by PMs'}
+                                            </p>
                                         </div>
                                     )}
 
