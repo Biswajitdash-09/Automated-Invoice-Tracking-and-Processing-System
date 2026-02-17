@@ -76,8 +76,14 @@ export async function GET() {
             { id: 'v-003', name: 'Office Depot', email: 'supply@officedepot.com', phone: '555-0199', address: '789 Supply Ave, FL', tax_id: 'TX-3003' }
         ];
 
-        // 1. Seed Variants (Parallel)
-        await Promise.all(vendors.map(v => db.createVendor(v)));
+        // 1. Seed Vendors (Sequential to avoid vendorCode conflicts)
+        for (const v of vendors) {
+            try {
+                await db.createVendor(v);
+            } catch (e) {
+                console.log(`[Seed] Vendor ${v.name} already exists, skipping.`);
+            }
+        }
 
         // 2. Seed Purchase Orders
         const pos = [
@@ -108,7 +114,13 @@ export async function GET() {
             }
         ];
 
-        await Promise.all(pos.map(po => db.createPurchaseOrder(po)));
+        for (const po of pos) {
+            try {
+                await db.createPurchaseOrder(po);
+            } catch (e) {
+                console.log(`[Seed] PO ${po.poNumber} already exists, skipping.`);
+            }
+        }
 
         // 3. Seed Ringi Annexures
         const annexures = [
@@ -123,7 +135,13 @@ export async function GET() {
             }
         ];
 
-        await Promise.all(annexures.map(ax => db.createAnnexure(ax)));
+        for (const ax of annexures) {
+            try {
+                await db.createAnnexure(ax);
+            } catch (e) {
+                console.log(`[Seed] Annexure ${ax.annexureNumber} already exists, skipping.`);
+            }
+        }
 
         // 4. Seed sample invoices (so they appear in dashboard, vendor portal, etc.)
         const sampleInvoices = [

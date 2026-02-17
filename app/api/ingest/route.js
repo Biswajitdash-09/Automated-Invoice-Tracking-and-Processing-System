@@ -5,6 +5,8 @@ import { getCurrentUser } from '@/lib/server-auth';
 import { sendStatusNotification } from '@/lib/notifications';
 import { ROLES } from '@/constants/roles';
 import { v4 as uuidv4 } from 'uuid';
+import connectToDatabase from '@/lib/mongodb';
+import DocumentUpload from '@/models/DocumentUpload';
 
 export async function POST(request) {
     try {
@@ -41,7 +43,6 @@ export async function POST(request) {
                 'jpg': 'image/jpeg',
                 'jpeg': 'image/jpeg',
                 'png': 'image/png',
-                'csv': 'text/csv'
             };
             mimeType = mimeMap[ext] || 'application/pdf';
         }
@@ -67,14 +68,62 @@ export async function POST(request) {
             assignedPM: formData.get('assignedPM'),
             assignedFinanceUser: formData.get('assignedFinanceUser'),
             invoiceNumber: formData.get('invoiceNumber'), // Manual override
-            date: formData.get('date'), // Manual override
+            date: formData.get('date'), // Submission date (auto-set by frontend)
+            invoiceDate: formData.get('invoiceDate'), // Invoice date from vendor
             amount: formData.get('amount') ? parseFloat(formData.get('amount')) : undefined, // Manual override
+            basicAmount: formData.get('basicAmount') ? parseFloat(formData.get('basicAmount')) : undefined,
+            taxType: formData.get('taxType') || undefined,
+            hsnCode: formData.get('hsnCode') || undefined,
             currency: 'INR', // Restricted to INR
-            dueDate: formData.get('dueDate') // Manual override
         };
 
         // Persist to DB and create audit trail (Admin can see via Audit log - RBAC)
         await db.saveInvoice(invoiceId, invoiceMetadata);
+
+        // Handle additional document uploads (RFP, Commercial/Timesheet)
+        await connectToDatabase();
+        const additionalDocs = [];
+        const rfpFile = formData.get('rfpFile');
+        const commercialFile = formData.get('commercialFile');
+
+        const saveAdditionalDoc = async (docFile, docType) => {
+            if (!docFile || docFile.size === 0) return null;
+            const docBuffer = Buffer.from(await docFile.arrayBuffer());
+            const docBase64 = docBuffer.toString('base64');
+            const docMime = docFile.type || 'application/octet-stream';
+            const docUrl = `data:${docMime};base64,${docBase64}`;
+            const docId = uuidv4();
+
+            const document = await DocumentUpload.create({
+                id: docId,
+                projectId: formData.get('projectId') || null,
+                invoiceId: invoiceId,
+                type: docType,
+                fileName: docFile.name,
+                fileUrl: docUrl,
+                mimeType: docMime,
+                fileSize: docBuffer.length,
+                uploadedBy: user.id,
+                metadata: {
+                    validated: docBuffer.length > 0,
+                    validationNotes: 'Document received via vendor submission',
+                },
+                status: docBuffer.length > 0 ? 'VALIDATED' : 'PENDING'
+            });
+
+            return { documentId: docId, type: docType };
+        };
+
+        const rfpDoc = await saveAdditionalDoc(rfpFile, 'ANNEX');
+        const commercialDoc = await saveAdditionalDoc(commercialFile, 'TIMESHEET');
+
+        if (rfpDoc) additionalDocs.push(rfpDoc);
+        if (commercialDoc) additionalDocs.push(commercialDoc);
+
+        // Link additional documents to invoice
+        if (additionalDocs.length > 0) {
+            await db.saveInvoice(invoiceId, { documents: additionalDocs });
+        }
 
         // Perform processing inline (Simulation)
         const result = await processInvoice(invoiceId, buffer);
@@ -92,9 +141,12 @@ export async function POST(request) {
                 // Prioritize Manual Entry over IDP (if provided)
                 invoiceNumber: invoiceMetadata.invoiceNumber || result.data.invoiceNumber || invoiceMetadata.invoiceNumber,
                 date: invoiceMetadata.date || result.data.date,
+                invoiceDate: invoiceMetadata.invoiceDate,
                 amount: invoiceMetadata.amount || result.data.amount,
+                basicAmount: invoiceMetadata.basicAmount,
+                taxType: invoiceMetadata.taxType,
+                hsnCode: invoiceMetadata.hsnCode,
                 currency: 'INR',
-                dueDate: invoiceMetadata.dueDate || result.data.dueDate,
 
                 fileUrl: fileUrl,
                 validation: result.validation,

@@ -44,7 +44,11 @@ const InvoiceSchema = new mongoose.Schema({
     receivedAt: { type: Date },
     invoiceNumber: { type: String },
     date: { type: String },
+    invoiceDate: { type: String }, // Separate invoice date field
     amount: { type: Number },
+    basicAmount: { type: Number }, // Amount before taxes
+    taxType: { type: String, enum: ['CGST_SGST', 'IGST', ''] }, // Tax type dropdown
+    hsnCode: { type: String }, // HSN Code
     // Invoice workflow status - follows PRD workflow: Submitted → PM → Finance
     status: {
         type: String,

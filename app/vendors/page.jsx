@@ -55,6 +55,68 @@ function VendorPortalContent() {
     const [selectedFinanceUser, setSelectedFinanceUser] = useState("");
     const [vendorProfile, setVendorProfile] = useState(null); // { vendorCode, name } for display
 
+    // OCR auto-fill state
+    const [ocrLoading, setOcrLoading] = useState(false);
+    const [ocrInvoiceNumber, setOcrInvoiceNumber] = useState('');
+    const [ocrInvoiceDate, setOcrInvoiceDate] = useState('');
+    const [ocrBasicAmount, setOcrBasicAmount] = useState('');
+    const [ocrTotalAmount, setOcrTotalAmount] = useState('');
+    const [ocrTaxType, setOcrTaxType] = useState('');
+    const [ocrHsnCode, setOcrHsnCode] = useState('');
+
+    const resetOcrFields = useCallback(() => {
+        setOcrInvoiceNumber('');
+        setOcrInvoiceDate('');
+        setOcrBasicAmount('');
+        setOcrTotalAmount('');
+        setOcrTaxType('');
+        setOcrHsnCode('');
+    }, []);
+
+    const handleInvoiceFileChange = useCallback(async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) { setSelectedFile(null); return; }
+
+        // Strict PDF-only check
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+            toast.error('Only PDF files are supported. Please upload a PDF invoice.');
+            e.target.value = '';
+            setSelectedFile(null);
+            return;
+        }
+
+        setSelectedFile(file);
+        resetOcrFields();
+
+        // Trigger OCR extraction
+        setOcrLoading(true);
+        const ocrToast = toast.loading('Extracting invoice data via OCR...');
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/api/ocr', { method: 'POST', body: formData });
+            const result = await res.json();
+
+            if (res.ok && result.success && result.data) {
+                const d = result.data;
+                setOcrInvoiceNumber(d.invoiceNumber ?? '');
+                setOcrInvoiceDate(d.invoiceDate ?? '');
+                setOcrBasicAmount(d.basicAmount != null ? String(d.basicAmount) : '');
+                setOcrTotalAmount(d.totalAmount != null ? String(d.totalAmount) : '');
+                setOcrTaxType(d.taxType ?? '');
+                setOcrHsnCode(d.hsnCode ?? '');
+                toast.success('Invoice fields auto-filled from OCR!', { id: ocrToast });
+            } else {
+                toast.error(result.error || 'OCR extraction failed. Please fill fields manually.', { id: ocrToast });
+            }
+        } catch (err) {
+            console.error('OCR call failed:', err);
+            toast.error('OCR service unavailable. Please fill fields manually.', { id: ocrToast });
+        } finally {
+            setOcrLoading(false);
+        }
+    }, [resetOcrFields]);
+
     const fetchFinanceUsers = useCallback(async () => {
         try {
             const res = await fetch('/api/finance-users', { cache: 'no-store' });
@@ -628,7 +690,7 @@ function VendorPortalContent() {
                                     const form = e.target;
                                     const formData = new FormData(form);
                                     const file = formData.get('file');
-                                    if (!file || file.size === 0) { toast.error("Please upload a file."); return; }
+                                    if (!file || file.size === 0) { toast.error("Please upload an invoice file."); return; }
 
                                     setLoading(true);
                                     const toastId = toast.loading("Uploading invoice...");
@@ -638,13 +700,21 @@ function VendorPortalContent() {
                                             assignedFinanceUser: null,
                                             invoiceNumber: formData.get('invoiceNumber'),
                                             date: formData.get('date'),
+                                            invoiceDate: formData.get('invoiceDate'),
                                             amount: formData.get('amount'),
-                                            dueDate: formData.get('dueDate')
+                                            basicAmount: formData.get('basicAmount'),
+                                            taxType: formData.get('taxType'),
+                                            hsnCode: formData.get('hsnCode'),
                                         };
-                                        await import("@/lib/api").then(mod => mod.ingestInvoice(file, metadata));
+                                        const additionalFiles = {
+                                            rfpFile: formData.get('rfpFile'),
+                                            commercialFile: formData.get('commercialFile'),
+                                        };
+                                        await import("@/lib/api").then(mod => mod.ingestInvoice(file, metadata, additionalFiles));
                                         toast.success("Invoice submitted successfully!", { id: toastId });
                                         setIsSubmissionModalOpen(false);
                                         setSelectedFile(null);
+                                        resetOcrFields();
                                         handleUploadComplete();
                                     } catch (error) {
                                         toast.error("Failed to submit invoice. Please try again.", { id: toastId });
@@ -666,59 +736,146 @@ function VendorPortalContent() {
                                             </select>
                                         </div>
 
+                                        {/* OCR Loading Overlay */}
+                                        {ocrLoading && (
+                                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 rounded-3xl flex flex-col items-center justify-center gap-3">
+                                                <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                                                <p className="text-[11px] font-black text-teal-600 uppercase tracking-widest">Extracting Invoice Data...</p>
+                                                <p className="text-[9px] text-slate-400 font-bold">Powered by Mindee OCR</p>
+                                            </div>
+                                        )}
+
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Invoice Number</label>
-                                                <input type="text" name="invoiceNumber" className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300" placeholder="e.g. #7721" required />
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Invoice No. <span className="text-rose-500">*</span></label>
+                                                <input type="text" name="invoiceNumber" value={ocrInvoiceNumber} onChange={(e) => setOcrInvoiceNumber(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300" placeholder={ocrLoading ? 'Extracting...' : 'e.g. #7721'} required />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Total Amount (₹)</label>
-                                                <input type="number" name="amount" step="0.01" className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-mono" placeholder="0.00" required />
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Invoice Date <span className="text-rose-500">*</span></label>
+                                                <input type="date" name="invoiceDate" value={ocrInvoiceDate} onChange={(e) => setOcrInvoiceDate(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all" required />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Basic Amount (Before Taxes) <span className="text-rose-500">*</span></label>
+                                                <input type="number" name="basicAmount" step="0.01" value={ocrBasicAmount} onChange={(e) => setOcrBasicAmount(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-mono" placeholder={ocrLoading ? 'Extracting...' : '0.00'} required />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Total Amount (₹) <span className="text-rose-500">*</span></label>
+                                                <input type="number" name="amount" step="0.01" value={ocrTotalAmount} onChange={(e) => setOcrTotalAmount(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-mono" placeholder={ocrLoading ? 'Extracting...' : '0.00'} required />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Taxes <span className="text-rose-500">*</span></label>
+                                                <select
+                                                    name="taxType"
+                                                    value={ocrTaxType}
+                                                    onChange={(e) => setOcrTaxType(e.target.value)}
+                                                    className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer"
+                                                    required
+                                                >
+                                                    <option value="">Select Tax Type</option>
+                                                    <option value="CGST_SGST">CGST + SGST</option>
+                                                    <option value="IGST">IGST</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">HSN Code <span className="text-rose-500">*</span></label>
+                                                <input type="text" name="hsnCode" value={ocrHsnCode} onChange={(e) => setOcrHsnCode(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300" placeholder={ocrLoading ? 'Extracting...' : 'e.g. 998314'} required />
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Submission Date</label>
-                                                <input type="date" name="date" className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all" required />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Target Due Date</label>
-                                                <input type="date" name="dueDate" className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all" />
+                                                <input type="date" name="date" defaultValue={new Date().toISOString().split('T')[0]} readOnly className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-500 outline-none transition-all cursor-not-allowed" />
                                             </div>
                                         </div>
 
+                                        {/* Invoice File (PDF) */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Upload Attachment</label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Invoice (PDF) <span className="text-rose-500">*</span></label>
                                             <div className="relative group/modalfile border-2 border-dashed border-slate-200 rounded-2xl hover:border-teal-500 hover:bg-teal-50/30 transition-all p-8 flex flex-col items-center justify-center gap-3">
                                                 <input
                                                     type="file"
                                                     name="file"
-                                                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                                                    accept=".pdf"
                                                     className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                     required
-                                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                                    onChange={handleInvoiceFileChange}
                                                 />
                                                 <div className={clsx(
                                                     "w-12 h-12 rounded-xl flex items-center justify-center transition-all shadow-sm",
-                                                    selectedFile ? "bg-teal-500 text-white" : "bg-slate-50 text-slate-400 group-hover/modalfile:text-teal-600 group-hover/modalfile:bg-white"
+                                                    selectedFile ? "bg-teal-500 text-white" : ocrLoading ? "bg-amber-500 text-white animate-pulse" : "bg-slate-50 text-slate-400 group-hover/modalfile:text-teal-600 group-hover/modalfile:bg-white"
                                                 )}>
-                                                    <Icon name={selectedFile ? "FileCheck" : "FileUp"} size={24} />
+                                                    <Icon name={ocrLoading ? "Loader" : selectedFile ? "FileCheck" : "FileUp"} size={24} />
                                                 </div>
                                                 <div className="text-center">
                                                     {selectedFile ? (
                                                         <>
                                                             <p className="text-[11px] font-black text-teal-600 uppercase tracking-widest">{selectedFile.name}</p>
                                                             <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-tight">
-                                                                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • Click to change
+                                                                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • {ocrLoading ? 'OCR in progress...' : 'Click to change'}
                                                             </p>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest">Select Invoice File</p>
-                                                            <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-tight">PDF, JPG, PNG, WORD, EXCEL or CSV (Max 10MB)</p>
+                                                            <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest">Select Invoice PDF</p>
+                                                            <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-tight">PDF Only (Max 10MB) • Fields will auto-fill via OCR</p>
                                                         </>
                                                     )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Additional Documents Section */}
+                                        <div className="space-y-4 pt-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-px flex-1 bg-slate-200" />
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Additional Documents</span>
+                                                <div className="h-px flex-1 bg-slate-200" />
+                                            </div>
+
+                                            {/* RFP Document */}
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">RFP Document</label>
+                                                <div className="relative border border-slate-200 rounded-2xl hover:border-teal-400 transition-all p-4 flex items-center gap-4">
+                                                    <input
+                                                        type="file"
+                                                        name="rfpFile"
+                                                        accept=".pdf,.doc,.docx,.xls,.xlsx"
+                                                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                                    />
+                                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
+                                                        <Icon name="FileText" size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[11px] font-bold text-slate-600">Upload RFP</p>
+                                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">PDF, Word, Excel</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Commercial / Timesheet */}
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Commercial / Timesheet</label>
+                                                <div className="relative border border-slate-200 rounded-2xl hover:border-teal-400 transition-all p-4 flex items-center gap-4">
+                                                    <input
+                                                        type="file"
+                                                        name="commercialFile"
+                                                        accept=".pdf,.xls,.xlsx"
+                                                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                                    />
+                                                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+                                                        <Icon name="Clock" size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[11px] font-bold text-slate-600">Upload Commercial / Timesheet</p>
+                                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">PDF, Excel</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
