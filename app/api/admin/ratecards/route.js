@@ -74,9 +74,9 @@ export async function POST(request) {
         const { vendorId, projectId, name, rates, effectiveFrom, effectiveTo, notes } = body;
 
         // Validation
-        if (!vendorId || !name || !rates || !Array.isArray(rates) || !effectiveFrom) {
+        if (!vendorId || !name || !rates || !Array.isArray(rates)) {
             return NextResponse.json(
-                { error: 'Missing required fields: vendorId, name, rates, effectiveFrom' },
+                { error: 'Missing required fields: vendorId, name, rates' },
                 { status: 400 }
             );
         }
@@ -103,7 +103,7 @@ export async function POST(request) {
             projectId: projectId || null,
             name,
             rates,
-            effectiveFrom: new Date(effectiveFrom),
+            effectiveFrom: effectiveFrom ? new Date(effectiveFrom) : new Date(),
             effectiveTo: effectiveTo ? new Date(effectiveTo) : null,
             status: 'ACTIVE',
             createdBy: session.user.id,

@@ -381,45 +381,12 @@ export default function RateCardManagementPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Effective Period Start</label>
-                                        <div className="relative">
-                                            <Icon name="Calendar" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                            <input
-                                                type="date"
-                                                value={formData.effectiveFrom}
-                                                onChange={(e) => setFormData({ ...formData, effectiveFrom: e.target.value })}
-                                                required
-                                                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 font-bold text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-hidden transition-all"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Effective Period End (Optional)</label>
-                                        <div className="relative">
-                                            <Icon name="Calendar" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                            <input
-                                                type="date"
-                                                value={formData.effectiveTo}
-                                                onChange={(e) => setFormData({ ...formData, effectiveTo: e.target.value })}
-                                                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 font-bold text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-hidden transition-all"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                {/* Dates removed as per request - handled by backend defaults */}
 
                                 {/* Rates Configuration */}
                                 <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                                     <div className="flex justify-between items-center mb-6">
                                         <h3 className="text-xs font-black uppercase tracking-widest text-slate-800">Rate Configuration Table</h3>
-                                        <button
-                                            type="button"
-                                            onClick={addRateRow}
-                                            className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-indigo-100 transition-all active:scale-95 border border-indigo-100 flex items-center gap-2"
-                                        >
-                                            <Icon name="PlusCircle" size={14} /> Row
-                                        </button>
                                     </div>
 
 
@@ -479,16 +446,7 @@ export default function RateCardManagementPage() {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Additional Notes</label>
-                                    <textarea
-                                        value={formData.notes}
-                                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                        rows={3}
-                                        placeholder="Add any specific terms or context here..."
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 font-bold text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-hidden transition-all"
-                                    />
-                                </div>
+
 
                                 <div className="flex gap-4 pt-4 border-t border-slate-100">
                                     <button
