@@ -152,9 +152,8 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
                                         <Link
                                             key={inv.id}
                                             href={
-                                                inv.status === 'MATCH_DISCREPANCY' ? `/matching/${inv.id}` :
-                                                    inv.status === 'VALIDATION_REQUIRED' ? `/digitization/${inv.id}` :
-                                                        `/approvals/${inv.id}`
+                                                inv.status === 'VALIDATION_REQUIRED' ? `/digitization/${inv.id}` :
+                                                    `/approvals/${inv.id}`
                                             }
                                             className="block p-4 flex justify-between items-center hover:bg-slate-50/80 transition-colors gap-4"
                                         >
@@ -232,10 +231,7 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
                         </Link>
                     </div>
                     <div className="p-5 space-y-4">
-                        <div className="flex justify-between items-center text-sm py-1">
-                            <span className="text-slate-600">3-Way Match Tolerance</span>
-                            <span className="font-mono bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-xs font-semibold">±5%</span>
-                        </div>
+
                         <div className="flex justify-between items-center text-sm py-1">
                             <span className="text-slate-600">OCR Engine</span>
                             <span className="flex items-center gap-1.5 text-rose-600 font-medium text-xs">

@@ -42,53 +42,7 @@ export async function POST(request, { params }) {
 
     // State Machine (FR-5, FR-6)
     try {
-        if (action === 'PROCESS_MATCH') {
-            // Trigger 3-Way Check
-            if (![ROLES.ADMIN, ROLES.FINANCE_USER].includes(userRole)) {
-                return NextResponse.json({ error: 'Unauthorized to run matching.' }, { status: 403 });
-            }
 
-            const { matchingEngine } = await import('@/lib/matching');
-            const matchResult = await matchingEngine.performThreeWayMatch(invoice);
-
-            if (matchResult.status === 'MATCHED') {
-                nextStatus = 'VERIFIED';
-                auditLog.details = 'Automated 3-Way Match Successful';
-            } else {
-                nextStatus = 'MATCH_DISCREPANCY';
-                auditLog.details = `Matching Failed: ${matchResult.discrepancies.join(', ')}`;
-            }
-
-            // Create comprehensive audit trail entry for match processing
-            const auditTrailEntry = {
-                action: 'PROCESS_MATCH',
-                actor: user.name || user.email || 'System',
-                actorId: user.id,
-                actorRole: userRole,
-                timestamp: new Date().toISOString(),
-                previousStatus: previousStatus,
-                newStatus: nextStatus,
-                notes: matchResult.status === 'MATCHED' ? 'Automated 3-Way Match Successful' : `Matching Failed: ${matchResult.discrepancies.join(', ')}`,
-                ipAddress: ipAddress,
-                userAgent: userAgent
-            };
-
-            // Save match details to invoice
-            await db.saveInvoice(id, {
-                status: nextStatus,
-                matching: matchResult,
-                auditTrailEntry: auditTrailEntry,
-                updatedAt: new Date().toISOString()
-            });
-
-            // Notification
-            await sendStatusNotification({ ...invoice, status: nextStatus }, nextStatus);
-
-            return NextResponse.json({
-                message: `Matching complete. Status: ${nextStatus}`,
-                invoice: await db.getInvoice(id)
-            });
-        }
 
         if (action === 'APPROVE') {
             // Admin approval for vendor submissions

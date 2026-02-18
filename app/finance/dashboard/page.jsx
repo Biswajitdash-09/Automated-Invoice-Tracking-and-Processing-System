@@ -122,7 +122,7 @@ export default function FinanceDashboardPage() {
             label: 'Discrepancies', value: discrepancyCount,
             subtitle: 'Need resolution', icon: 'AlertTriangle',
             border: 'border-amber-200', iconBg: 'bg-amber-50', iconColor: 'text-amber-600',
-            link: '/matching?status=MATCH_DISCREPANCY', urgent: discrepancyCount > 0
+            urgent: discrepancyCount > 0
         }
     ];
 
@@ -135,10 +135,6 @@ export default function FinanceDashboardPage() {
             label: 'Manual Entry', icon: 'FilePlus2', desc: 'Create invoice record', link: '/finance/manual-entry',
             iconClasses: 'bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white'
         }] : []),
-        {
-            label: 'Discrepancies', icon: 'GitCompare', desc: 'Resolve match issues', link: '/matching',
-            iconClasses: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white'
-        },
         {
             label: 'Analytics', icon: 'BarChart3', desc: 'View financial reports', link: '/analytics',
             iconClasses: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white'

@@ -123,28 +123,11 @@ export default function ConfigurationPage() {
                     <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                         <Icon name="GitMerge" size={24} />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">Matching & OCR</h2>
+                    <h2 className="text-xl font-bold text-gray-900">OCR Settings</h2>
                 </div>
 
                 <div className="space-y-5">
-                    <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl">
-                        <div>
-                            <h3 className="font-semibold text-gray-900">3-Way Match Tolerance</h3>
-                            <p className="text-sm text-gray-500">Allowed variance for Invoice + PO + Annexure matching</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-gray-500">±</span>
-                            <input
-                                type="number"
-                                min="1"
-                                max="20"
-                                value={settings.matchTolerance}
-                                onChange={(e) => setSettings({ ...settings, matchTolerance: parseInt(e.target.value) })}
-                                className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 w-20 text-center focus:outline-none focus:ring-2 focus:ring-primary/20"
-                            />
-                            <span className="text-gray-500">%</span>
-                        </div>
-                    </div>
+
 
                     <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl">
                         <div>

@@ -60,16 +60,6 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
 
     const statCards = [
         {
-            title: 'Discrepancies',
-            subtitle: 'Require resolution',
-            value: discrepancyCount,
-            icon: 'AlertTriangle',
-            gradient: 'from-rose-500 to-red-600',
-            shadowColor: 'shadow-rose-200',
-            link: '/matching?status=MATCH_DISCREPANCY',
-            urgent: true
-        },
-        {
             title: 'Manual Review',
             subtitle: 'Awaiting validation',
             value: manualReview,
@@ -336,7 +326,6 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
                             <div className="space-y-2.5">
                                 {[
                                     { label: 'Manual Invoice Entry', desc: 'Create record without file', icon: 'PlusCircle', link: '/finance/manual-entry', color: 'indigo' },
-                                    { label: 'Matching Engine', desc: 'Review 3-way matches', icon: 'GitCompare', link: '/matching', color: 'violet' },
                                     { label: 'Audit Logs', desc: 'View activity trail', icon: 'ScrollText', link: '/audit', color: 'slate' },
                                 ].map((action) => (
                                     <button
