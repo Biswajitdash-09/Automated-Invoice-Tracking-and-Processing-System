@@ -24,7 +24,8 @@ const formatBillingMonth = (monthValue) => {
 const DOCUMENT_TYPES = [
     { value: 'RINGI', label: 'Ringi', description: 'PDF, Word, or Excel', color: 'purple' },
     { value: 'ANNEX', label: 'Annex', description: 'PDF, Word, or Excel', color: 'blue' },
-    { value: 'TIMESHEET', label: 'Timesheet', description: 'Excel, PDF, or Word', color: 'green' }
+    { value: 'TIMESHEET', label: 'Timesheet', description: 'Excel, PDF, or Word', color: 'green' },
+    { value: 'RATE_CARD', label: 'Rate Card', description: 'Excel or PDF', color: 'orange' }
 ];
 
 export default function FinanceDocumentsPage() {
@@ -198,6 +199,7 @@ export default function FinanceDocumentsPage() {
             case 'RINGI': return 'bg-purple-50 text-purple-600 border-purple-100';
             case 'ANNEX': return 'bg-blue-50 text-blue-600 border-blue-100';
             case 'TIMESHEET': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+            case 'RATE_CARD': return 'bg-orange-50 text-orange-600 border-orange-100';
             default: return 'bg-slate-50 text-slate-500 border-slate-100';
         }
     };
@@ -220,6 +222,7 @@ export default function FinanceDocumentsPage() {
         { id: 'RINGI', label: 'Ringi', icon: 'FileText' },
         { id: 'ANNEX', label: 'Annex', icon: 'File' },
         { id: 'TIMESHEET', label: 'Timesheet', icon: 'Calendar' },
+        { id: 'RATE_CARD', label: 'Rate Card', icon: 'CreditCard' },
     ];
 
     if (authLoading || !user || role !== ROLES.FINANCE_USER) {

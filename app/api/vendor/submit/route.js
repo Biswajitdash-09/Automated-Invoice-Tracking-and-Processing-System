@@ -52,6 +52,9 @@ export async function POST(request) {
         const assignedPM = formData.get('assignedPM');
         const project = formData.get('project');
         const amount = formData.get('amount');
+        const basicAmount = formData.get('basicAmount');
+        const taxType = formData.get('taxType');
+        const hsnCode = formData.get('hsnCode');
         const invoiceNumber = formData.get('invoiceNumber');
         const invoiceDate = formData.get('invoiceDate');
         const assignedFinanceUser = formData.get('assignedFinanceUser');
@@ -138,8 +141,13 @@ export async function POST(request) {
             receivedAt: new Date(),
             invoiceNumber: invoiceNumber || null,
             date: invoiceDate || null,
+            invoiceDate: invoiceDate || null,
             amount: amount ? parseFloat(amount) : null,
-            status: 'Pending',
+            basicAmount: basicAmount ? parseFloat(basicAmount) : null,
+            taxType: taxType || '',
+            hsnCode: hsnCode || null,
+            status: 'Submitted',
+            originatorRole: 'Vendor',
             fileUrl: invoiceFileUrl,
             project: project || null,
             assignedPM: assignedPM || null,
@@ -147,8 +155,18 @@ export async function POST(request) {
             pmApproval: { status: 'PENDING' },
             financeApproval: { status: 'PENDING' },
             hilReview: { status: 'PENDING' },
-            lineItems: lineItems, // Store validated line items
-            documents: []
+            lineItems: lineItems,
+            documents: [],
+            auditTrail: [{
+                action: 'SUBMITTED',
+                actor: session.user.name || session.user.email || 'Vendor',
+                actorId: session.user.id,
+                actorRole: 'Vendor',
+                timestamp: new Date(),
+                previousStatus: null,
+                newStatus: 'Submitted',
+                notes: notes || 'Invoice submitted by vendor'
+            }]
         });
 
         // Process additional documents
@@ -191,7 +209,7 @@ export async function POST(request) {
             await DocumentUpload.create({
                 id: annexId,
                 invoiceId: invoiceId,
-                type: 'ANNEX',
+                type: 'RFP_COMMERCIAL',
                 fileName: annexFile.name,
                 fileUrl: annexFileUrl,
                 mimeType: annexMimeType,

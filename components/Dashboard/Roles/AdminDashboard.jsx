@@ -61,7 +61,6 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
 
     const quickActions = [
         { name: "User Management", icon: "Users", path: "/users", color: "from-blue-500 to-blue-600", desc: "Manage system users" },
-        { name: "Documents", icon: "FolderOpen", path: "/admin/documents", color: "from-pink-500 to-rose-600", desc: "View uploaded files" },
         { name: "Rate Cards", icon: "CreditCard", path: "/admin/ratecards", color: "from-indigo-500 to-purple-600", desc: "Manage vendor rates" },
         { name: "Configuration", icon: "Settings", path: "/config", color: "from-purple-500 to-purple-600", desc: "System settings" },
         { name: "Audit Logs", icon: "FileText", path: "/audit", color: "from-teal-500 to-teal-600", desc: "Activity history" },

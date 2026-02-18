@@ -23,12 +23,17 @@ export default function VendorSubmitPage() {
         invoiceNumber: '',
         invoiceDate: '',
         amount: '',
+        basicAmount: '',
+        taxType: '',
+        hsnCode: '',
         billingMonth: '',
         project: '',
         assignedPM: '',
         assignedFinanceUser: '',
         notes: ''
     });
+
+    const [disclaimerChecked, setDisclaimerChecked] = useState(false);
 
     // Line Items State
     const [lineItems, setLineItems] = useState([
@@ -156,6 +161,11 @@ export default function VendorSubmitPage() {
             return;
         }
 
+        if (!disclaimerChecked) {
+            setError('Please accept the disclaimer before submitting');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -167,11 +177,15 @@ export default function VendorSubmitPage() {
             submitData.append('invoiceNumber', formData.invoiceNumber);
             submitData.append('invoiceDate', formData.invoiceDate);
             submitData.append('amount', formData.amount);
+            submitData.append('basicAmount', formData.basicAmount);
+            submitData.append('taxType', formData.taxType);
+            submitData.append('hsnCode', formData.hsnCode);
             submitData.append('billingMonth', formData.billingMonth);
             submitData.append('project', formData.project);
             submitData.append('assignedPM', formData.assignedPM);
             submitData.append('assignedFinanceUser', formData.assignedFinanceUser);
             submitData.append('notes', formData.notes);
+            submitData.append('disclaimer', disclaimerChecked ? 'true' : 'false');
             
             // Append Line Items
             submitData.append('lineItems', JSON.stringify(lineItems));
@@ -193,12 +207,16 @@ export default function VendorSubmitPage() {
                 invoiceNumber: '',
                 invoiceDate: '',
                 amount: '',
+                basicAmount: '',
+                taxType: '',
+                hsnCode: '',
                 billingMonth: '',
                 project: '',
                 assignedPM: '',
                 assignedFinanceUser: '',
                 notes: ''
             });
+            setDisclaimerChecked(false);
             setLineItems([{ role: '', experienceRange: '', quantity: '', unit: 'HOUR', rate: '', amount: 0 }]);
             if (invoiceRef.current) invoiceRef.current.value = '';
             if (timesheetRef.current) timesheetRef.current.value = '';
@@ -286,7 +304,7 @@ export default function VendorSubmitPage() {
                                 {formData.timesheetFile && <p className="mt-1 text-xs text-green-400">✓ {formData.timesheetFile.name}</p>}
                             </div>
                             <div className="md:col-span-1 bg-white/5 rounded-xl p-4 border border-white/10">
-                                <label className="block text-sm font-bold text-slate-300 mb-2">Annex (Optional)</label>
+                                <label className="block text-sm font-bold text-slate-300 mb-2">RFP Commercial (Optional)</label>
                                 <input
                                     ref={rfpRef}
                                     type="file"
@@ -338,6 +356,46 @@ export default function VendorSubmitPage() {
                                     <option value="">Select Project</option>
                                     {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>
+                            </div>
+                        </div>
+
+                        {/* Tax & HSN Details */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-300 mb-1">Basic Amount (Before Tax)</label>
+                                <input
+                                    type="number"
+                                    value={formData.basicAmount}
+                                    onChange={(e) => setFormData({ ...formData, basicAmount: e.target.value })}
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                                    placeholder="e.g. 100000"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-300 mb-1">Tax Type</label>
+                                <select
+                                    value={formData.taxType}
+                                    onChange={(e) => setFormData({ ...formData, taxType: e.target.value })}
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                                >
+                                    <option value="">Select Tax Type</option>
+                                    <option value="CGST_SGST">CGST + SGST</option>
+                                    <option value="IGST">IGST</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-300 mb-1">HSN Code</label>
+                                <input
+                                    type="text"
+                                    value={formData.hsnCode}
+                                    onChange={(e) => setFormData({ ...formData, hsnCode: e.target.value })}
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                                    placeholder="e.g. 998314"
+                                />
+                            </div>
+                            <div className="flex items-end">
+                                <p className="text-xs text-slate-400">Total Amount (incl. Tax)</p>
+                                <p className="text-lg font-bold text-white ml-2">₹{formData.amount ? Number(formData.amount).toLocaleString() : '0'}</p>
                             </div>
                         </div>
 
@@ -454,10 +512,27 @@ export default function VendorSubmitPage() {
                             />
                         </div>
 
+                        {/* Disclaimer */}
+                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                            <label className="flex items-start gap-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={disclaimerChecked}
+                                    onChange={(e) => setDisclaimerChecked(e.target.checked)}
+                                    className="mt-1 w-4 h-4 accent-purple-500 rounded"
+                                />
+                                <span className="text-xs text-amber-200/80 leading-relaxed">
+                                    I have verified all the information as per agreed terms with Maruti Suzuki India Limited. 
+                                    The Invoice, RFP Proposal/Timesheet is strictly as per agreement. I understand that any 
+                                    discrepancy may lead to rejection of the invoice.
+                                </span>
+                            </label>
+                        </div>
+
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={loading || !formData.invoiceFile}
+                            disabled={loading || !formData.invoiceFile || !disclaimerChecked}
                             className="w-full py-4 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
