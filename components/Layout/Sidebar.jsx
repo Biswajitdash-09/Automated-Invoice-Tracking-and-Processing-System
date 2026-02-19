@@ -16,8 +16,6 @@ const SIDEBAR_COLLAPSED_KEY = "invoiceflow-sidebar-collapsed";
 const menuItems = [
   { name: "Dashboard", icon: "LayoutDashboard", path: "/dashboard" },
   { name: "Messages", icon: "Mail", path: "/pm/messages" },
-  { name: "Digitization", icon: "ScanLine", path: "/digitization" },
-  { name: "Matching", icon: "GitMerge", path: "/matching" },
   { name: "Approvals", icon: "CheckCircle", path: "/pm/approvals" },
   { name: "PM Approval Queue", icon: "ClipboardCheck", path: "/pm/approval-queue" },
   { name: "Documents", icon: "FileText", path: "/pm/documents" },

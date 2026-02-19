@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sendStatusNotification } from '@/lib/notifications';
 import { getCurrentUser } from '@/lib/server-auth';
-
+import { INVOICE_STATUS, validateTransition } from '@/lib/invoice-workflow';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,157 +35,153 @@ export async function POST(request, { params }) {
     const timestampUpdates = {};
     const auditLog = {
         invoice_id: id,
-        username: userRole || 'System',
+        username: user.name || user.email || userRole || 'System',
         action: action,
         details: comments || `Action ${action} performed on invoice ${id}`
     };
 
-    // State Machine (FR-5, FR-6)
+    // State Machine aligned with invoice-workflow.js INVOICE_STATUS
     try {
-        if (action === 'PROCESS_MATCH') {
-            // Trigger 3-Way Check
-            if (![ROLES.ADMIN, ROLES.FINANCE_USER].includes(userRole)) {
-                return NextResponse.json({ error: 'Unauthorized to run matching.' }, { status: 403 });
-            }
-
-            const { matchingEngine } = await import('@/lib/matching');
-            const matchResult = await matchingEngine.performThreeWayMatch(invoice);
-
-            if (matchResult.status === 'MATCHED') {
-                nextStatus = 'VERIFIED';
-                auditLog.details = 'Automated 3-Way Match Successful';
-            } else {
-                nextStatus = 'MATCH_DISCREPANCY';
-                auditLog.details = `Matching Failed: ${matchResult.discrepancies.join(', ')}`;
-            }
-
-            // Create comprehensive audit trail entry for match processing
-            const auditTrailEntry = {
-                action: 'PROCESS_MATCH',
-                actor: user.name || user.email || 'System',
-                actorId: user.id,
-                actorRole: userRole,
-                timestamp: new Date().toISOString(),
-                previousStatus: previousStatus,
-                newStatus: nextStatus,
-                notes: matchResult.status === 'MATCHED' ? 'Automated 3-Way Match Successful' : `Matching Failed: ${matchResult.discrepancies.join(', ')}`,
-                ipAddress: ipAddress,
-                userAgent: userAgent
-            };
-
-            // Save match details to invoice
-            await db.saveInvoice(id, {
-                status: nextStatus,
-                matching: matchResult,
-                auditTrailEntry: auditTrailEntry,
-                updatedAt: new Date().toISOString()
-            });
-
-            // Notification
-            await sendStatusNotification({ ...invoice, status: nextStatus }, nextStatus);
-
-            return NextResponse.json({
-                message: `Matching complete. Status: ${nextStatus}`,
-                invoice: await db.getInvoice(id)
-            });
-        }
-
         if (action === 'APPROVE') {
-            // Admin approval for vendor submissions
-            if (invoice.status === 'RECEIVED' || invoice.status === 'DIGITIZING') {
-                if (userRole !== ROLES.ADMIN) {
-                    return NextResponse.json({ error: 'Only Admin can approve vendor submissions.' }, { status: 403 });
+            // ─── PM Approval ───
+            if (userRole === ROLES.PROJECT_MANAGER) {
+                // PM can approve invoices in Submitted or Pending PM Approval status
+                if (invoice.status !== INVOICE_STATUS.SUBMITTED &&
+                    invoice.status !== INVOICE_STATUS.PENDING_PM_APPROVAL) {
+                    return NextResponse.json({ error: `PM cannot approve invoices in '${invoice.status}' status.` }, { status: 400 });
                 }
-                nextStatus = 'VERIFIED';
-                auditLog.details = `Admin approved vendor submission: ${comments || 'No comments'}`;
-                
-                // Create comprehensive audit trail entry for admin approval
-                const auditTrailEntry = {
-                    action: 'APPROVE',
-                    actor: user.name || user.email || 'System',
-                    actorId: user.id,
-                    actorRole: userRole,
-                    timestamp: new Date().toISOString(),
-                    previousStatus: previousStatus,
-                    newStatus: nextStatus,
-                    notes: comments || 'Workflow action: APPROVE',
-                    ipAddress: ipAddress,
-                    userAgent: userAgent
-                };
-                
-                await db.saveInvoice(id, {
-                    ...timestampUpdates,
-                    status: nextStatus,
-                    auditTrailEntry: auditTrailEntry,
-                    updatedAt: new Date().toISOString()
-                });
-                
-                await db.createAuditTrailEntry(auditLog);
-                await sendStatusNotification(await db.getInvoice(id), nextStatus);
-                
-                return NextResponse.json({
-                    message: `Invoice moved to ${nextStatus}`,
-                    invoice: await db.getInvoice(id)
-                });
-            }
-            // Project Manager Approval
-            else if (userRole === ROLES.PROJECT_MANAGER) {
+
+                // Verify PM is assigned to this invoice/project
                 const isPmForProject = user.assignedProjects?.includes(invoice.project);
                 const isPmForInvoice = invoice.assignedPM === user.id;
-
                 if (!isPmForProject && !isPmForInvoice) {
                     return NextResponse.json({ error: 'You are not authorized to approve this invoice (not assigned to this project/invoice).' }, { status: 403 });
                 }
-                nextStatus = 'PENDING_FM_APPROVAL';
+
+                // PM Approved → auto-advance to Pending Finance Review
+                nextStatus = INVOICE_STATUS.PENDING_FINANCE_REVIEW;
                 timestampUpdates.pmApprovedAt = new Date().toISOString();
-                auditLog.details = `PM Approved: ${comments || 'No comments'}`;
-            } else if (invoice.status === 'PENDING_FM_APPROVAL' || invoice.status === 'PENDING_APPROVAL') {
-                // Final Payment Release - Admin can release payment
-                if (userRole !== ROLES.ADMIN) {
-                    return NextResponse.json({ error: 'Only Admin can release final payment.' }, { status: 403 });
-                }
-                nextStatus = 'PAID';
-                timestampUpdates.paidAt = new Date().toISOString();
-                auditLog.details = `Payment Released: ${comments || 'No comments'}`;
-            } else if (invoice.status === 'MATCH_DISCREPANCY' || invoice.status === 'VALIDATION_REQUIRED') {
-                // Manual overrides for discrepancies
-                if (![ROLES.ADMIN, ROLES.FINANCE_USER].includes(userRole)) {
-                    return NextResponse.json({ error: 'Unauthorized to resolve discrepancies.' }, { status: 403 });
-                }
-                nextStatus = 'VERIFIED';
-                auditLog.details = `Manual Override/Resolution: ${comments || 'No comments'}`;
+                auditLog.details = `PM Approved: ${comments || 'No comments'}. Auto-advanced to Pending Finance Review.`;
             }
-        } else if (action === 'REJECT') {
-            if (![ROLES.ADMIN, ROLES.PROJECT_MANAGER, ROLES.FINANCE_USER].includes(userRole)) {
+            // ─── Finance User Approval ───
+            else if (userRole === ROLES.FINANCE_USER) {
+                if (invoice.status !== INVOICE_STATUS.PENDING_FINANCE_REVIEW) {
+                    return NextResponse.json({ error: `Finance User cannot approve invoices in '${invoice.status}' status.` }, { status: 400 });
+                }
+
+                nextStatus = INVOICE_STATUS.FINANCE_APPROVED;
+                timestampUpdates.financeApprovedAt = new Date().toISOString();
+                auditLog.details = `Finance Approved: ${comments || 'No comments'}`;
+            }
+            // ─── Admin Override Approval ───
+            else if (userRole === ROLES.ADMIN) {
+                // Admin can approve at any stage
+                if (invoice.status === INVOICE_STATUS.SUBMITTED ||
+                    invoice.status === INVOICE_STATUS.PENDING_PM_APPROVAL) {
+                    // Admin approves vendor submission → advance to Pending PM Approval
+                    nextStatus = INVOICE_STATUS.PENDING_PM_APPROVAL;
+                    auditLog.details = `Admin approved vendor submission → Pending PM Approval: ${comments || 'No comments'}`;
+                } else if (invoice.status === INVOICE_STATUS.PENDING_FINANCE_REVIEW) {
+                    // Admin can finalize finance approval
+                    nextStatus = INVOICE_STATUS.FINANCE_APPROVED;
+                    timestampUpdates.financeApprovedAt = new Date().toISOString();
+                    auditLog.details = `Admin Finance Approved: ${comments || 'No comments'}`;
+                } else if (invoice.status === 'MATCH_DISCREPANCY' || invoice.status === 'VALIDATION_REQUIRED') {
+                    // Admin manual override for discrepancies
+                    nextStatus = INVOICE_STATUS.PENDING_PM_APPROVAL;
+                    auditLog.details = `Admin resolved discrepancy → Pending PM Approval: ${comments || 'No comments'}`;
+                } else {
+                    // Generic admin approval - move to next logical stage
+                    nextStatus = INVOICE_STATUS.PENDING_PM_APPROVAL;
+                    auditLog.details = `Admin override approval: ${comments || 'No comments'}`;
+                }
+            } else {
+                return NextResponse.json({ error: 'Unauthorized to approve invoices.' }, { status: 403 });
+            }
+        }
+        // ─── REJECT ───
+        else if (action === 'REJECT') {
+            if (userRole === ROLES.PROJECT_MANAGER) {
+                if (invoice.status !== INVOICE_STATUS.SUBMITTED &&
+                    invoice.status !== INVOICE_STATUS.PENDING_PM_APPROVAL) {
+                    return NextResponse.json({ error: `PM cannot reject invoices in '${invoice.status}' status.` }, { status: 400 });
+                }
+                nextStatus = INVOICE_STATUS.PM_REJECTED;
+                auditLog.details = `PM Rejected: ${comments || 'No reasons provided'}`;
+            } else if (userRole === ROLES.FINANCE_USER) {
+                if (invoice.status !== INVOICE_STATUS.PENDING_FINANCE_REVIEW) {
+                    return NextResponse.json({ error: `Finance User cannot reject invoices in '${invoice.status}' status.` }, { status: 400 });
+                }
+                nextStatus = INVOICE_STATUS.FINANCE_REJECTED;
+                auditLog.details = `Finance Rejected: ${comments || 'No reasons provided'}`;
+            } else if (userRole === ROLES.ADMIN) {
+                // Admin can reject at any stage
+                if (invoice.status === INVOICE_STATUS.PENDING_PM_APPROVAL ||
+                    invoice.status === INVOICE_STATUS.SUBMITTED) {
+                    nextStatus = INVOICE_STATUS.PM_REJECTED;
+                } else {
+                    nextStatus = INVOICE_STATUS.FINANCE_REJECTED;
+                }
+                auditLog.details = `Admin Rejected: ${comments || 'No reasons provided'}`;
+            } else {
                 return NextResponse.json({ error: 'Unauthorized to reject invoices.' }, { status: 403 });
             }
-            nextStatus = 'REJECTED';
-            auditLog.details = `Rejected by ${userRole}: ${comments || 'No reasons provided'}`;
-        } else if (action === 'REQUEST_INFO') {
-            if (userRole !== ROLES.PROJECT_MANAGER && userRole !== ROLES.ADMIN) {
-                return NextResponse.json({ error: 'Only PMs can request info from vendors.' }, { status: 403 });
+        }
+        // ─── REQUEST_INFO (Send back to vendor for more info) ───
+        else if (action === 'REQUEST_INFO') {
+            if (![ROLES.PROJECT_MANAGER, ROLES.ADMIN, ROLES.FINANCE_USER].includes(userRole)) {
+                return NextResponse.json({ error: 'Unauthorized to request info.' }, { status: 403 });
             }
-            nextStatus = 'AWAITING_INFO';
-            auditLog.details = `More Info Requested: ${comments || 'No specific requests'}`;
-        } else if (action === 'RESTORE') {
-            // Restore rejected/approved invoices back to review
+            nextStatus = INVOICE_STATUS.MORE_INFO_NEEDED;
+            auditLog.details = `More Info Requested by ${userRole}: ${comments || 'No specific requests'}`;
+        }
+        // ─── SEND_BACK (Finance sends back to PM review) ───
+        else if (action === 'SEND_BACK') {
+            if (userRole === ROLES.FINANCE_USER || userRole === ROLES.ADMIN) {
+                nextStatus = INVOICE_STATUS.PENDING_PM_APPROVAL;
+                auditLog.details = `Sent back to PM review by ${userRole}: ${comments || 'No comments'}`;
+            } else {
+                return NextResponse.json({ error: 'Only Finance User or Admin can send back to PM.' }, { status: 403 });
+            }
+        }
+        // ─── RESUBMIT (Vendor resubmits after info request) ───
+        else if (action === 'RESUBMIT') {
+            if (userRole !== ROLES.VENDOR) {
+                return NextResponse.json({ error: 'Only Vendor can resubmit.' }, { status: 403 });
+            }
+            if (invoice.status !== INVOICE_STATUS.MORE_INFO_NEEDED) {
+                return NextResponse.json({ error: 'Can only resubmit invoices that need more info.' }, { status: 400 });
+            }
+            nextStatus = INVOICE_STATUS.PENDING_PM_APPROVAL;
+            auditLog.details = `Vendor resubmitted with additional info: ${comments || 'No comments'}`;
+        }
+        // ─── RESTORE (Admin restores rejected invoices) ───
+        else if (action === 'RESTORE') {
             if (userRole !== ROLES.ADMIN) {
                 return NextResponse.json({ error: 'Only Admin can restore invoices.' }, { status: 403 });
             }
-            if (!['REJECTED', 'APPROVED'].includes(invoice.status)) {
-                return NextResponse.json({ error: 'Can only restore REJECTED or APPROVED invoices.' }, { status: 400 });
+            const rejectStatuses = [
+                INVOICE_STATUS.PM_REJECTED, 
+                INVOICE_STATUS.FINANCE_REJECTED
+            ];
+            if (!rejectStatuses.includes(invoice.status)) {
+                return NextResponse.json({ error: 'Can only restore REJECTED invoices.' }, { status: 400 });
             }
-            nextStatus = 'PENDING_APPROVAL';
-            auditLog.details = `Invoice restored to review: ${comments || 'No comments'}`;
+            nextStatus = INVOICE_STATUS.PENDING_PM_APPROVAL;
+            auditLog.details = `Invoice restored to PM review by Admin: ${comments || 'No comments'}`;
+        }
+        // ─── Unknown action ───
+        else {
+            return NextResponse.json({ error: `Unknown workflow action: ${action}` }, { status: 400 });
         }
 
         // Create comprehensive audit trail entry for workflow action
         const auditTrailEntry = {
-            action: action,
+            action: action.toLowerCase(),
             actor: user.name || user.email || 'System',
-            actorId: user.id,
+            actorId: String(user.id),
             actorRole: userRole,
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
             previousStatus: previousStatus,
             newStatus: nextStatus,
             notes: comments || `Workflow action: ${action}`,
@@ -200,10 +196,7 @@ export async function POST(request, { params }) {
             updatedAt: new Date().toISOString()
         });
 
-        // Legacy audit trail entry for backward compatibility
-        await db.createAuditTrailEntry(auditLog);
-
-        // Trigger simulated notification
+        // Trigger notification
         await sendStatusNotification(updatedInvoice, nextStatus);
 
         return NextResponse.json({
@@ -215,4 +208,5 @@ export async function POST(request, { params }) {
         console.error('Workflow error:', error);
         return NextResponse.json({ error: 'Workflow transition failed' }, { status: 500 });
     }
+
 }

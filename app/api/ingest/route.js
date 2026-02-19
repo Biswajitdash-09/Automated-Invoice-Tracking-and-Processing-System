@@ -23,6 +23,15 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        // Validate disclaimer acceptance (FR-6: Declaration & Confirmation)
+        const disclaimerAccepted = formData.get('disclaimerAccepted');
+        if (disclaimerAccepted !== 'true') {
+            return NextResponse.json({
+                error: 'Declaration & Confirmation must be accepted before submitting an invoice',
+                detail: 'Please check the certification checkbox to confirm the invoice data is accurate'
+            }, { status: 400 });
+        }
+
         const buffer = Buffer.from(await file.arrayBuffer());
 
         // Vercel Fix: Do not write to filesystem (read-only).
@@ -51,6 +60,10 @@ export async function POST(request) {
 
         const invoiceId = `INV-${uuidv4().slice(0, 8).toUpperCase()}`;
         const receivedAt = new Date().toISOString();
+        
+        // Use constants for initial status
+        const { INVOICE_STATUS } = await import('@/lib/invoice-workflow');
+
         const invoiceMetadata = {
             id: invoiceId,
             vendorName: user.role === ROLES.VENDOR ? user.name : 'Pending Identification',
@@ -58,11 +71,11 @@ export async function POST(request) {
             vendorId: user.role === ROLES.VENDOR && user.vendorId ? user.vendorId : undefined, // Uniquely identify which vendor uploaded (admin/PM)
             originalName: file.name,
             fileUrl: fileUrl,
-            status: 'RECEIVED',
+            status: INVOICE_STATUS.SUBMITTED,
             receivedAt,
             auditUsername: user.name || 'Vendor',
             auditAction: 'SUBMIT',
-            auditDetails: `Invoice "${file.name}" submitted via vendor portal (${user.role === ROLES.VENDOR ? 'Vendor' : user.role})`,
+            auditDetails: `Invoice "${file.name}" submitted via vendor portal (${userRole === ROLES.VENDOR ? 'Vendor' : userRole})`,
             // Manual Entry Fields
             project: formData.get('projectId'),
             assignedPM: formData.get('assignedPM'),
@@ -75,10 +88,30 @@ export async function POST(request) {
             taxType: formData.get('taxType') || undefined,
             hsnCode: formData.get('hsnCode') || undefined,
             currency: 'INR', // Restricted to INR
+            // Disclaimer acceptance for audit trail
+            disclaimerAccepted: disclaimerAccepted === 'true',
+            disclaimerAcceptedAt: new Date().toISOString(),
         };
 
-        // Persist to DB and create audit trail (Admin can see via Audit log - RBAC)
-        await db.saveInvoice(invoiceId, invoiceMetadata);
+        // Create initial audit trail entry
+        const auditTrailEntry = {
+            action: 'submit',
+            actor: user.name || user.email || 'System',
+            actorId: String(user.id),
+            actorRole: userRole,
+            timestamp: new Date(),
+            previousStatus: null,
+            newStatus: INVOICE_STATUS.SUBMITTED,
+            notes: `Invoice "${file.name}" submitted via vendor portal`,
+            ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown',
+            userAgent: request.headers.get('user-agent') || 'unknown'
+        };
+
+        // Persist to DB and create audit trail
+        await db.saveInvoice(invoiceId, {
+            ...invoiceMetadata,
+            auditTrailEntry: auditTrailEntry
+        });
 
         // Handle additional document uploads (RFP, Commercial/Timesheet)
         await connectToDatabase();
@@ -129,6 +162,12 @@ export async function POST(request) {
         const result = await processInvoice(invoiceId, buffer);
 
         if (result.success) {
+            // Determine final status based on validation result
+            // Advanced automatically to Pending PM Approval if valid, otherwise stays in Submitted or flagged
+            const finalStatus = (result.validation.isValid && result.matching?.isMatched) 
+                ? INVOICE_STATUS.PENDING_PM_APPROVAL 
+                : INVOICE_STATUS.SUBMITTED;
+
             await db.saveInvoice(invoiceId, {
                 ...result.data,
                 // Preserve vendor identity & Project/PM
@@ -139,7 +178,7 @@ export async function POST(request) {
                 assignedPM: invoiceMetadata.assignedPM,
 
                 // Prioritize Manual Entry over IDP (if provided)
-                invoiceNumber: invoiceMetadata.invoiceNumber || result.data.invoiceNumber || invoiceMetadata.invoiceNumber,
+                invoiceNumber: invoiceMetadata.invoiceNumber || result.data.invoiceNumber,
                 date: invoiceMetadata.date || result.data.date,
                 invoiceDate: invoiceMetadata.invoiceDate,
                 amount: invoiceMetadata.amount || result.data.amount,
@@ -151,18 +190,17 @@ export async function POST(request) {
                 fileUrl: fileUrl,
                 validation: result.validation,
                 matching: result.matching,
-                status: (result.validation.isValid && result.matching?.isMatched) ? 'VERIFIED' :
-                    (result.status || (!result.validation.isValid ? 'VALIDATION_REQUIRED' : 'MATCH_DISCREPANCY')),
+                status: finalStatus,
                 processedAt: new Date().toISOString(),
                 digitizedAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
             });
         }
 
-        // Notify vendor that invoice was received (FR-1: acknowledgment within 5 min)
+        // Notify vendor that invoice was received
         const savedInvoice = await db.getInvoice(invoiceId);
         if (savedInvoice) {
-            await sendStatusNotification(savedInvoice, 'RECEIVED').catch((err) =>
+            await sendStatusNotification(savedInvoice, savedInvoice.status).catch((err) =>
                 console.error('[Ingest] Notification failed:', err)
             );
         }
@@ -171,6 +209,7 @@ export async function POST(request) {
             message: 'Invoice received and processing started',
             invoice: await db.getInvoice(invoiceId)
         });
+
 
     } catch (error) {
         console.error('Ingestion error:', error);

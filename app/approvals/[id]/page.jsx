@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ROLES, getNormalizedRole } from "@/constants/roles";
 import { getInvoiceStatus, transitionWorkflow } from "@/lib/api";
-import ThreeWayMatch from "@/components/Matching/ThreeWayMatch";
 import AuditTrail from "@/components/Workflow/AuditTrail";
 import ApprovalActions from "@/components/Workflow/ApprovalActions";
 import Icon from "@/components/Icon";
@@ -152,7 +151,7 @@ export default function ApprovalDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-        {/* Left Panel: Context (Three-Way Match Read-Only) */}
+        {/* Left Panel: Invoice Summary */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -163,24 +162,36 @@ export default function ApprovalDetailPage() {
           <div className="alert bg-blue-50 border-blue-200 text-blue-800 shadow-sm">
             <Icon name="Info" size={20} />
             <div>
-              <h3 className="font-bold text-sm">Review Context</h3>
+              <h3 className="font-bold text-sm">Invoice Summary</h3>
               <div className="text-xs">
-                Review the matching analysis below. This section is read-only for final approval context.
+                Review invoice details and pending discrepancies below.
               </div>
             </div>
           </div>
 
-          {/* Wrapper: scrollable content, Read Only badge with clear spacing */}
-          <div className="relative rounded-2xl overflow-hidden border border-gray-200/50 bg-gray-50/50">
-            <div className="overflow-x-auto min-w-0">
-              <div className="pointer-events-none opacity-90 grayscale-[0.05] p-4 min-w-[640px]">
-                <ThreeWayMatch invoice={invoice} />
+          {/* Invoice Details Display */}
+          <div className="relative rounded-2xl overflow-hidden border border-gray-200/50 bg-white/60 p-6 space-y-3">
+            <div className="flex flex-col">
+              <div className="text-sm font-semibold text-gray-800 mb-2">
+                <Icon name="Info" size={16} />
+                <span className="text-sm font-semibold text-gray-800 ml-2">Invoice #{invoice.id}</span>
               </div>
-            </div>
-            <div className="absolute top-3 right-3 z-20 pointer-events-none flex items-center gap-2">
-              <span className="badge badge-ghost bg-white/90 backdrop-blur text-[10px] font-mono uppercase tracking-widest border border-gray-200 shadow-sm py-1.5 px-2">
-                Read Only View
-              </span>
+              <div className="text-sm font-medium text-gray-700 mt-2">
+                <span className="text-sm font-medium text-gray-700 inline">Vendor:</span>
+                <span className="text-sm font-medium text-gray-700 inline"> {invoice.vendorName || "N/A"}</span>
+              </div>
+              <div className="text-sm font-medium text-gray-700 mt-2">
+                <span className="text-sm font-medium text-gray-700 inline">Status:</span>
+                <span className={`text-sm font-semibold text-gray-700 inline ${invoice.status === "MATCH_DISCREPANCY" ? "bg-amber-50/50" : ""}`}> {invoice.status}</span>
+              </div>
+              <div className="text-sm font-medium text-gray-700 mt-2">
+                <span className="text-sm font-medium text-gray-700 inline">Amount:</span>
+                <span className="text-sm font-semibold text-gray-700 inline"> ${invoice.totalAmount !== undefined && invoice.totalAmount !== null ? invoice.totalAmount.toLocaleString() : (invoice.amount ? invoice.amount.toLocaleString() : "N/A")}</span>
+              </div>
+              <div className="text-sm font-medium text-gray-700 mt-2">
+                <span className="text-sm font-medium text-gray-700 inline">PO Number:</span>
+                <span className="text-sm font-semibold text-gray-700 inline"> ${invoice.purchaseOrderNumber || "N/A"}</span>
+              </div>
             </div>
           </div>
         </motion.div>

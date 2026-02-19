@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/server-auth';
 import { db } from '@/lib/db';
 import { ROLES } from '@/constants/roles';
+import connectToDatabase from '@/lib/mongodb';
+import DocumentUpload from '@/models/DocumentUpload';
 
 export async function GET() {
     try {
@@ -21,6 +23,30 @@ export async function GET() {
         // Fetch invoices with RBAC filtering (Vendor only sees their own invoices via submittedByUserId)
         const invoices = await db.getInvoices(user);
 
+        // Fetch additional documents for all invoices
+        await connectToDatabase();
+        const invoiceIds = invoices.map(inv => inv.id);
+        const additionalDocs = invoiceIds.length > 0
+            ? await DocumentUpload.find({ invoiceId: { $in: invoiceIds } }).lean()
+            : [];
+
+        // Build a map of invoiceId -> documents
+        const docsMap = {};
+        for (const doc of additionalDocs) {
+            if (!docsMap[doc.invoiceId]) docsMap[doc.invoiceId] = [];
+            docsMap[doc.invoiceId].push({
+                documentId: doc.id,
+                type: doc.type,
+                fileName: doc.fileName,
+            });
+        }
+
+        // Enrich invoices with additional documents
+        const enrichedInvoices = invoices.map(inv => ({
+            ...inv,
+            additionalDocs: docsMap[inv.id] || [],
+        }));
+
         // Calculate vendor-specific statistics
         const stats = {
             totalInvoices: invoices.length,
@@ -32,7 +58,7 @@ export async function GET() {
         // Return stats and filtered invoices
         return NextResponse.json({
             stats,
-            invoices
+            invoices: enrichedInvoices
         });
 
     } catch (error) {

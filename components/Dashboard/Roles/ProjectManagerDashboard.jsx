@@ -144,9 +144,9 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Resolution Required</p>
                             </div>
                         </div>
-                        <Link href="/matching" className="p-2 hover:bg-white rounded-xl transition-colors group">
-                            <Icon name="ArrowRight" size={18} className="text-slate-400 group-hover:text-rose-600 transition-colors" />
-                        </Link>
+                        <div className="p-2 rounded-xl bg-white border border-slate-300 text-slate-400">
+                            <Icon name="ArrowRight" size={18} />
+                        </div>
                     </div>
 
                     {discrepancies.length === 0 ? (
@@ -168,7 +168,7 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
                                     </div>
                                     <div className="text-right">
                                         <p className="font-black text-sm text-slate-900">{formatCurrency(inv.amount)}</p>
-                                        <Link href={`/matching`}>
+                                        <Link href={`/pm/approvals?invoiceId=${inv.id}`}>
                                             <span className="text-[9px] font-black uppercase tracking-widest text-rose-600 bg-rose-100 px-2 py-0.5 rounded-lg">Resolve</span>
                                         </Link>
                                     </div>
