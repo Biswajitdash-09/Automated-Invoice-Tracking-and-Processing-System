@@ -55,10 +55,17 @@ export async function GET() {
             totalBillingVolume: invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0)
         };
 
-        // Return stats and filtered invoices
+        // Fetch active rate cards for the vendor
+        const rateCardRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/vendor/rate-cards`, {
+            headers: { cookie: request.headers.get('cookie') || '' }
+        });
+        const rateCards = rateCardRes.ok ? await rateCardRes.json() : [];
+
+        // Return stats, filtered invoices, and rate cards
         return NextResponse.json({
             stats,
-            invoices: enrichedInvoices
+            invoices: enrichedInvoices,
+            rateCards
         });
 
     } catch (error) {

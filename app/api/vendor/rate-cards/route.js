@@ -46,9 +46,8 @@ export async function GET(request) {
         if (projectId) {
             query.$or.push({ projectId: projectId });
             query.$or.push({ projectId: null }); // Fallback to global
-        } else {
-             query.projectId = null; // Only global if no project specified
         }
+        // If no projectId, we don't restrict by projectId, returning all active rates for this vendor
 
         const rateCards = await RateCard.find(query).sort({ projectId: -1, effectiveFrom: -1 });
 

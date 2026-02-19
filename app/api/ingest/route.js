@@ -63,12 +63,13 @@ export async function POST(request) {
         
         // Use constants for initial status
         const { INVOICE_STATUS } = await import('@/lib/invoice-workflow');
+        const userRole = getNormalizedRole(user);
 
         const invoiceMetadata = {
             id: invoiceId,
-            vendorName: user.role === ROLES.VENDOR ? user.name : 'Pending Identification',
+            vendorName: userRole === ROLES.VENDOR ? user.name : 'Pending Identification',
             submittedByUserId: user.id, // So vendor list filters by user.id and updates correctly
-            vendorId: user.role === ROLES.VENDOR && user.vendorId ? user.vendorId : undefined, // Uniquely identify which vendor uploaded (admin/PM)
+            vendorId: userRole === ROLES.VENDOR && user.vendorId ? user.vendorId : undefined, // Uniquely identify which vendor uploaded (admin/PM)
             originalName: file.name,
             fileUrl: fileUrl,
             status: INVOICE_STATUS.SUBMITTED,

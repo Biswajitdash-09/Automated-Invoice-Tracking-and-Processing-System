@@ -5,13 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Icon from "@/components/Icon";
-import { getAllInvoices, getVendorDashboardData } from "@/lib/api";
+import { getAllInvoices, getVendorDashboardData, ingestInvoice } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { getNormalizedRole, ROLES } from "@/constants/roles";
 import { INVOICE_STATUS } from "@/lib/invoice-workflow";
 import DocumentViewer from "@/components/ui/DocumentViewer";
 import clsx from "clsx";
 import PageHeader from "@/components/Layout/PageHeader";
+import ActiveRates from "@/components/Vendor/ActiveRates";
 
 export default function VendorPortal() {
     return (
@@ -38,9 +39,11 @@ function VendorPortalContent() {
             // If component unmounted or new fetch started, ignore result
             if (thisFetchId !== fetchIdRef.current) return;
 
-            // Vendor API returns { stats: {...}, invoices: [...] }
+            // Vendor API returns { stats: {...}, invoices: [...], rateCards: { rateCards: [...] } }
             const invoiceList = Array.isArray(data) ? data : (data?.invoices || []);
+            const rateCardList = data?.rateCards?.rateCards || [];
             setAllSubmissions(invoiceList);
+            setRateCards(rateCardList);
         } catch (e) {
             console.error("Failed to fetch vendor submissions", e);
             if (thisFetchId !== fetchIdRef.current) return;
@@ -454,8 +457,9 @@ function VendorPortalContent() {
                 )}
             </AnimatePresence>
 
-            <div className="max-w-screen-2xl mx-auto">
-                <div className="bg-white rounded-2xl sm:rounded-[3rem] shadow-2xl shadow-slate-200/40 border border-slate-100 overflow-hidden flex flex-col min-h-[500px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="lg:col-span-2 space-y-10">
+                    <div className="bg-white rounded-2xl sm:rounded-[3rem] shadow-2xl shadow-slate-200/40 border border-slate-100 overflow-hidden flex flex-col min-h-[500px]">
                     <div className="p-6 sm:p-10 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-end justify-between bg-white/50 backdrop-blur-xl gap-4">
                         <div>
                             <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 sm:gap-4">
@@ -763,6 +767,24 @@ function VendorPortalContent() {
                                 })
                             )}
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="space-y-10">
+                    <ActiveRates rateCards={rateCards} loading={loading} />
+                    
+                    {/* Quick Guide card if needed */}
+                    <div className="bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-xl">
+                         <div className="absolute top-0 right-0 p-6 opacity-10">
+                             <Icon name="LifeBuoy" size={100} />
+                         </div>
+                         <h3 className="text-xl font-black mb-4">Submission Guide</h3>
+                         <ul className="space-y-3 text-sm text-slate-400 font-medium">
+                             <li className="flex gap-3"><Icon name="CheckCircle" size={16} className="text-teal-500 shrink-0" /> Ensure PDF format</li>
+                             <li className="flex gap-3"><Icon name="CheckCircle" size={16} className="text-teal-500 shrink-0" /> Upload RFP Commercial</li>
+                             <li className="flex gap-3"><Icon name="CheckCircle" size={16} className="text-teal-500 shrink-0" /> Verify Basic Amount</li>
+                         </ul>
                     </div>
                 </div>
             </div>
