@@ -95,7 +95,7 @@ export default function LoginPage() {
                 console.log(`[OTP Login] Verification successful for user: ${data.user.email}, role: ${data.user.role}`);
 
                 // Success! Redirect based on role
-                router.push("/dashboard");
+                router.push(data.user?.role === ROLES.VENDOR ? "/vendors" : "/dashboard");
             } else {
                 // Log OTP verification failure for debugging
                 console.error(`[OTP Login] Verification failed:`, data);

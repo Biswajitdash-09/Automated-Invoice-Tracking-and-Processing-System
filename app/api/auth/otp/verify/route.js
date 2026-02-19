@@ -43,13 +43,10 @@ export async function POST(request) {
         // Login successful: Generate session
         // We reuse the 'login' function from lib/auth which sets the cookie
 
-        // Ensure we return a plain JavaScript object (not Mongoose doc)
-        // and normalize role for consistency
-        let normalizedRole = user.role;
-        if (user.role === 'Project Manager' || user.role === 'ProjectManager') {
-            normalizedRole = 'PM';
-        }
-
+        // Generate session with normalized role
+        const { getNormalizedRole: normalize } = await import('@/constants/roles');
+        const normalizedRole = normalize({ role: user.role });
+ 
         const sessionUser = {
             id: user.id,
             name: user.name,

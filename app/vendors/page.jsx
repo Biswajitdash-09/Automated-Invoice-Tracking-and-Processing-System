@@ -28,7 +28,9 @@ function VendorPortalContent() {
     const logoutRef = useRef(logout);
     logoutRef.current = logout;
     const [allSubmissions, setAllSubmissions] = useState([]);
+    const [rateCards, setRateCards] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [unreadRecheckCount, setUnreadRecheckCount] = useState(0);
     const fetchIdRef = useRef(0);
 
@@ -254,7 +256,6 @@ function VendorPortalContent() {
     const [viewerDocName, setViewerDocName] = useState(null);
     const [viewerLoading, setViewerLoading] = useState(true);
     const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
     const [spreadsheetData, setSpreadsheetData] = useState(null);
 
     const handleViewDocument = async (e, id) => {
@@ -364,7 +365,7 @@ function VendorPortalContent() {
                         {getNormalizedRole(user) === ROLES.VENDOR && (
                             <button
                                 onClick={() => setIsSubmissionModalOpen(true)}
-                                className="flex items-center justify-center gap-2 h-10 sm:h-11 px-4 sm:px-6 bg-teal-600 hover:bg-teal-700 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl sm:rounded-2xl shadow-lg shadow-teal-500/20 active:scale-95 transition-all whitespace-nowrap order-1 sm:order-none"
+                                className="flex items-center justify-center gap-2 h-10 sm:h-11 px-4 sm:px-6 bg-teal-600 hover:bg-teal-700 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest rounded-xl sm:rounded-2xl shadow-lg shadow-teal-500/20 active:scale-95 transition-all whitespace-nowrap order-1 sm:order-0"
                             >
                                 <Icon name="Plus" size={16} /> <span className="hidden xs:inline">New Submission</span><span className="xs:hidden">New</span>
                             </button>
@@ -372,7 +373,7 @@ function VendorPortalContent() {
 
                         <div className="hidden sm:block h-10 w-px bg-slate-200 mx-1" />
 
-                        <div className="flex items-center gap-2 order-2 sm:order-none">
+                        <div className="flex items-center gap-2 order-2 sm:order-0">
                             <button
                                 type="button"
                                 onClick={() => { setLoading(true); fetchSubmissions(); }}
@@ -434,7 +435,7 @@ function VendorPortalContent() {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="bg-amber-50 border-2 border-amber-200 p-6 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl shadow-amber-500/5"
+                        className="bg-amber-50 border-2 border-amber-200 p-6 rounded-4xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl shadow-amber-500/5"
                     >
                         <div className="flex items-center gap-5">
                             <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20 animate-bounce">
@@ -769,13 +770,12 @@ function VendorPortalContent() {
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="space-y-10">
+                <div className="space-y-10">
                     <ActiveRates rateCards={rateCards} loading={loading} />
                     
                     {/* Quick Guide card if needed */}
-                    <div className="bg-slate-900 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-xl">
+                    <div className="bg-slate-900 rounded-4xl p-8 text-white relative overflow-hidden shadow-xl">
                          <div className="absolute top-0 right-0 p-6 opacity-10">
                              <Icon name="LifeBuoy" size={100} />
                          </div>
@@ -792,7 +792,7 @@ function VendorPortalContent() {
             {/* Refined Submission Modal */}
             <AnimatePresence>
                 {isSubmissionModalOpen && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-150 flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -804,7 +804,7 @@ function VendorPortalContent() {
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative bg-white w-full max-w-4xl rounded-3xl sm:rounded-[3rem] shadow-2xl overflow-hidden z-[151] flex flex-col md:flex-row max-h-[95vh] sm:max-h-[90vh] border border-white mx-auto"
+                            className="relative bg-white w-full max-w-4xl rounded-3xl sm:rounded-4xl shadow-2xl overflow-hidden z-151 flex flex-col md:flex-row max-h-[95vh] sm:max-h-[90vh] border border-white mx-auto"
                         >
                             <div className="hidden lg:flex lg:w-[35%] bg-teal-600 p-10 flex-col justify-between text-white relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-8 opacity-10 scale-150 rotate-12">

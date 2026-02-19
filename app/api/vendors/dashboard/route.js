@@ -5,7 +5,7 @@ import { ROLES } from '@/constants/roles';
 import connectToDatabase from '@/lib/mongodb';
 import DocumentUpload from '@/models/DocumentUpload';
 
-export async function GET() {
+export async function GET(request) {
     try {
         // Get current user from session
         const user = await getCurrentUser();
