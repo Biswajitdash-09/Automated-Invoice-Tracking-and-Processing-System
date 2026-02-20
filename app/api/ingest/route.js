@@ -8,7 +8,34 @@ import { v4 as uuidv4 } from 'uuid';
 import connectToDatabase from '@/lib/mongodb';
 import DocumentUpload from '@/models/DocumentUpload';
 
+// Helper to log to DB for production debugging
+const logToDb = async (level, message, details = {}) => {
+    try {
+        console.log(`[${level}] ${message}`, details); // Consoles for Vercel logs
+        // Also save to a debug collection for persistence
+        await connectToDatabase();
+        if (db && db.createDebugLog) {
+             await db.createDebugLog({ level, message, details, timestamp: new Date() });
+        } else {
+             // Fallback if db helper helper missing, direct insert if possible or just console
+             const mongoose = await import('mongoose');
+             const DebugLog = mongoose.models.DebugLog || mongoose.model('DebugLog', new mongoose.Schema({
+                 level: String,
+                 message: String,
+                 details: Object,
+                 timestamp: Date
+             }));
+             await DebugLog.create({ level, message, details, timestamp: new Date() });
+        }
+    } catch (e) {
+        console.error('Failed to log to DB:', e);
+    }
+};
+
 export async function POST(request) {
+    // No file system logging in Vercel
+
+
     try {
         const formData = await request.formData();
         const file = formData.get('file');
@@ -20,8 +47,11 @@ export async function POST(request) {
         // Get the authenticated user to associate invoice with vendor
         const user = await getCurrentUser();
         if (!user) {
+            await logToDb('WARN', 'Unauthorized access attempt in /api/ingest');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        await logToDb('INFO', `User submitting invoice`, { userId: user.id, email: user.email, role: user.role });
+
 
         // Validate disclaimer acceptance (FR-6: Declaration & Confirmation)
         const disclaimerAccepted = formData.get('disclaimerAccepted');
@@ -206,6 +236,8 @@ export async function POST(request) {
             );
         }
 
+        await logToDb('INFO', `Invoice saved successfully`, { invoiceId, userId: invoiceMetadata.submittedByUserId });
+
         return NextResponse.json({
             message: 'Invoice received and processing started',
             invoice: await db.getInvoice(invoiceId)
@@ -214,6 +246,8 @@ export async function POST(request) {
 
     } catch (error) {
         console.error('Ingestion error:', error);
+        await logToDb('ERROR', `Ingestion failed: ${error.message}`, { stack: error.stack });
+        
         return NextResponse.json({ error: 'Failed to process invoice ingestion' }, { status: 500 });
     }
 }
