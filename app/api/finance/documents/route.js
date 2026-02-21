@@ -26,6 +26,7 @@ export async function GET(request) {
 
         await connectToDatabase();
 
+        const { searchParams } = new URL(request.url);
         const userRole = getNormalizedRole(session.user);
         const invoiceId = searchParams.get('invoiceId');
         const uploadedBy = searchParams.get('uploadedBy'); // Filter by specific uploader (used by admin to scope FU docs)
