@@ -21,11 +21,11 @@ const Background3D = () => {
   return (
     <div className="fixed inset-0 z- overflow-hidden bg-base-100">
       {/* Primary Gradient Mesh */}
-      <div className="absolute inset-0 bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 opacity-60"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 opacity-60 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-slate-950 dark:opacity-80"></div>
 
       {/* Floating Orb 1 - Top Left */}
       <motion.div
-        className="absolute -top-20 -left-20 w-[40rem] h-[40rem] rounded-full bg-purple-300/30 blur-3xl"
+        className="absolute -top-20 -left-20 w-[40rem] h-[40rem] rounded-full bg-purple-300/30 dark:bg-purple-700/15 blur-3xl"
         animate={{
           x: mousePosition.x * 30,
           y: mousePosition.y * 30,
@@ -35,7 +35,7 @@ const Background3D = () => {
 
       {/* Floating Orb 2 - Bottom Right */}
       <motion.div
-        className="absolute top-1/2 -right-20 w-[30rem] h-[30rem] rounded-full bg-blue-300/20 blur-3xl"
+        className="absolute top-1/2 -right-20 w-[30rem] h-[30rem] rounded-full bg-blue-300/20 dark:bg-blue-700/10 blur-3xl"
         animate={{
           x: mousePosition.x * -40,
           y: mousePosition.y * -40,
@@ -45,7 +45,7 @@ const Background3D = () => {
 
       {/* Floating Orb 3 - Center dynamic */}
       <motion.div
-        className="absolute bottom-0 left-1/3 w-[25rem] h-[25rem] rounded-full bg-pink-300/20 blur-3xl"
+        className="absolute bottom-0 left-1/3 w-[25rem] h-[25rem] rounded-full bg-pink-300/20 dark:bg-pink-800/10 blur-3xl"
         animate={{
           x: mousePosition.x * 20,
           y: mousePosition.y * 20,
@@ -60,7 +60,7 @@ const Background3D = () => {
       
       {/* Grid Overlay for depth */}
       <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.04] pointer-events-none"
         style={{
             backgroundImage: `radial-gradient(#444 1px, transparent 1px)`,
             backgroundSize: "40px 40px"

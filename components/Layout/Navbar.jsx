@@ -19,7 +19,7 @@ const Navbar = ({ onMenuClick }) => {
       <header className="navbar w-full p-0 min-h-[4rem] relative z-50 lg:hidden">
         <div className="flex-1 flex items-center px-4">
           <button
-            className="p-2 -ml-2 rounded-xl text-slate-500 hover:bg-primary/10 hover:text-primary transition-colors active:scale-95"
+            className="p-2 -ml-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors active:scale-95"
             onClick={onMenuClick}
             aria-label="Open Menu"
           >
@@ -34,7 +34,7 @@ const Navbar = ({ onMenuClick }) => {
     <header className="navbar w-full p-0 min-h-[4rem] relative z-50">
       <div className="flex-1 flex items-center lg:hidden px-4 gap-2">
         <button
-          className="p-2 -ml-2 rounded-xl text-slate-500 hover:bg-primary/10 hover:text-primary transition-colors active:scale-95"
+          className="p-2 -ml-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors active:scale-95"
           onClick={onMenuClick}
           aria-label="Open Menu"
         >

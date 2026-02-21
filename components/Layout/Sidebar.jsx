@@ -10,6 +10,7 @@ import { APP_VERSION } from "@/lib/version";
 import { useAuth } from "@/context/AuthContext";
 import { canSeeMenuItem, ROLES, getNormalizedRole } from "@/constants/roles";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/Layout/ThemeToggle";
 
 const SIDEBAR_COLLAPSED_KEY = "invoiceflow-sidebar-collapsed";
 
@@ -97,8 +98,6 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
   };
 
   // Dynamic menu path replacement based on role
-  // - "Dashboard" points to the role-specific landing page
-  // - "Messages" points to the correct messages area per role
   const dynamicMenuItems = menuItems.map(item => {
     if (user) {
       const role = getNormalizedRole(user);
@@ -112,7 +111,6 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
 
       if (item.name === 'Messages') {
         if (role === ROLES.ADMIN) return { ...item, path: '/admin/messages' };
-        // PM, Vendor, and Finance User all share the /pm/messages area
         if (role === ROLES.PROJECT_MANAGER || role === ROLES.VENDOR || role === ROLES.FINANCE_USER) {
           return { ...item, path: '/pm/messages' };
         }
@@ -130,7 +128,6 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
 
       if (item.name === 'Approvals') {
         if (role === ROLES.ADMIN) return { ...item, path: '/approvals' };
-        // PM already uses /pm/approvals (the default)
       }
 
     }
@@ -154,13 +151,13 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
         className={clsx(
           "flex-col h-screen sticky top-0 z-50 pt-6 pb-6 transition-[width,transform] duration-300 ease-in-out",
           // Desktop styles
-          "hidden lg:flex pl-6 pr-0", // Adjusted padding for better glass effect
-          !mobileOpen && (collapsed ? "w-[5.5rem]" : "w-72"), // Slightly more space for icons when collapsed
+          "hidden lg:flex pl-6 pr-0",
+          !mobileOpen && (collapsed ? "w-[5.5rem]" : "w-72"),
           // Mobile Styles (Drawer mode)
-          mobileOpen ? "!flex fixed inset-y-0 left-0 w-[280px] sx:w-80 p-4 lg:p-6 bg-slate-50/10 backdrop-blur-xl" : "-translate-x-full lg:translate-x-0"
+          mobileOpen ? "!flex fixed inset-y-0 left-0 w-[280px] sx:w-80 p-4 lg:p-6 bg-slate-50/10 dark:bg-slate-950/20 backdrop-blur-xl" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="glass-panel h-full rounded-3xl flex flex-col justify-between overflow-hidden p-3 relative border border-white/20 shadow-xl bg-white/80">
+        <div className="glass-panel h-full rounded-3xl flex flex-col justify-between overflow-hidden p-3 relative border border-white/20 dark:border-white/8 shadow-xl bg-white/80 dark:bg-slate-900/80">
 
           {/* Brand + Toggle */}
           <div className={clsx("shrink-0 min-h-[4.5rem] mb-4 relative z-10 flex items-center", collapsed ? "flex-col justify-center gap-2" : "flex-row justify-between gap-2 px-2")}>
@@ -186,7 +183,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
             <button
               type="button"
               onClick={toggleSidebar}
-              className="hidden lg:block shrink-0 p-2 rounded-lg text-gray-500 hover:text-primary hover:bg-primary/10 transition-colors"
+              className="hidden lg:block shrink-0 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
               title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <Icon name={collapsed ? "PanelRightOpen" : "PanelLeftClose"} size={20} />
@@ -195,7 +192,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="lg:hidden shrink-0 p-2 rounded-lg text-gray-500 hover:text-error hover:bg-error/10 transition-colors"
+              className="lg:hidden shrink-0 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-error hover:bg-error/10 transition-colors"
             >
               <Icon name="X" size={20} />
             </button>
@@ -210,7 +207,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                   key={item.path}
                   href={item.path}
                   className="block relative group"
-                  onClick={() => setMobileOpen(false)} // Close on mobile navigation
+                  onClick={() => setMobileOpen(false)}
                   title={collapsed ? item.name : undefined}
                 >
                   {isActive && (
@@ -224,13 +221,15 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                     className={clsx(
                       "relative flex items-center rounded-xl transition-colors duration-200",
                       collapsed ? "justify-center px-3 py-3" : "gap-3 px-4 py-3",
-                      isActive ? "text-primary font-semibold" : "text-gray-500 hover:text-gray-900 hover:bg-white/30"
+                      isActive
+                        ? "text-primary font-semibold"
+                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/30 dark:hover:bg-white/5"
                     )}
                   >
                     <Icon
                       name={item.icon}
                       size={22}
-                      className={clsx("shrink-0", isActive ? "text-primary" : "text-gray-400 group-hover:text-primary transition-colors")}
+                      className={clsx("shrink-0", isActive ? "text-primary" : "text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors")}
                     />
                     <AnimatePresence initial={false}>
                       {!collapsed && (
@@ -268,10 +267,11 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
             })}
           </nav>
 
-          {/* Version + Online Status */}
-          <div className="shrink-0 mt-auto pt-4 border-t border-gray-200/30">
-            <div className={clsx("flex items-center", collapsed ? "justify-center px-0" : "justify-between px-2 gap-2")}>
-              {!collapsed && <span className="text-xs font-mono text-gray-400">v{APP_VERSION}</span>}
+          {/* Footer: Theme Toggle + Version + Online Status */}
+          <div className="shrink-0 mt-auto pt-4 border-t border-gray-200/30 dark:border-gray-700/30">
+            <div className={clsx("flex items-center", collapsed ? "flex-col gap-2 px-0" : "justify-between px-2 gap-2")}>
+              <ThemeToggle size={16} />
+              {!collapsed && <span className="text-xs font-mono text-gray-400 dark:text-gray-500">v{APP_VERSION}</span>}
               <div className="w-2 h-2 rounded-full bg-success/60 animate-pulse shrink-0" title="System Online" />
             </div>
           </div>
