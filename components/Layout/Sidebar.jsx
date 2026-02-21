@@ -21,7 +21,6 @@ const menuItems = [
   { name: "Documents", icon: "FileText", path: "/pm/documents" },
   { name: "Analytics", icon: "BarChart3", path: "/analytics" },
   { name: "Finance Approval Queue", icon: "ListChecks", path: "/finance/approval-queue" },
-  { name: "Manual Entry", icon: "FilePlus", path: "/finance/manual-entry" },
   { name: "Configuration", icon: "Settings", path: "/config" },
   { name: "User Management", icon: "Shield", path: "/users" },
   { name: "Audit Logs", icon: "FileText", path: "/audit" },

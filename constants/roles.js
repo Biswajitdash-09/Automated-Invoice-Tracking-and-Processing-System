@@ -65,7 +65,6 @@ export const MENU_PERMISSIONS = {
     'Messages': [ROLES.ADMIN, ROLES.PROJECT_MANAGER, ROLES.VENDOR, ROLES.FINANCE_USER],
     'Analytics': [ROLES.ADMIN],
     'Finance Approval Queue': [ROLES.FINANCE_USER],
-    'Manual Entry': [ROLES.ADMIN],
     'Configuration': [ROLES.ADMIN],
     'User Management': [ROLES.ADMIN],
     'Audit Logs': [ROLES.ADMIN],
@@ -105,8 +104,6 @@ export const hasPermission = (user, action, resource = null) => {
 
         case 'PROCESS_DISCREPANCIES':
             return effectiveRole === ROLES.FINANCE_USER;
-        case 'MANUAL_ENTRY':
-            return effectiveRole === ROLES.ADMIN;
 
         case 'VIEW_AUDIT_LOGS':
         case 'VIEW_COMPLIANCE':
