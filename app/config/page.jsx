@@ -14,7 +14,7 @@ export default function ConfigurationPage() {
         sharepointIntegration: true,
         smtpIntegration: true,
         matchTolerance: 5,
-        ocrEngine: "azure",
+        ocrEngine: "mindee",
         auditRetentionYears: 7
     });
     const [loading, setLoading] = useState(true);
