@@ -48,7 +48,7 @@ export default function SignupPage() {
                 <div className="glass-panel p-8 rounded-3xl shadow-2xl border border-white/50 backdrop-blur-xl bg-white/40">
 
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-accent">
                             Create Account
                         </h1>
                         <p className="text-gray-500 mt-2">Join InvoiceFlow today</p>

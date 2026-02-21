@@ -122,7 +122,7 @@ const VendorPortal = ({ onUploadClick }) => {
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white/80 p-6 rounded-[2rem] border border-slate-200/40 shadow-lg shadow-slate-100/50 backdrop-blur-sm relative overflow-hidden group hover:bg-white transition-all"
+                        className="bg-white/80 p-6 rounded-4xl border border-slate-200/40 shadow-lg shadow-slate-100/50 backdrop-blur-sm relative overflow-hidden group hover:bg-white transition-all"
                     >
                         <div className="flex items-center gap-4 mb-2">
                             <div className={clsx(

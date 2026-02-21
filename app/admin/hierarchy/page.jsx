@@ -14,7 +14,7 @@ const ROLE_CONFIG = {
         text: 'text-violet-700',
         border: 'border-violet-200',
         dot: 'bg-violet-500',
-        avatarBg: 'bg-gradient-to-br from-violet-500 to-indigo-600',
+        avatarBg: 'bg-linear-to-r from-violet-500 to-indigo-600',
         shadow: 'shadow-violet-200',
         icon: 'Shield',
         label: 'Admin',
@@ -26,7 +26,7 @@ const ROLE_CONFIG = {
         text: 'text-emerald-700',
         border: 'border-emerald-200',
         dot: 'bg-emerald-500',
-        avatarBg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
+        avatarBg: 'bg-linear-to-r from-emerald-500 to-teal-600',
         shadow: 'shadow-emerald-200',
         icon: 'Landmark',
         label: 'Finance User',
@@ -38,7 +38,7 @@ const ROLE_CONFIG = {
         text: 'text-blue-700',
         border: 'border-blue-200',
         dot: 'bg-blue-500',
-        avatarBg: 'bg-gradient-to-br from-blue-500 to-cyan-600',
+        avatarBg: 'bg-linear-to-r from-blue-500 to-cyan-600',
         shadow: 'shadow-blue-200',
         icon: 'ClipboardCheck',
         label: 'Project Manager',
@@ -50,7 +50,7 @@ const ROLE_CONFIG = {
         text: 'text-amber-700',
         border: 'border-amber-200',
         dot: 'bg-amber-500',
-        avatarBg: 'bg-gradient-to-br from-amber-500 to-orange-500',
+        avatarBg: 'bg-linear-to-r from-amber-500 to-orange-500',
         shadow: 'shadow-amber-200',
         icon: 'Store',
         label: 'Vendor',
@@ -366,7 +366,7 @@ export default function HierarchyPage() {
             {/* ═══ HEADER ═══ */}
             <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="flex items-center gap-4 mb-2">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-200">
+                    <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-200">
                         <Icon name="GitBranch" size={24} className="text-white" />
                     </div>
                     <div>
@@ -467,7 +467,7 @@ export default function HierarchyPage() {
                                 {/* Header */}
                                 <div className="p-4 sm:p-5 flex justify-between items-center bg-slate-50/80 border-b border-slate-100">
                                     <div className="flex items-center gap-2 sm:gap-3">
-                                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center border border-indigo-100/60">
+                                        <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-50 to-violet-50 flex items-center justify-center border border-indigo-100/60">
                                             <Icon name="Users" size={16} className="text-indigo-600" />
                                         </div>
                                         <div>
@@ -534,7 +534,7 @@ export default function HierarchyPage() {
                                             initial="hidden"
                                             animate="visible"
                                             variants={fadeUp}
-                                            className={`group relative rounded-2xl p-4 bg-gradient-to-br ${conf.gradient} text-white overflow-hidden shadow-lg ${conf.shadow} hover:scale-[1.02] hover:shadow-xl transition-all duration-200`}
+                                            className={`group relative rounded-2xl p-4 bg-linear-to-br ${conf.gradient} text-white overflow-hidden shadow-lg ${conf.shadow} hover:scale-[1.02] hover:shadow-xl transition-all duration-200`}
                                         >
                                             <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mt-4 -mr-4 blur-xl" />
                                             <div className="relative z-10">
@@ -628,7 +628,7 @@ export default function HierarchyPage() {
                                                                     </div>
                                                                     <button
                                                                         onClick={() => openAssignModal(u)}
-                                                                        className={`shrink-0 px-3 py-1.5 text-[10px] font-bold rounded-lg text-white shadow-sm hover:shadow-md transition-all bg-gradient-to-r ${conf.gradient}`}
+                                                                        className={`shrink-0 px-3 py-1.5 text-[10px] font-bold rounded-lg text-white shadow-sm hover:shadow-md transition-all bg-linear-to-r ${conf.gradient}`}
                                                                     >
                                                                         Assign
                                                                     </button>
@@ -802,7 +802,7 @@ export default function HierarchyPage() {
                                 </button>
                                 <button
                                     onClick={handleSaveAssignment}
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-xl font-bold text-sm hover:from-violet-600 hover:to-indigo-700 transition-all shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300"
+                                    className="flex-1 px-4 py-2.5 bg-linear-to-r from-violet-500 to-indigo-600 text-white rounded-xl font-bold text-sm hover:from-violet-600 hover:to-indigo-700 transition-all shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300"
                                 >
                                     Save Changes
                                 </button>

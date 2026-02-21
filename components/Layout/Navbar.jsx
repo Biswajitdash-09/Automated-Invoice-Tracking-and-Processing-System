@@ -41,10 +41,10 @@ const Navbar = ({ onMenuClick }) => {
           <Icon name="Menu" size={24} />
         </button>
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
+          <div className="w-8 h-8 shrink-0 rounded-lg bg-linear-to-r from-primary to-accent flex items-center justify-center shadow-md">
             <Icon name="Zap" className="text-white" size={18} strokeWidth={2.5} />
           </div>
-          <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">InvoiceFlow</span>
+          <span className="text-lg font-bold bg-clip-text text-transparent bg-linear-to- from-primary to-accent">InvoiceFlow</span>
         </Link>
       </div>
       <div className="flex-1 hidden lg:flex px-4" />

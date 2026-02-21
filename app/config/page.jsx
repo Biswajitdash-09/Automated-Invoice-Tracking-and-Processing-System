@@ -86,7 +86,7 @@ export default function ConfigurationPage() {
         <div className="p-8 max-w-5xl mx-auto space-y-8">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-gray-900 to-gray-600">
                         System Configuration
                     </h1>
                     <p className="text-gray-500 mt-2">Application settings, integrations, and system preferences</p>
@@ -132,7 +132,7 @@ export default function ConfigurationPage() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                     {/* SAP */}
-                    <div className="p-6 border border-gray-100 rounded-2xl bg-gradient-to-br from-white to-gray-50">
+                    <div className="p-6 border border-gray-100 rounded-2xl bg-linear-to-br from-white to-gray-50">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-[#008FD3]/10 flex items-center justify-center text-[#008FD3]">
@@ -175,7 +175,7 @@ export default function ConfigurationPage() {
                     </div>
 
                     {/* Ringi Portal */}
-                    <div className="p-6 border border-gray-100 rounded-2xl bg-gradient-to-br from-white to-gray-50">
+                    <div className="p-6 border border-gray-100 rounded-2xl bg-linear-to-br from-white to-gray-50">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
@@ -218,7 +218,7 @@ export default function ConfigurationPage() {
                     </div>
 
                     {/* SharePoint */}
-                    <div className="p-6 border border-gray-100 rounded-2xl bg-gradient-to-br from-white to-gray-50">
+                    <div className="p-6 border border-gray-100 rounded-2xl bg-linear-to-br from-white to-gray-50">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
@@ -261,7 +261,7 @@ export default function ConfigurationPage() {
                     </div>
 
                     {/* SMTP */}
-                    <div className="p-6 border border-gray-100 rounded-2xl bg-gradient-to-br from-white to-gray-50">
+                    <div className="p-6 border border-gray-100 rounded-2xl bg-linear-to-br from-white to-gray-50">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">

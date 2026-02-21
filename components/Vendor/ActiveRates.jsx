@@ -59,8 +59,8 @@ export default function ActiveRates({ rateCards, loading }) {
                     >
                         <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
                             <div className="min-w-0 flex-1">
-                                <h4 className="font-black text-slate-800 text-sm group-hover:text-indigo-600 transition-colors truncate" title={card.projectId ? card.projectName || card.projectId : 'Global Rate Card'}>
-                                    {card.projectId ? `Project: ${card.projectName || card.projectId}` : 'Global Rate Card'}
+                                <h4 className="font-black text-slate-800 text-sm group-hover:text-indigo-600 transition-colors truncate" title="Vendor Rate Card">
+                                    Vendor Rate Card
                                 </h4>
                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Status: Active</p>
                             </div>
@@ -74,7 +74,7 @@ export default function ActiveRates({ rateCards, loading }) {
 
                         <div className="flex flex-wrap gap-3">
                             {card.rates.map((rate, rIdx) => (
-                                <div key={rIdx} className="bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 flex-grow sm:flex-grow-0">
+                                <div key={rIdx} className="bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 grow sm:grow-0">
                                     <div className="min-w-0">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 truncate">{rate.role}</p>
                                         <p className="text-xs font-black text-slate-700 leading-none truncate">{rate.experienceRange}</p>

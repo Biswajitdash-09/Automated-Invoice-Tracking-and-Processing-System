@@ -264,7 +264,7 @@ export default function AuditLogPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 text-[10px] font-bold shrink-0">
+                                                <div className="w-8 h-8 rounded-full bg-linear-to-r from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 text-[10px] font-bold shrink-0">
                                                     {log.username?.charAt(0) || "S"}
                                                 </div>
                                                 <div className="min-w-0">

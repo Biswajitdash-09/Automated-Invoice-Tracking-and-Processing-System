@@ -231,7 +231,7 @@ export default function UserManagementPage() {
                                     <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-linear-to-r from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
                                                     {user.name?.charAt(0) || "?"}
                                                 </div>
                                                 <div className="min-w-0">

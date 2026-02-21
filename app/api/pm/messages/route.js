@@ -80,8 +80,7 @@ export async function POST(request) {
 
         await connectToDatabase();
 
-        const body = await request.json();
-        const { recipientId, invoiceId, projectId, subject, content, messageType, parentMessageId } = body;
+        const { recipientId, invoiceId, subject, content, messageType, parentMessageId } = body;
 
         if (!recipientId || !content) {
             return NextResponse.json(
@@ -138,7 +137,6 @@ export async function POST(request) {
         const message = await Message.create({
             id: messageId,
             invoiceId: invoiceId || null,
-            projectId: projectId || null,
             senderId: session.user.id,
             senderName: session.user.name || session.user.email,
             senderRole: getNormalizedRole(session.user),

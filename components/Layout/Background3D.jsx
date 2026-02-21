@@ -19,9 +19,9 @@ const Background3D = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[-1] overflow-hidden bg-base-100">
+    <div className="fixed inset-0 z- overflow-hidden bg-base-100">
       {/* Primary Gradient Mesh */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 opacity-60"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 opacity-60"></div>
 
       {/* Floating Orb 1 - Top Left */}
       <motion.div

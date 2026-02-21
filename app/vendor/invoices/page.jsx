@@ -51,7 +51,7 @@ export default function VendorInvoicesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+        <div className="min-h-screen bg-linear-to-r from-slate-900 via-purple-900 to-slate-900 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div
@@ -168,7 +168,7 @@ export default function VendorInvoicesPage() {
                                                 <div className="flex items-center gap-2">
                                                     <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+                                                            className="h-full bg-linear-to- from-purple-500 to-pink-500 transition-all"
                                                             style={{ width: `${invoice.progressPercent}%` }}
                                                         />
                                                     </div>

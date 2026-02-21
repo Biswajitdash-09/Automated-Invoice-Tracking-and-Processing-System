@@ -19,7 +19,6 @@ export default function UserManagementPage() {
         password: '',
         role: ROLES.FINANCE_USER,
         department: '',
-        assignedProjects: [],
         managedBy: ''
     });
 
@@ -90,7 +89,7 @@ export default function UserManagementPage() {
             if (!res.ok) throw new Error(data.error);
 
             setShowCreateModal(false);
-            setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [], managedBy: '' });
+            setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', managedBy: '' });
             fetchUsers();
         } catch (err) {
             setError(err.message);
@@ -129,14 +128,6 @@ export default function UserManagementPage() {
         }
     };
 
-    const toggleProjectAssignment = (projectId) => {
-        const current = formData.assignedProjects || [];
-        const updated = current.includes(projectId)
-            ? current.filter(id => id !== projectId)
-            : [...current, projectId];
-        setFormData({ ...formData, assignedProjects: updated });
-    };
-
     const openEditModal = (user) => {
         setFormData({
             name: user.name,
@@ -144,7 +135,6 @@ export default function UserManagementPage() {
             password: '',
             role: user.role,
             department: user.department || '',
-            assignedProjects: user.assignedProjects || [],
             managedBy: user.managedBy || ''
         });
         setEditingUser(user);
@@ -158,7 +148,7 @@ export default function UserManagementPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+        <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div
@@ -207,10 +197,10 @@ export default function UserManagementPage() {
                         </div>
                         <button
                             onClick={() => {
-                                setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', assignedProjects: [], managedBy: '' });
+                                setFormData({ name: '', email: '', password: '', role: ROLES.FINANCE_USER, department: '', managedBy: '' });
                                 setShowCreateModal(true);
                             }}
-                            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg shadow-purple-500/25"
+                            className="px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg shadow-purple-500/25"
                         >
                             + Create User
                         </button>
@@ -375,33 +365,6 @@ export default function UserManagementPage() {
                                         </select>
                                     </div>
 
-                                    {formData.role === 'PM' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-1">Assigned Projects</label>
-                                            <div className="max-h-40 overflow-y-auto bg-white/5 border border-white/20 rounded-lg p-2 space-y-1 custom-scrollbar">
-                                                {projects.map(project => (
-                                                    <div
-                                                        key={project.id}
-                                                        onClick={() => toggleProjectAssignment(project.id)}
-                                                        className={`px-3 py-1.5 rounded cursor-pointer text-sm transition-colors flex items-center justify-between ${formData.assignedProjects?.includes(project.id)
-                                                            ? 'bg-purple-600 text-white'
-                                                            : 'hover:bg-white/10 text-gray-300'
-                                                            }`}
-                                                    >
-                                                        <span>{project.name}</span>
-                                                        {formData.assignedProjects?.includes(project.id) && (
-                                                            <span className="text-xs">✓</span>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                                {projects.length === 0 && (
-                                                    <div className="text-xs text-gray-500 p-2 italic">No projects available</div>
-                                                )}
-                                            </div>
-                                            <p className="text-[10px] text-gray-400 mt-1 italic">Click to toggle multiple project assignments</p>
-                                        </div>
-                                    )}
-
                                     {/* Manager dropdown (for non-Admin roles) */}
                                     {formData.role !== ROLES.ADMIN && managers.length > 0 && (
                                         <div>
@@ -443,7 +406,7 @@ export default function UserManagementPage() {
                                         </button>
                                         <button
                                             type="submit"
-                                            className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+                                            className="flex-1 px-4 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
                                         >
                                             {editingUser ? 'Update' : 'Create'}
                                         </button>

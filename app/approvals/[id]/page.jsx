@@ -263,7 +263,7 @@ export default function ApprovalDetailPage() {
       {/* Document viewer modal — view invoice like in vendor portal */}
       <AnimatePresence>
         {showDocViewer && invoice && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z- flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -275,7 +275,7 @@ export default function ApprovalDetailPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
-              className="relative bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden z-[101] flex flex-col max-h-[90vh]"
+              className="relative bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden z- flex flex-col max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50 shrink-0">

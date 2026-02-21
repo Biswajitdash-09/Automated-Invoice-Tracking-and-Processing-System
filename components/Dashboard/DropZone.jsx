@@ -100,8 +100,8 @@ const DropZone = ({ onUploadComplete, uploadMetadata = {}, theme = "light" }) =>
           ${isDragActive
             ? "border-indigo-500 bg-indigo-50 shadow-2xl shadow-indigo-200 scale-[0.99]"
             : isDark
-              ? "border-white/30 hover:border-white/50 bg-gradient-to-br from-white/10 to-white/5 hover:from-white/15 hover:to-white/10"
-              : "border-indigo-100/50 hover:border-indigo-300 bg-gradient-to-br from-white/50 via-indigo-50/10 to-purple-50/20 hover:from-white/80 hover:via-indigo-50/40 hover:to-purple-50/50 shadow-xl shadow-indigo-100/30"
+              ? "border-white/30 hover:border-white/50 bg-linear-to-r from-white/10 to-white/5 hover:from-white/15 hover:to-white/10"
+              : "border-indigo-100/50 hover:border-indigo-300 bg-linear-to-r from-white/50 via-indigo-50/10 to-purple-50/20 hover:from-white/80 hover:via-indigo-50/40 hover:to-purple-50/50 shadow-xl shadow-indigo-100/30"
           }
           ${isDragReject ? "border-red-400 bg-red-50/50" : ""}
           backdrop-blur-md cursor-pointer overflow-hidden group
@@ -112,8 +112,8 @@ const DropZone = ({ onUploadComplete, uploadMetadata = {}, theme = "light" }) =>
         {/* Animated background gradient orbs */}
         {!isDark && !isUploading && (
           <>
-            <div className="absolute -top-20 -right-20 w-48 h-48 bg-gradient-to-br from-indigo-200/40 to-purple-200/30 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
-            <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-gradient-to-tr from-blue-200/30 to-indigo-200/20 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute -top-20 -right-20 w-48 h-48 bg-linear-to-r from-indigo-200/40 to-purple-200/30 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-linear-to-r from-blue-200/30 to-indigo-200/20 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
           </>
         )}
 
@@ -131,7 +131,7 @@ const DropZone = ({ onUploadComplete, uploadMetadata = {}, theme = "light" }) =>
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center mb-5 mx-auto shadow-xl shadow-emerald-200"
+                    className="w-24 h-24 rounded-full bg-linear-to-r from-emerald-400 to-green-500 flex items-center justify-center mb-5 mx-auto shadow-xl shadow-emerald-200"
                   >
                     <Icon name="Check" size={48} className="text-white" />
                   </motion.div>
@@ -140,13 +140,13 @@ const DropZone = ({ onUploadComplete, uploadMetadata = {}, theme = "light" }) =>
                 </div>
               ) : (
                 <div className="w-full max-w-sm text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-5 mx-auto shadow-xl shadow-indigo-200 animate-pulse">
+                  <div className="w-20 h-20 bg-linear-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-5 mx-auto shadow-xl shadow-indigo-200 animate-pulse">
                     <Icon name="UploadCloud" size={40} className="text-white" />
                   </div>
                   <h3 className={`text-xl font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Uploading Files...</h3>
                   <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-full"
+                      className="h-full bg-linear-to- from-indigo-500 via-purple-500 to-indigo-600 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(100, uploadProgress)}%` }}
                       transition={{ type: "tween", duration: 0.35 }}
@@ -169,10 +169,10 @@ const DropZone = ({ onUploadComplete, uploadMetadata = {}, theme = "light" }) =>
                 className={`
                   w-24 h-24 rounded-3xl mx-auto mb-6 flex items-center justify-center transition-all duration-300 relative
                   ${isDragActive
-                    ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-2xl shadow-indigo-300 scale-110"
+                    ? "bg-linear-to-r from-indigo-500 to-purple-600 text-white shadow-2xl shadow-indigo-300 scale-110"
                     : isDark
-                      ? "bg-gradient-to-br from-white/20 to-white/10 text-white shadow-xl"
-                      : "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-200"
+                      ? "bg-linear-to-r from-white/20 to-white/10 text-white shadow-xl"
+                      : "bg-linear-to-r from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-200"
                   }
                 `}
                 whileHover={{ scale: 1.05 }}
@@ -199,7 +199,7 @@ const DropZone = ({ onUploadComplete, uploadMetadata = {}, theme = "light" }) =>
                   btn rounded-full px-10 py-3 font-bold text-sm tracking-wide transition-all shadow-lg
                   ${isDark
                     ? 'bg-white text-indigo-600 hover:bg-white/90 shadow-white/20'
-                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-indigo-300'
+                    : 'bg-linear-to- from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-indigo-300'
                   }
                 `}
                 whileHover={{ scale: 1.05 }}

@@ -27,8 +27,6 @@ export async function GET(request) {
         await connectToDatabase();
 
         const userRole = getNormalizedRole(session.user);
-        const { searchParams } = new URL(request.url);
-        const projectId = searchParams.get('projectId');
         const invoiceId = searchParams.get('invoiceId');
         const uploadedBy = searchParams.get('uploadedBy'); // Filter by specific uploader (used by admin to scope FU docs)
         const type = searchParams.get('type');
@@ -41,7 +39,6 @@ export async function GET(request) {
             query.uploadedBy = session.user.id;
         }
 
-        if (projectId) query.projectId = projectId;
         if (invoiceId) query.invoiceId = invoiceId;
         // Admin can pass uploadedBy explicitly to scope to a specific FU
         if (uploadedBy && userRole === ROLES.ADMIN) query.uploadedBy = uploadedBy;

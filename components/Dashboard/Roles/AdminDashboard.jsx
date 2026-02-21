@@ -79,14 +79,14 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
         <div className="space-y-8 pb-10 px-4 sm:px-6 lg:px-0">
             {/* System Health - clean cards */}
             <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-2 gap-5">
-                <Card className="p-6 rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40 shadow-sm hover:shadow-md transition-shadow">
+                <Card className="p-6 rounded-2xl border border-emerald-100 bg-linear-to-br from-white to-emerald-50/40 shadow-sm hover:shadow-md transition-shadow">
                     <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Database</p>
                     <div className="flex items-center gap-3 mt-2">
                         <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-sm" />
                         <p className="text-xl font-bold text-gray-900">{systemHealth.dbStatus}</p>
                     </div>
                 </Card>
-                <Card className="p-6 rounded-2xl border border-violet-100 bg-gradient-to-br from-white to-violet-50/40 shadow-sm hover:shadow-md transition-shadow">
+                <Card className="p-6 rounded-2xl border border-violet-100 bg-linear-to-br from-white to-violet-50/40 shadow-sm hover:shadow-md transition-shadow">
                     <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Total Users</p>
                     <p className="text-2xl font-bold text-gray-900 mt-2">{loading ? '…' : userCount}</p>
                 </Card>
@@ -152,7 +152,7 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
                                                 inv.status === 'VALIDATION_REQUIRED' ? `/digitization/${inv.id}` :
                                                     `/approvals/${inv.id}`
                                             }
-                                            className="block p-4 flex justify-between items-center hover:bg-slate-50/80 transition-colors gap-4"
+                                            className="p-4 flex justify-between items-center hover:bg-slate-50/80 transition-colors gap-4"
                                         >
                                             <div className="flex items-center gap-4 min-w-0 flex-1">
                                                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -206,7 +206,7 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
                     {quickActions.map((action) => (
                         <Link key={action.path} href={action.path}>
                             <Card className="p-4 sm:p-5 rounded-2xl border border-slate-100 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group shadow-sm h-full flex flex-col items-center sm:items-start text-center sm:text-left">
-                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 sm:mb-4 shadow-md group-hover:scale-105 transition-transform shrink-0`}>
+                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-linear-to-br ${action.color} flex items-center justify-center mb-3 sm:mb-4 shadow-md group-hover:scale-105 transition-transform shrink-0`}>
                                     <Icon name={action.icon} size={20} className="text-white sm:hidden" />
                                     <Icon name={action.icon} size={24} className="text-white hidden sm:block" />
                                 </div>
@@ -329,7 +329,7 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
                             recentLogs.map((log, idx) => (
                                 <div key={log._id || idx} className="p-4 flex justify-between items-center hover:bg-slate-50/50 transition-colors">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 text-sm font-semibold">
+                                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 text-sm font-semibold">
                                             {log.username?.charAt(0) || "S"}
                                         </div>
                                         <div>

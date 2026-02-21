@@ -25,7 +25,6 @@ const ManualInvoiceEntryPage = () => {
         date: new Date().toISOString().split('T')[0],
         description: '',
         poNumber: '',
-        project: '',
         assignedPM: '',
         document: null
     });
@@ -93,7 +92,6 @@ const ManualInvoiceEntryPage = () => {
             submitData.append('date', formData.date);
             submitData.append('description', formData.description);
             submitData.append('poNumber', formData.poNumber);
-            submitData.append('project', formData.project);
             submitData.append('status', 'VERIFIED');
             submitData.append('assignedPM', formData.assignedPM);
             if (formData.document) submitData.append('document', formData.document);
@@ -114,7 +112,6 @@ const ManualInvoiceEntryPage = () => {
                 date: new Date().toISOString().split('T')[0],
                 description: '',
                 poNumber: '',
-                project: '',
                 assignedPM: '',
                 document: null
             });
@@ -233,10 +230,7 @@ const ManualInvoiceEntryPage = () => {
                             </div>
                         </div>
 
-                        <div>
-                            <label className={labelClass}>Project (Optional)</label>
-                            <input type="text" name="project" value={formData.project} onChange={handleChange} placeholder="Project name or code" className={inputClass} />
-                        </div>
+
 
                         <div>
                             <label className={labelClass}>Assigned PM (Optional)</label>

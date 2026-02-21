@@ -165,7 +165,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
           {/* Brand + Toggle */}
           <div className={clsx("shrink-0 min-h-[4.5rem] mb-4 relative z-10 flex items-center", collapsed ? "flex-col justify-center gap-2" : "flex-row justify-between gap-2 px-2")}>
             <Link href="/dashboard" className={clsx("flex items-center gap-3 min-w-0", collapsed && "justify-center")}>
-              <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 ring-1 ring-black/5 flex-shrink-0">
+              <div className="w-11 h-11 shrink-0 rounded-xl bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 ring-1 ring-black/5 flex-shrink-0">
                 <Icon name="Zap" className="text-white shrink-0" size={26} strokeWidth={2.5} />
               </div>
               <AnimatePresence initial={false}>
@@ -175,7 +175,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                     animate={{ opacity: 1, width: "auto" }}
                     exit={{ opacity: 0, width: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent whitespace-nowrap overflow-hidden"
+                    className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-accent whitespace-nowrap overflow-hidden"
                   >
                     InvoiceFlow
                   </motion.span>

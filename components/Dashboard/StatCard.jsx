@@ -107,7 +107,7 @@ const StatCard = ({
       >
         <Card className={`h-full relative overflow-hidden group ${style.bg} ${style.border} border bg-opacity-40 backdrop-blur-md`}>
           {/* Shine effect */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
 
           <div className="relative z-10 p-1">
             <div className="flex justify-between items-start mb-4">

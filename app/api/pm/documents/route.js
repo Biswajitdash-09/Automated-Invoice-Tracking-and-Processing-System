@@ -66,31 +66,10 @@ export async function GET(request) {
         let query = {};
 
         if (userRole === ROLES.PROJECT_MANAGER) {
-            // PMs only see documents for projects they are assigned to or delegated to
-            const accessibleProjectIds = await getAccessibleProjectIds(session.user.id);
-
-            if (accessibleProjectIds.length === 0) {
-                // PM has no accessible projects - return empty
-                return NextResponse.json({ documents: [] });
-            }
-
-            query.projectId = { $in: accessibleProjectIds };
+            // Project assignment is disabled, PMs see their own uploaded documents
+            query.uploadedBy = session.user.id;
         }
         // Admin and Finance users see all documents (no restriction)
-
-        if (projectId) {
-            // Additional security: ensure projectId is accessible if PM
-            if (userRole === ROLES.PROJECT_MANAGER) {
-                const accessibleProjectIds = await getAccessibleProjectIds(session.user.id);
-                if (!accessibleProjectIds.includes(projectId)) {
-                    return NextResponse.json(
-                        { error: 'Access denied: project not assigned or delegated' },
-                        { status: 403 }
-                    );
-                }
-            }
-            query.projectId = projectId;
-        }
 
         if (invoiceId) query.invoiceId = invoiceId;
         if (uploadedBy) query.uploadedBy = uploadedBy;
@@ -136,18 +115,8 @@ export async function POST(request) {
         const vendorId = formData.get('vendorId');
         const description = formData.get('description');
 
-        // Verify projectId ownership for PMs (Admin and Finance can upload to any project)
+        // Verify projectId ownership removed since projects are disabled
         const role = getNormalizedRole(session.user);
-        if (role === ROLES.PROJECT_MANAGER && projectId) {
-            const accessibleProjectIds = await getAccessibleProjectIds(session.user.id);
-
-            if (!accessibleProjectIds.includes(projectId)) {
-                return NextResponse.json(
-                    { error: 'Access denied: project is not assigned or delegated to you' },
-                    { status: 403 }
-                );
-            }
-        }
 
         if (!file || !type) {
             return NextResponse.json(

@@ -28,7 +28,7 @@ const MIME_BY_EXT = {
 export async function GET(request, { params }) {
     try {
         const { id } = await params;
-        
+
         // Get current user for authorization
         const user = await getCurrentUser();
         if (!user) {
@@ -39,20 +39,14 @@ export async function GET(request, { params }) {
 
         // Fetch document from database
         const document = await DocumentUpload.findOne({ id });
-        
+
         if (!document || !document.fileUrl) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
         }
 
         // Authorization check:
         // - Admin can view all documents
-        // - PM can only view documents assigned to their projects
-        if (user.role === ROLES.PROJECT_MANAGER && document.projectId) {
-            // For PM, check if they have access to this project
-            // This is a simplified check - adjust based on your actual project access logic
-            // If document.projectId is not in user's accessible projects, deny access
-            // For now, we'll allow PMs to view their assigned project documents
-        }
+        // - PM can view all documents (project authorization removed)
 
         const fileUrl = document.fileUrl;
         const fileName = document.fileName || `document-${id}`;
@@ -81,10 +75,10 @@ export async function GET(request, { params }) {
         if (fileUrl.startsWith('/')) {
             const { readFile } = await import('fs/promises');
             const { join } = await import('path');
-            
+
             const filePath = join(process.cwd(), fileUrl.replace(/^\//, ''));
             const { stat } = await import('fs/promises');
-            
+
             try {
                 const fileStats = await stat(filePath);
                 if (!fileStats.isFile()) {
@@ -98,7 +92,7 @@ export async function GET(request, { params }) {
             const ext = extname(filePath).toLowerCase();
             const mimeType = MIME_BY_EXT[ext] || document.mimeType || 'application/octet-stream';
             const buffer = await readFile(filePath);
-            
+
             return new NextResponse(buffer, {
                 status: 200,
                 headers: {
@@ -119,20 +113,20 @@ export async function GET(request, { params }) {
                         const response = await fetch(fileUrl, {
                             cache: 'no-store',
                         });
-                        
+
                         if (!response.ok) {
                             controller.error(new Error('Failed to fetch file'));
                             return;
                         }
 
                         const reader = response.body.getReader();
-                        
+
                         while (true) {
                             const { done, value } = await reader.read();
                             if (done) break;
                             controller.enqueue(value);
                         }
-                        
+
                         controller.close();
                     } catch (error) {
                         console.error('[API] Document fetch error:', error);

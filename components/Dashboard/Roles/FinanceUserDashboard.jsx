@@ -99,7 +99,7 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
                         animate="visible"
                         variants={fadeUp}
                         onClick={() => card.link && router.push(card.link)}
-                        className={`group relative rounded-2xl p-4 sm:p-5 bg-gradient-to-br ${card.gradient} text-white overflow-hidden
+                        className={`group relative rounded-2xl p-4 sm:p-5 bg-linear-to-br ${card.gradient} text-white overflow-hidden
                             ${card.link ? 'cursor-pointer' : ''} shadow-lg ${card.shadowColor}
                             hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] transition-all duration-200`}
                     >
@@ -203,7 +203,7 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
                                                                 >
                                                                     <td className="pl-5 py-3.5">
                                                                         <div className="flex items-center gap-3">
-                                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center font-bold text-indigo-600 text-[10px] border border-indigo-100/60 shrink-0">
+                                                                            <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-50 to-violet-50 flex items-center justify-center font-bold text-indigo-600 text-[10px] border border-indigo-100/60 shrink-0">
                                                                                 {inv.vendorName?.substring(0, 2).toUpperCase() || 'NA'}
                                                                             </div>
                                                                             <div className="min-w-0">
@@ -257,7 +257,7 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
                                                         <div key={inv.id} className="p-4 hover:bg-slate-50/60 transition-colors">
                                                             <div className="flex items-start justify-between gap-3">
                                                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center font-bold text-indigo-600 text-[10px] border border-indigo-100/60 shrink-0">
+                                                                    <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-50 to-violet-50 flex items-center justify-center font-bold text-indigo-600 text-[10px] border border-indigo-100/60 shrink-0">
                                                                         {inv.vendorName?.substring(0, 2).toUpperCase() || 'NA'}
                                                                     </div>
                                                                     <div className="min-w-0">
@@ -298,7 +298,7 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
                 {/* Right Column: Upload & Quick Actions */}
                 < div className="space-y-5" >
                     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-                        <Card className="h-auto border-0 shadow-xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white overflow-hidden relative shadow-indigo-200/50 rounded-2xl">
+                        <Card className="h-auto border-0 shadow-xl bg-linear-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white overflow-hidden relative shadow-indigo-200/50 rounded-2xl">
                             {/* Decorative blurs */}
                             <div className="absolute top-0 right-0 -mt-6 -mr-6 w-36 h-36 bg-white/8 rounded-full blur-2xl" />
                             <div className="absolute bottom-0 left-0 -mb-6 -ml-6 w-28 h-28 bg-white/8 rounded-full blur-2xl" />

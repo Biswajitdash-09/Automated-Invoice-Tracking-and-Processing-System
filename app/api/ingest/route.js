@@ -15,17 +15,17 @@ const logToDb = async (level, message, details = {}) => {
         // Also save to a debug collection for persistence
         await connectToDatabase();
         if (db && db.createDebugLog) {
-             await db.createDebugLog({ level, message, details, timestamp: new Date() });
+            await db.createDebugLog({ level, message, details, timestamp: new Date() });
         } else {
-             // Fallback if db helper helper missing, direct insert if possible or just console
-             const mongoose = await import('mongoose');
-             const DebugLog = mongoose.models.DebugLog || mongoose.model('DebugLog', new mongoose.Schema({
-                 level: String,
-                 message: String,
-                 details: Object,
-                 timestamp: Date
-             }));
-             await DebugLog.create({ level, message, details, timestamp: new Date() });
+            // Fallback if db helper helper missing, direct insert if possible or just console
+            const mongoose = await import('mongoose');
+            const DebugLog = mongoose.models.DebugLog || mongoose.model('DebugLog', new mongoose.Schema({
+                level: String,
+                message: String,
+                details: Object,
+                timestamp: Date
+            }));
+            await DebugLog.create({ level, message, details, timestamp: new Date() });
         }
     } catch (e) {
         console.error('Failed to log to DB:', e);
@@ -108,7 +108,6 @@ export async function POST(request) {
             auditAction: 'SUBMIT',
             auditDetails: `Invoice "${file.name}" submitted via vendor portal (${userRole === ROLES.VENDOR ? 'Vendor' : userRole})`,
             // Manual Entry Fields
-            project: formData.get('projectId'),
             assignedPM: formData.get('assignedPM'),
             assignedFinanceUser: formData.get('assignedFinanceUser'),
             invoiceNumber: formData.get('invoiceNumber'), // Manual override
@@ -160,7 +159,6 @@ export async function POST(request) {
 
             const document = await DocumentUpload.create({
                 id: docId,
-                projectId: formData.get('projectId') || null,
                 invoiceId: invoiceId,
                 type: docType,
                 fileName: docFile.name,
@@ -205,7 +203,6 @@ export async function POST(request) {
                 submittedByUserId: invoiceMetadata.submittedByUserId,
                 vendorName: invoiceMetadata.vendorName,
                 vendorId: invoiceMetadata.vendorId,
-                project: invoiceMetadata.project,
                 assignedPM: invoiceMetadata.assignedPM,
 
                 // Prioritize Manual Entry over IDP (if provided)
@@ -247,7 +244,7 @@ export async function POST(request) {
     } catch (error) {
         console.error('Ingestion error:', error);
         await logToDb('ERROR', `Ingestion failed: ${error.message}`, { stack: error.stack });
-        
+
         return NextResponse.json({ error: 'Failed to process invoice ingestion' }, { status: 500 });
     }
 }

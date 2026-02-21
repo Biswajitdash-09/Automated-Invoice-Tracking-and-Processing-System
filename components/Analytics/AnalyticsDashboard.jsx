@@ -173,7 +173,7 @@ const AnalyticsDashboard = () => {
     <div className="space-y-6">
 
       {/* Compliance & Audit Reports Banner - Prominent at top */}
-      <Card className="p-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0 shadow-xl">
+      <Card className="p-6 bg-linear-to- from-indigo-600 to-purple-600 text-white border-0 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">

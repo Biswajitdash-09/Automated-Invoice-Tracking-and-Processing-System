@@ -354,7 +354,7 @@ function PMApprovalsPageContent() {
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         {/* Left */}
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-100/50 flex items-center justify-center font-bold text-indigo-600 text-xs shrink-0">
+                                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100/50 flex items-center justify-center font-bold text-indigo-600 text-xs shrink-0">
                                                 {inv.vendorName?.substring(0, 2).toUpperCase() || 'NA'}
                                             </div>
                                             <div className="min-w-0">
@@ -481,11 +481,6 @@ function PMApprovalsPageContent() {
                                                 <Icon name="Hash" size={10} /> PO: {inv.poNumber}
                                             </span>
                                         )}
-                                        {inv.project && (
-                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
-                                                <Icon name="FolderOpen" size={10} /> {inv.project}
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
 
@@ -521,7 +516,7 @@ function PMApprovalsPageContent() {
             {/* Document Viewer Modal */}
             <AnimatePresence>
                 {viewerInvoiceId && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -533,7 +528,7 @@ function PMApprovalsPageContent() {
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.98 }}
-                            className="relative bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden z-[101] flex flex-col max-h-[90vh]"
+                            className="relative bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden z-101 flex flex-col max-h-[90vh]"
                         >
                             <div className="flex items-center justify-between px-5 py-3 border-b bg-slate-50/70 shrink-0">
                                 <div>

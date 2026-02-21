@@ -75,7 +75,7 @@ const OCRScanner = ({ imageUrl = "https://picsum.photos/600/800", isScanning = t
 
             {/* Scanning Overlay Gradient Trail */}
             <motion.div
-              className="absolute left-0 right-0 h-40 bg-gradient-to-b from-primary/10 to-transparent z-10"
+              className="absolute left-0 right-0 h-40 bg-linear-to- from-primary/10 to-transparent z-10"
               animate={{
                 top: ["-5%", "95%", "-5%"],
               }}

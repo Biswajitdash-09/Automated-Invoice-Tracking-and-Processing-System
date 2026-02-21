@@ -79,7 +79,7 @@ export default function HILReviewPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+        <div className="min-h-screen bg-linear-to-r from-slate-900 via-purple-900 to-slate-900 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div
@@ -317,7 +317,7 @@ export default function HILReviewPage() {
                                     <button
                                         onClick={() => submitReview('REVIEWED')}
                                         disabled={submitting}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                                        className="flex-1 px-4 py-3 bg-linear-to- from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                                     >
                                         {submitting ? 'Submitting...' : '✓ Mark as Reviewed'}
                                     </button>

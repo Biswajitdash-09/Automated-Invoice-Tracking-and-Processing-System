@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VendorSubmitPage() {
-    const [projects, setProjects] = useState([]);
     const [pms, setPMs] = useState([]);
 
     const [availableRates, setAvailableRates] = useState([]);
@@ -27,7 +26,7 @@ export default function VendorSubmitPage() {
         taxType: '',
         hsnCode: '',
         billingMonth: '',
-        project: '',
+        billingMonth: '',
         assignedPM: '',
         notes: ''
     });
@@ -40,25 +39,9 @@ export default function VendorSubmitPage() {
     ]);
 
     useEffect(() => {
-        fetchProjects();
         fetchPMs();
         fetchRateCards();
     }, []);
-
-    // Fetch Rate Cards when Project changes
-    useEffect(() => {
-        fetchRateCards(formData.project);
-    }, [formData.project]);
-
-    const fetchProjects = async () => {
-        try {
-            const res = await fetch('/api/projects', { cache: 'no-store' });
-            const data = await res.json();
-            if (res.ok) setProjects(data.projects || []);
-        } catch (err) {
-            console.error('Error fetching projects:', err);
-        }
-    };
 
     const fetchPMs = async () => {
         try {
@@ -72,10 +55,9 @@ export default function VendorSubmitPage() {
 
 
 
-    const fetchRateCards = async (projectId = null) => {
+    const fetchRateCards = async () => {
         try {
-            const url = projectId ? `/api/vendor/rate-cards?projectId=${projectId}` : '/api/vendor/rate-cards';
-            const res = await fetch(url, { cache: 'no-store' });
+            const res = await fetch('/api/vendor/rate-cards', { cache: 'no-store' });
             const data = await res.json();
             if (res.ok) {
                 // Flatten rates for easy lookup
@@ -171,7 +153,6 @@ export default function VendorSubmitPage() {
             submitData.append('taxType', formData.taxType);
             submitData.append('hsnCode', formData.hsnCode);
             submitData.append('billingMonth', formData.billingMonth);
-            submitData.append('project', formData.project);
             submitData.append('assignedPM', formData.assignedPM);
             submitData.append('notes', formData.notes);
             submitData.append('disclaimer', disclaimerChecked ? 'true' : 'false');
@@ -200,7 +181,7 @@ export default function VendorSubmitPage() {
                 taxType: '',
                 hsnCode: '',
                 billingMonth: '',
-                project: '',
+                billingMonth: '',
                 assignedPM: '',
                 notes: ''
             });
@@ -305,7 +286,7 @@ export default function VendorSubmitPage() {
                         </div>
 
                         {/* Basic Details */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-xs font-medium text-gray-300 mb-1">Invoice Number</label>
                                 <input
@@ -333,17 +314,6 @@ export default function VendorSubmitPage() {
                                     onChange={(e) => setFormData({ ...formData, billingMonth: e.target.value })}
                                     className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-300 mb-1">Project</label>
-                                <select
-                                    value={formData.project}
-                                    onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
-                                >
-                                    <option value="">Select Project</option>
-                                    {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                </select>
                             </div>
                         </div>
 

@@ -54,7 +54,7 @@ export default function VendorRateCards() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 shadow-lg p-12 text-center flex flex-col items-center"
                 >
-                    <div className="w-20 h-20 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-5 text-teal-300 border border-teal-100/50 shadow-inner">
+                    <div className="w-20 h-20 bg-linear-to-br from-teal-50 to-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-5 text-teal-300 border border-teal-100/50 shadow-inner">
                         <Icon name="FileText" size={36} />
                     </div>
                     <h3 className="text-xl font-black text-slate-800 tracking-tight">No Rate Cards Assigned</h3>
@@ -71,7 +71,7 @@ export default function VendorRateCards() {
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-lg p-4 flex items-center gap-3.5"
                         >
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg shadow-teal-500/20 flex items-center justify-center shrink-0">
+                            <div className="w-11 h-11 rounded-xl bg-linear-to-br from-teal-500 to-emerald-600 shadow-lg shadow-teal-500/20 flex items-center justify-center shrink-0">
                                 <Icon name="Layers" size={20} className="text-white" />
                             </div>
                             <div>
@@ -85,7 +85,7 @@ export default function VendorRateCards() {
                             transition={{ delay: 0.08 }}
                             className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-lg p-4 flex items-center gap-3.5"
                         >
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg shadow-emerald-500/20 flex items-center justify-center shrink-0">
+                            <div className="w-11 h-11 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 shadow-lg shadow-emerald-500/20 flex items-center justify-center shrink-0">
                                 <Icon name="CheckCircle" size={20} className="text-white" />
                             </div>
                             <div>
@@ -99,7 +99,7 @@ export default function VendorRateCards() {
                             transition={{ delay: 0.16 }}
                             className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-lg p-4 flex items-center gap-3.5"
                         >
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/20 flex items-center justify-center shrink-0">
+                            <div className="w-11 h-11 rounded-xl bg-linear-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/20 flex items-center justify-center shrink-0">
                                 <Icon name="TrendingUp" size={20} className="text-white" />
                             </div>
                             <div>
@@ -121,17 +121,17 @@ export default function VendorRateCards() {
                             >
                                 <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-slate-200/60 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
                                     {/* Accent Strip */}
-                                    <div className="h-1.5 bg-gradient-to-r from-teal-500 via-emerald-500 to-green-500" />
+                                    <div className="h-1.5 bg-linear-to-r from-teal-500 via-emerald-500 to-green-500" />
 
                                     {/* Card Header */}
                                     <div className="p-5 pb-3 flex items-start justify-between gap-3">
                                         <div className="flex items-start gap-3 min-w-0">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-100/50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-teal-500/10 to-emerald-500/10 border border-teal-100/50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                                                 <Icon name="CreditCard" size={18} className="text-teal-600" />
                                             </div>
                                             <div className="min-w-0">
                                                 <h3 className="font-black text-slate-800 text-sm tracking-tight group-hover:text-teal-700 transition-colors truncate leading-tight">
-                                                    {card.projectId ? `Project: ${card.projectName || card.projectId}` : 'Global Rate Card'}
+                                                    Vendor Rate Card
                                                 </h3>
                                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 truncate">
                                                     Active since {new Date(card.effectiveFrom).toLocaleDateString()}

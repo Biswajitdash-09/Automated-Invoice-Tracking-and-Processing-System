@@ -92,7 +92,7 @@ export default function VendorRateCardsPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 shadow-lg text-center py-20 flex flex-col items-center"
                     >
-                        <div className="w-20 h-20 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl flex items-center justify-center text-purple-300 mb-5 border border-purple-100/50 shadow-inner">
+                        <div className="w-20 h-20 bg-linear-to-br from-purple-50 to-indigo-50 rounded-2xl flex items-center justify-center text-purple-300 mb-5 border border-purple-100/50 shadow-inner">
                             <Icon name="Layers" size={36} />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 tracking-tight">No Rate Cards Assigned</h3>
@@ -112,13 +112,13 @@ export default function VendorRateCardsPage() {
                             >
                                 <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-slate-200/60 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
                                     {/* Accent Strip */}
-                                    <div className="h-1.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500" />
+                                    <div className="h-1.5 bg-linear-to-r from-purple-500 via-indigo-500 to-blue-500" />
 
                                     {/* Card Header */}
                                     <div className="p-5 pb-4">
                                         <div className="flex justify-between items-start gap-3">
                                             <div className="flex items-start gap-3 min-w-0">
-                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-100/50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500/10 to-indigo-500/10 border border-purple-100/50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                                                     <Icon name="CreditCard" size={18} className="text-purple-600" />
                                                 </div>
                                                 <div className="min-w-0">

@@ -43,7 +43,6 @@ export default function FinanceDocumentsPage() {
     const [uploading, setUploading] = useState(false);
     const [uploadingAttachment, setUploadingAttachment] = useState(false);
     const [filterType, setFilterType] = useState('');
-    const [filterProject, setFilterProject] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [viewerDocumentId, setViewerDocumentId] = useState(null);
     const [viewerLoading, setViewerLoading] = useState(true);
@@ -52,8 +51,6 @@ export default function FinanceDocumentsPage() {
     const [uploadData, setUploadData] = useState({
         file: null,
         type: 'RINGI',
-        projectId: '',
-        projectName: '',
         billingMonth: '',
         ringiNumber: '',
         description: ''
@@ -77,7 +74,6 @@ export default function FinanceDocumentsPage() {
             setLoading(true);
             const params = new URLSearchParams();
             if (filterType) params.append('type', filterType);
-            if (filterProject) params.append('projectId', filterProject);
 
             const res = await fetch(`/api/finance/documents?${params}`, { cache: 'no-store' });
             const data = await res.json();
@@ -111,11 +107,7 @@ export default function FinanceDocumentsPage() {
         e.preventDefault();
         if (!uploadData.file || !uploadData.type) return;
 
-        // Require Project ID for all uploads to ensure they are linked
-        if (!uploadData.projectId) {
-            setError("Please select a valid Project for this document.");
-            return;
-        }
+        if (!uploadData.file || !uploadData.type) return;
 
         try {
             // Start upload process
@@ -140,8 +132,6 @@ export default function FinanceDocumentsPage() {
             const formData = new FormData();
             formData.append('file', uploadData.file);
             formData.append('type', uploadData.type);
-            if (uploadData.projectId) formData.append('projectId', uploadData.projectId);
-            if (uploadData.projectName) formData.append('projectName', uploadData.projectName);
             if (uploadData.billingMonth) formData.append('billingMonth', uploadData.billingMonth);
             if (uploadData.ringiNumber) formData.append('ringiNumber', uploadData.ringiNumber);
             if (uploadData.description) formData.append('description', uploadData.description);
@@ -177,8 +167,6 @@ export default function FinanceDocumentsPage() {
             setUploadData({
                 file: null,
                 type: 'RINGI',
-                projectId: '',
-                projectName: '',
                 billingMonth: '',
                 ringiNumber: '',
                 description: ''
@@ -275,16 +263,6 @@ export default function FinanceDocumentsPage() {
                                 <option key={t.value} value={t.value}>{t.label}</option>
                             ))}
                         </select>
-                        <select
-                            value={filterProject}
-                            onChange={(e) => setFilterProject(e.target.value)}
-                            className="px-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 font-medium"
-                        >
-                            <option value="">All Projects</option>
-                            {projects.map(p => (
-                                <option key={p.id} value={p.id}>{p.name}</option>
-                            ))}
-                        </select>
                     </div>
                 </div>
 
@@ -357,12 +335,6 @@ export default function FinanceDocumentsPage() {
                                         </div>
 
                                         <div className="space-y-3 mb-6">
-                                            {doc.metadata?.projectName && (
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Project</span>
-                                                    <span className="text-xs font-bold text-slate-700 truncate ml-4 text-right">{doc.metadata.projectName}</span>
-                                                </div>
-                                            )}
                                             {doc.metadata?.billingMonth && (
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Month</span>
@@ -532,29 +504,8 @@ export default function FinanceDocumentsPage() {
                                         )}
                                     </div>
 
-                                    {/* Project & Details Grid - Updated */}
+                                    {/* Additional Details Fields */}
                                     <div className="grid grid-cols-1 gap-6">
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Select Project</label>
-                                            <select
-                                                value={uploadData.projectId}
-                                                onChange={(e) => {
-                                                    const pid = e.target.value;
-                                                    const proj = projects.find(p => p.id === pid);
-                                                    setUploadData({
-                                                        ...uploadData,
-                                                        projectId: pid,
-                                                        projectName: proj ? proj.name : ''
-                                                    });
-                                                }}
-                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all font-bold text-sm appearance-none"
-                                            >
-                                                <option value="">-- Select Project associated with this document --</option>
-                                                {projects.map(p => (
-                                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
 
                                         <div>
                                             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Billing cycle (Date)</label>
@@ -613,7 +564,7 @@ export default function FinanceDocumentsPage() {
                 {/* Document viewer modal - matching vendor page implementation */}
                 <AnimatePresence>
                     {viewerDocumentId && (
-                        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+                        <div className="fixed inset-0 z-150 flex items-center justify-center p-4">
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -625,7 +576,7 @@ export default function FinanceDocumentsPage() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="relative bg-white w-full max-w-5xl rounded-3xl sm:rounded-[3rem] shadow-2xl overflow-hidden z-[151] flex flex-col max-h-[90vh] border border-white"
+                                className="relative bg-white w-full max-w-5xl rounded-3xl sm:rounded-[3rem] shadow-2xl overflow-hidden z-151 flex flex-col max-h-[90vh] border border-white"
                             >
                                 <div className="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 bg-slate-50/50 gap-4">
                                     <div className="flex items-center gap-4 w-full sm:w-auto">

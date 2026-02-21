@@ -117,7 +117,6 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
                                         </div>
                                         <div>
                                             <p className="font-semibold text-gray-800 text-sm">{inv.vendorName}{inv.vendorCode && <span className="text-indigo-600 font-mono text-xs ml-1.5">({inv.vendorCode})</span>}</p>
-                                            <p className="text-xs text-gray-500">{inv.project || 'General Project'}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -263,7 +262,6 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
                                             </td>
                                             <td className="px-6 py-4">
                                                 <p className="font-black text-slate-800 text-sm tracking-tight">{inv.vendorName}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{inv.project || 'General Project'}</p>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <p className="font-black text-slate-800 text-sm uppercase">{inv.date || '---'}</p>

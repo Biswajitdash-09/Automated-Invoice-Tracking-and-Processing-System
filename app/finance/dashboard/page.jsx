@@ -278,7 +278,7 @@ export default function FinanceDashboardPage() {
                                                                 <tr key={inv.id} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors">
                                                                     <td className="pl-5 py-3.5">
                                                                         <div className="flex items-center gap-3">
-                                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-100/50 flex items-center justify-center font-bold text-indigo-600 text-[10px] shrink-0">
+                                                                            <div className="w-9 h-9 rounded-xl bg-linear-to-r from-indigo-50 to-violet-50 border border-indigo-100/50 flex items-center justify-center font-bold text-indigo-600 text-[10px] shrink-0">
                                                                                 {inv.vendorName?.substring(0, 2).toUpperCase() || 'NA'}
                                                                             </div>
                                                                             <div className="min-w-0">

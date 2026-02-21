@@ -11,7 +11,7 @@ const LogoutOverlay = ({ isVisible }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/20 backdrop-blur-xl"
+                    className="fixed inset-0 z- flex items-center justify-center bg-white/20 backdrop-blur-xl"
                 >
                     {/* Animated Background Gradients */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -50,7 +50,7 @@ const LogoutOverlay = ({ isVisible }) => {
                                 transition={{ duration: 2, repeat: Infinity }}
                                 className="absolute inset-0 bg-primary/20 rounded-3xl blur-2xl"
                             />
-                            <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl shadow-primary/30 ring-1 ring-white/20">
+                            <div className="relative w-24 h-24 rounded-3xl bg-linear-to-r from-primary to-accent flex items-center justify-center shadow-2xl shadow-primary/30 ring-1 ring-white/20">
                                 <motion.div
                                     animate={{ rotate: 360 }}
                                     transition={{ duration: 3, repeat: Infinity, ease: "linear" }}

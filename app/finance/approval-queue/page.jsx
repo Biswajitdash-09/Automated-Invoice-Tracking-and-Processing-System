@@ -204,7 +204,6 @@ export default function FinanceApprovalQueuePage() {
             fd.append('type', uploadForm.type);
             fd.append('description', uploadForm.description);
             fd.append('invoiceId', reviewInvoice.id);
-            fd.append('projectId', reviewInvoice.project || '');
             const res = await fetch('/api/finance/documents', { method: 'POST', body: fd });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Upload failed');
@@ -400,7 +399,7 @@ export default function FinanceApprovalQueuePage() {
                                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                                             {/* Left */}
                                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-100/50 flex items-center justify-center font-bold text-indigo-600 text-xs shrink-0">
+                                                <div className="w-11 h-11 rounded-xl bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100/50 flex items-center justify-center font-bold text-indigo-600 text-xs shrink-0">
                                                     {inv.vendorName?.substring(0, 2).toUpperCase() || 'NA'}
                                                 </div>
                                                 <div className="min-w-0 flex-1">
@@ -525,7 +524,6 @@ export default function FinanceApprovalQueuePage() {
                                                 <KV label="Invoice No." value={reviewInvoice.invoiceNumber} mono />
                                                 <KV label="Invoice Date" value={reviewInvoice.invoiceDate || reviewInvoice.date} />
                                                 <KV label="Billing Month" value={reviewInvoice.billingMonth} />
-                                                <KV label="Project" value={reviewInvoice.project} />
                                             </div>
                                         </Section>
 
@@ -826,7 +824,7 @@ export default function FinanceApprovalQueuePage() {
             <AnimatePresence>
                 {docViewer && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-60 p-4"
                         onClick={() => setDocViewer(null)}>
                         <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                             onClick={e => e.stopPropagation()}

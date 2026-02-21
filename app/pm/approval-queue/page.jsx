@@ -424,7 +424,7 @@ export default function PMApprovalQueuePage() {
                                     <div className="p-4 sm:p-5">
                                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                                             <div className="flex items-start gap-3 min-w-0 flex-1">
-                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100/50 flex items-center justify-center font-bold text-violet-600 text-xs shrink-0">
+                                                <div className="w-11 h-11 rounded-xl bg-linear-to-br from-violet-50 to-indigo-50 border border-violet-100/50 flex items-center justify-center font-bold text-violet-600 text-xs shrink-0">
                                                     {inv.vendorName?.substring(0, 2).toUpperCase() || 'NA'}
                                                 </div>
                                                 <div className="min-w-0 flex-1">
@@ -443,11 +443,6 @@ export default function PMApprovalQueuePage() {
                                                         {inv.billingMonth && (
                                                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
                                                                 <Icon name="Calendar" size={10} /> {inv.billingMonth}
-                                                            </span>
-                                                        )}
-                                                        {inv.project && (
-                                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
-                                                                <Icon name="FolderOpen" size={10} /> {inv.project}
                                                             </span>
                                                         )}
                                                         {pmSt === 'INFO_REQUESTED' && (
@@ -570,7 +565,6 @@ export default function PMApprovalQueuePage() {
                                                 <KV label="Invoice No." value={reviewInvoice.invoiceNumber} mono />
                                                 <KV label="Invoice Date" value={reviewInvoice.invoiceDate || reviewInvoice.date} />
                                                 <KV label="Billing Month" value={reviewInvoice.billingMonth} />
-                                                <KV label="Project" value={reviewInvoice.project} />
                                             </div>
                                         </Section>
 
@@ -838,7 +832,7 @@ export default function PMApprovalQueuePage() {
             <AnimatePresence>
                 {docViewer && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-60 p-4"
                         onClick={() => setDocViewer(null)}>
                         <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                             onClick={e => e.stopPropagation()}

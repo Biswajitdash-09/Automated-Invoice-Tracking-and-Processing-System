@@ -33,7 +33,7 @@ const Card = ({
     >
       {/* Decorative subtle gradient background for aesthetic depth */}
       {glass && (
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none z-0"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-linear-to-r from-white/10 to-transparent pointer-events-none z-0"></div>
       )}
       <div className="relative z-10">
         {children}

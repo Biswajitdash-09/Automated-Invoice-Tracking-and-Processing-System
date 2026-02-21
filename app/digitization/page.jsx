@@ -118,7 +118,7 @@ function DigitizationPageContent() {
               <Icon name="Filter" size={16} className={statusFilter ? "text-indigo-600" : ""} />
               {statusFilter ? statusFilter.replace('_', ' ') : 'Filter'}
             </label>
-            <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow-2xl bg-white rounded-2xl w-52 border border-slate-100 mt-2">
+            <ul tabIndex={0} className="dropdown-content z- menu p-2 shadow-2xl bg-white rounded-2xl w-52 border border-slate-100 mt-2">
               <div className="px-4 py-2 border-b border-slate-50 mb-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status Filter</p>
               </div>
