@@ -122,7 +122,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
       if (item.name === 'Rate Cards') {
         if (role === ROLES.PROJECT_MANAGER) return { ...item, path: '/pm/rate-cards' };
         if (role === ROLES.FINANCE_USER) return { ...item, path: '/finance/rate-cards' };
-        if (role === ROLES.VENDOR) return { ...item, path: '/vendors/rate-cards' }; // Or show on dashboard
+        if (role === ROLES.VENDOR) return { ...item, path: '/vendor/ratecards' };
       }
 
       if (item.name === 'Hierarchy') {
