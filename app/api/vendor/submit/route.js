@@ -296,7 +296,7 @@ export async function POST(request) {
                 },
                 status: 'PENDING'
             });
-            documentIds.push({ documentId: tsId, type: 'TIMESHEET' });
+            documentIds.push({ documentId: tsId, type: 'TIMESHEET', fileName: timesheetFile.name });
         }
 
         // Save Annex if provided
@@ -322,7 +322,7 @@ export async function POST(request) {
                 },
                 status: 'PENDING'
             });
-            documentIds.push({ documentId: annexId, type: 'ANNEX' });
+            documentIds.push({ documentId: annexId, type: 'ANNEX', fileName: annexFile.name });
         }
 
         // Update invoice with document references
