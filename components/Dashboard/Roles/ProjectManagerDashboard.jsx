@@ -201,25 +201,6 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
                     </div>
                 </div>
 
-                {/* Project Assets Card */}
-                <div className="group relative p-8 bg-linear-to-br from-indigo-600 to-purple-700 rounded-3xl text-white shadow-2xl shadow-indigo-500/20 overflow-hidden active:scale-[0.98] transition-all">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
-                        <Icon name="Files" size={120} />
-                    </div>
-                    <div className="relative z-10 flex flex-col h-full justify-between gap-6">
-                        <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-2">Project Assets</p>
-                            <h3 className="text-2xl font-black tracking-tight leading-tight">Document<br />Management</h3>
-                            <p className="text-indigo-100 text-sm mt-3 font-medium max-w-xs leading-relaxed">Access and manage Ringi, Annex, and Timesheets for your projects.</p>
-                        </div>
-                        <Link
-                            href="/pm/documents"
-                            className="w-full sm:w-fit px-8 py-4 bg-white text-indigo-700 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-900/10 hover:shadow-indigo-900/20 transition-all flex items-center justify-center gap-2 group/btn"
-                        >
-                            Open Documents <Icon name="ArrowRight" size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-                        </Link>
-                    </div>
-                </div>
 
                 {/* Messages Card */}
                 <div className="group relative p-8 bg-linear-to-br from-emerald-600 to-teal-700 rounded-3xl text-white shadow-2xl shadow-emerald-500/20 overflow-hidden active:scale-[0.98] transition-all">
