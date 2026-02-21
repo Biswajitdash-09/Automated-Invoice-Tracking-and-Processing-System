@@ -46,6 +46,7 @@ const InvoiceSchema = new mongoose.Schema({
     invoiceNumber: { type: String },
     date: { type: String },
     invoiceDate: { type: String }, // Separate invoice date field
+    billingMonth: { type: String }, // Format: YYYY-MM
     amount: { type: Number },
     basicAmount: { type: Number }, // Amount before taxes
     taxType: { type: String, enum: ['CGST_SGST', 'IGST', ''] }, // Tax type dropdown

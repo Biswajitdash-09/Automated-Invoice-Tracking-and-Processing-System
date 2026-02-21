@@ -1,6 +1,6 @@
 {
   "name": "0236120b-6d4d-4c10-8833-99940f850c0e",
-  "version": "1.0.80",
+  "version": "1.0.81",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,6 @@
     "start": "next start",
     "lint": "next lint",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.mjs",
-
     "bump": "node scripts/bump_version.js",
     "seed:users": "node scripts/seed-users.mjs",
     "seed": "node scripts/seed-users.mjs"

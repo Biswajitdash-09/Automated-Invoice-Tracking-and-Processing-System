@@ -31,7 +31,13 @@ const APPROVAL_STATUS_MAP = {
   PENDING: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', label: 'Pending' },
   INFO_REQUESTED: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500', label: 'Info Requested' },
 };
-const getApprovalStatus = (s) => APPROVAL_STATUS_MAP[s] || APPROVAL_STATUS_MAP.PENDING;
+const getApprovalStatus = (s) => {
+  if (['APPROVED', 'Finance Approved', 'PM Approved'].includes(s)) return APPROVAL_STATUS_MAP.APPROVED;
+  if (['REJECTED', 'Finance Rejected', 'PM Rejected'].includes(s)) return APPROVAL_STATUS_MAP.REJECTED;
+  if (['INFO_REQUESTED', 'More Info Needed'].includes(s)) return APPROVAL_STATUS_MAP.INFO_REQUESTED;
+  if (['Pending Finance Review'].includes(s)) return APPROVAL_STATUS_MAP.PENDING; // Still pending for finance
+  return APPROVAL_STATUS_MAP[s] || APPROVAL_STATUS_MAP.PENDING;
+};
 
 /* ─── Section wrapper ─────────────────────────────────────── */
 function Section({ title, icon, children, accent = 'amber' }) {

@@ -243,6 +243,7 @@ export async function POST(request) {
             invoiceNumber: invoiceNumber || null,
             date: invoiceDate || null,
             invoiceDate: invoiceDate || null,
+            billingMonth: billingMonth || null,
             amount: amount ? parseFloat(amount) : null,
             basicAmount: basicAmount ? parseFloat(basicAmount) : null,
             taxType: taxType || '',

@@ -535,7 +535,8 @@ export default function PMApprovalQueuePage() {
                                         {(() => {
                                             const fuSt = reviewInvoice.financeApproval?.status ||
                                                 (reviewInvoice.status === INVOICE_STATUS.FINANCE_APPROVED ? 'APPROVED' :
-                                                    reviewInvoice.status === INVOICE_STATUS.PENDING_FINANCE_REVIEW ? 'PENDING' : null);
+                                                    reviewInvoice.status === INVOICE_STATUS.FINANCE_REJECTED ? 'REJECTED' :
+                                                        reviewInvoice.status === INVOICE_STATUS.PENDING_FINANCE_REVIEW ? 'PENDING' : null);
                                             if (!fuSt) return null;
                                             const cfg = fuSt === 'APPROVED' ? { icon: 'CheckCircle2', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', label: 'Finance Approved' }
                                                 : fuSt === 'REJECTED' ? { icon: 'XCircle', color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200', label: 'Finance Rejected' }
