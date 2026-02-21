@@ -19,7 +19,6 @@ const menuItems = [
   { name: "Approvals", icon: "CheckCircle", path: "/pm/approvals" },
   { name: "PM Approval Queue", icon: "ClipboardCheck", path: "/pm/approval-queue" },
   { name: "Documents", icon: "FileText", path: "/pm/documents" },
-  { name: "Analytics", icon: "BarChart3", path: "/analytics" },
   { name: "Finance Approval Queue", icon: "ListChecks", path: "/finance/approval-queue" },
   { name: "Configuration", icon: "Settings", path: "/config" },
   { name: "User Management", icon: "Shield", path: "/users" },

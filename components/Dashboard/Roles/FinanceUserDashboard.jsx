@@ -326,7 +326,6 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
                             <div className="space-y-2.5">
                                 {[
                                     { label: 'Manual Invoice Entry', desc: 'Create record without file', icon: 'PlusCircle', link: '/finance/manual-entry', color: 'indigo' },
-                                    { label: 'Audit Logs', desc: 'View activity trail', icon: 'ScrollText', link: '/audit', color: 'slate' },
                                 ].map((action) => (
                                     <button
                                         key={action.label}

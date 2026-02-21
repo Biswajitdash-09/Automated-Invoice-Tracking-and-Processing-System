@@ -64,7 +64,6 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
         { name: "Rate Cards", icon: "CreditCard", path: "/admin/ratecards", color: "from-indigo-500 to-purple-600", desc: "Manage vendor rates" },
         { name: "Configuration", icon: "Settings", path: "/config", color: "from-purple-500 to-purple-600", desc: "System settings" },
         { name: "Audit Logs", icon: "FileText", path: "/audit", color: "from-teal-500 to-teal-600", desc: "Activity history" },
-        { name: "Analytics", icon: "BarChart3", path: "/analytics", color: "from-orange-500 to-orange-600", desc: "Reports & insights" }
     ];
 
     const formatTime = (timestamp) => {

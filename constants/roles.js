@@ -63,7 +63,6 @@ export const MENU_PERMISSIONS = {
     'PM Approval Queue': [ROLES.PROJECT_MANAGER],
     'Documents': [ROLES.FINANCE_USER, ROLES.PROJECT_MANAGER],
     'Messages': [ROLES.ADMIN, ROLES.PROJECT_MANAGER, ROLES.VENDOR, ROLES.FINANCE_USER],
-    'Analytics': [ROLES.ADMIN],
     'Finance Approval Queue': [ROLES.FINANCE_USER],
     'Configuration': [ROLES.ADMIN],
     'User Management': [ROLES.ADMIN],
