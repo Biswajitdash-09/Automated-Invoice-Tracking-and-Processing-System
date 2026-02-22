@@ -14,11 +14,7 @@ export default function LandingPage() {
   const isVendor = role === ROLES.VENDOR;
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-[#F8F9FC] dark:bg-slate-950">
-      {/* Background Decorative Elements */}
-      <div className="absolute inset-0 z-0 bg-linear-to-br from-indigo-100 via-purple-50 to-white dark:from-indigo-950/50 dark:via-purple-950/30 dark:to-slate-950">
-        <div className="absolute top-0 left-0 w-full h-full opacity-30 dark:opacity-10 bg-[radial-gradient(#4f46e5_1px,transparent_1px)] bg-size-[24px_24px]"></div>
-      </div>
+    <div className="min-h-screen flex flex-col relative overflow-hidden aurora-background-pattern">
 
       {/* Top Navigation for public access */}
       <nav className="absolute top-0 left-0 w-full z-20 flex justify-between items-center p-6 px-8">
