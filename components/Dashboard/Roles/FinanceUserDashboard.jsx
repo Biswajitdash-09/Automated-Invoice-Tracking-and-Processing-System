@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/Icon";
@@ -310,7 +309,7 @@ const FinanceUserDashboard = ({ invoices, onUploadComplete, statusFilter = 'ALL'
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-sm">Quick Ingestion</h3>
-                                        <p className="text-[10px] text-indigo-200 dark:text-indigo-800 font-medium">Drop files to start OCR</p>
+                                        <p className="text-[10px] text-indigo-100 dark:text-indigo-200/70 font-medium">Drop files to start OCR</p>
                                     </div>
                                 </div>
                                 <div className="bg-white/10 rounded-xl p-1 backdrop-blur-sm">

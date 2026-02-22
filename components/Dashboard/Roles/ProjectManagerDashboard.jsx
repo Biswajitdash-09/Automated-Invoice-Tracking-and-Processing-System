@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import clsx from "clsx";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/Icon";
@@ -72,7 +72,13 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (
                     <Card key={idx} className="flex items-center gap-5 border-slate-200/60 dark:border-slate-700/60 hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-slate-800/40 transition-all p-6 group">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border-4 border-white dark:border-white shadow-sm transition-transform group-hover:scale-110 ${stat.bg} dark:${stat.bg.replace('50', '900')} ${stat.color} dark:${stat.color.replace('600', '300')}`}>
+                        <div className={clsx(
+                            "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border-4 border-white dark:border-slate-800 shadow-sm transition-transform group-hover:scale-110",
+                            stat.color === 'text-indigo-600' ? 'bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400' :
+                            stat.color === 'text-amber-600' ? 'bg-amber-50 dark:bg-amber-900 text-amber-600 dark:text-amber-400' :
+                            stat.color === 'text-emerald-600' ? 'bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400' :
+                            'bg-rose-50 dark:bg-rose-900 text-rose-600 dark:text-rose-400'
+                        )}>
                             <Icon name={stat.icon} size={28} />
                         </div>
                         <div>
@@ -180,19 +186,19 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {/* Approvals Card */}
-                <div className="group relative p-8 bg-gradient-linear from-amber-500 dark:from-amber-700 to-orange-600 dark:to-orange-800 rounded-3xl text-white dark:text-white shadow-2xl shadow-amber-500/20 dark:shadow-amber-700/20 overflow-hidden active:scale-[0.98] transition-all">
+                <div className="group relative p-8 bg-linear-to-r from-amber-500 to-orange-600 dark:from-amber-600 dark:to-orange-700 rounded-3xl text-white shadow-2xl shadow-amber-500/20 dark:shadow-amber-900/40 overflow-hidden active:scale-[0.98] transition-all">
                     <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
                         <Icon name="CheckCircle" size={120} />
                     </div>
                     <div className="relative z-10 flex flex-col h-full justify-between gap-6">
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-100 dark:text-amber-800 mb-2">Invoice Review</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-100 dark:text-amber-200/60 mb-2">Invoice Review</p>
                             <h3 className="text-2xl font-black tracking-tight leading-tight">Approve &<br />Review</h3>
-                            <p className="text-amber-100 dark:text-amber-800 text-sm mt-3 font-medium max-w-xs leading-relaxed">Review pending invoices, approve, reject, or request more information.</p>
+                            <p className="text-amber-100 dark:text-amber-200/60 text-sm mt-3 font-medium max-w-xs leading-relaxed">Review pending invoices, approve, reject, or request more information.</p>
                         </div>
                         <Link
                             href="/pm/approval-queue"
-                            className="w-full sm:w-fit px-8 py-4 bg-white dark:bg-slate-700 text-amber-700 dark:text-amber-300 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-900/10 dark:shadow-amber-900/20 hover:shadow-amber-900/20 transition-all flex items-center justify-center gap-2 group/btn"
+                            className="w-full sm:w-fit px-8 py-4 bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-300 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-900/10 dark:shadow-amber-950/20 hover:shadow-amber-900/20 transition-all flex items-center justify-center gap-2 group/btn"
                         >
                             Open Approvals <Icon name="ArrowRight" size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                         </Link>
@@ -201,19 +207,19 @@ export default function ProjectManagerDashboard({ user, invoices = [], filteredI
 
 
                 {/* Messages Card */}
-                <div className="group relative p-8 bg-gradient-linear from-emerald-600 dark:from-emerald-800 to-teal-700 dark:to-teal-900 rounded-3xl text-white dark:text-white shadow-2xl shadow-emerald-500/20 dark:shadow-emerald-700/20 overflow-hidden active:scale-[0.98] transition-all">
+                <div className="group relative p-8 bg-linear-to-r from-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-800 rounded-3xl text-white shadow-2xl shadow-emerald-500/20 dark:shadow-emerald-900/40 overflow-hidden active:scale-[0.98] transition-all">
                     <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500">
                         <Icon name="Mail" size={120} />
                     </div>
                     <div className="relative z-10 flex flex-col h-full justify-between gap-6">
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-200 dark:text-emerald-800 mb-2">Communication</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-200 dark:text-emerald-200/60 mb-2">Communication</p>
                             <h3 className="text-2xl font-black tracking-tight leading-tight">Vendor<br />Messages</h3>
-                            <p className="text-emerald-100 dark:text-emerald-800 text-sm mt-3 font-medium max-w-xs leading-relaxed">Communicate with vendors regarding invoice issues and requests.</p>
+                            <p className="text-emerald-100 dark:text-emerald-200/60 text-sm mt-3 font-medium max-w-xs leading-relaxed">Communicate with vendors regarding invoice issues and requests.</p>
                         </div>
                         <Link
                             href="/pm/messages"
-                            className="w-full sm:w-fit px-8 py-4 bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-900/10 dark:shadow-emerald-900/20 hover:shadow-emerald-900/20 transition-all flex items-center justify-center gap-2 group/btn"
+                            className="w-full sm:w-fit px-8 py-4 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-900/10 dark:shadow-emerald-950/20 hover:shadow-emerald-900/20 transition-all flex items-center justify-center gap-2 group/btn"
                         >
                             Open Messages <Icon name="ArrowRight" size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                         </Link>

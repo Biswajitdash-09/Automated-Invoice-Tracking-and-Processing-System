@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
+import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Icon from '@/components/Icon';
@@ -18,22 +19,22 @@ const fadeUp = {
 };
 
 const STATUS_STYLES = {
-    APPROVED: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-    VERIFIED: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-    PAID: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-    PM_APPROVED: { bg: 'bg-teal-50', text: 'text-teal-700', dot: 'bg-teal-500' },
-    manually_submitted: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-    REJECTED: { bg: 'bg-rose-50', text: 'text-rose-700', dot: 'bg-rose-500' },
-    MATCH_DISCREPANCY: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
-    VALIDATION_REQUIRED: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500' },
-    PENDING: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500' },
-    RECEIVED: { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400' },
+    APPROVED: { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500 dark:bg-emerald-400' },
+    VERIFIED: { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500 dark:bg-emerald-400' },
+    PAID: { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500 dark:bg-emerald-400' },
+    PM_APPROVED: { bg: 'bg-teal-50 dark:bg-teal-950/30', text: 'text-teal-700 dark:text-teal-400', dot: 'bg-teal-500 dark:bg-teal-400' },
+    manually_submitted: { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500 dark:bg-emerald-400' },
+    REJECTED: { bg: 'bg-rose-50 dark:bg-rose-950/30', text: 'text-rose-700 dark:text-rose-400', dot: 'bg-rose-500 dark:bg-rose-400' },
+    MATCH_DISCREPANCY: { bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500 dark:bg-amber-400' },
+    VALIDATION_REQUIRED: { bg: 'bg-sky-50 dark:bg-sky-950/30', text: 'text-sky-700 dark:text-sky-400', dot: 'bg-sky-500 dark:bg-sky-400' },
+    PENDING: { bg: 'bg-violet-50 dark:bg-violet-950/30', text: 'text-violet-700 dark:text-violet-400', dot: 'bg-violet-500 dark:bg-violet-400' },
+    RECEIVED: { bg: 'bg-slate-100 dark:bg-slate-800', text: 'text-slate-600 dark:text-slate-400', dot: 'bg-slate-400 dark:bg-slate-500' },
 };
 const getStatus = (s) => STATUS_STYLES[s] || { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400' };
 
 export default function FinanceDashboardPage() {
     const router = useRouter();
-    const { user, isLoading: authLoading, logout } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
     const [allInvoices, setAllInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -196,7 +197,11 @@ export default function FinanceDashboardPage() {
                     {quickActions.map((action) => (
                         <Link key={action.label} href={action.link}>
                             <div className="group rounded-xl p-4 bg-white border border-slate-100 hover:border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${action.iconClasses}`}>
+                                <div className={clsx(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors",
+                                    action.label === 'Approval Queue' ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 dark:group-hover:bg-indigo-500 group-hover:text-white' :
+                                    'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                )}>
                                     <Icon name={action.icon} size={20} />
                                 </div>
                                 <p className="text-sm font-bold text-slate-700">{action.label}</p>
@@ -267,7 +272,7 @@ export default function FinanceDashboardPage() {
                                                             </td>
                                                         </tr>
                                                     ) : recentInvoices.length > 0 ? (
-                                                        recentInvoices.map((inv, idx) => {
+                                                        recentInvoices.map((inv) => {
                                                             const sc = getStatus(inv.status);
                                                             const pmSc = inv.pmApproval?.status === 'APPROVED'
                                                                 ? { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' }

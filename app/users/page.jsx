@@ -92,7 +92,7 @@ export default function UserManagementPage() {
             await api.put(`/api/users/${user.id}`, { isActive: !user.isActive });
             toast.success(`User ${user.isActive ? 'deactivated' : 'activated'}`);
             fetchUsers();
-        } catch (error) {
+        } catch (_err) {
             toast.error("Failed to update user status");
         }
     };
@@ -121,10 +121,10 @@ export default function UserManagementPage() {
     };
 
     const roleColors = {
-        [ROLES.ADMIN]: 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800',
-        [ROLES.PROJECT_MANAGER]: 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-100 dark:border-orange-800',
-        [ROLES.FINANCE_USER]: 'bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 border-teal-100 dark:border-teal-800',
-        [ROLES.VENDOR]: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800'
+        [ROLES.ADMIN]: 'bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800',
+        [ROLES.PROJECT_MANAGER]: 'bg-orange-50 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-orange-100 dark:border-orange-800',
+        [ROLES.FINANCE_USER]: 'bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border-teal-100 dark:border-teal-800',
+        [ROLES.VENDOR]: 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800'
     };
 
     return (
@@ -231,7 +231,7 @@ export default function UserManagementPage() {
                                     <tr key={user.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-linear from-slate-100 dark:from-slate-700 to-slate-200 dark:to-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-sm">
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-sm border border-slate-200 dark:border-slate-600 shadow-sm">
                                                     {user.name?.charAt(0) || "?"}
                                                 </div>
                                                 <div className="min-w-0">

@@ -108,6 +108,10 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.125);
 }
 
+.bg-gradient-linear {
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

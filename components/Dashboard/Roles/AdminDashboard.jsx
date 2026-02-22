@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import clsx from "clsx";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/Icon";
 import Link from "next/link";
@@ -206,7 +207,12 @@ const AdminDashboard = ({ invoices = [], onRefresh }) => {
                     {quickActions.map((action) => (
                         <Link key={action.path} href={action.path}>
                             <Card className="p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-600 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group shadow-sm h-full flex flex-col items-center sm:items-start text-center sm:text-left">
-                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-linear ${action.color} dark:${action.color.replace(/from-(\w+)-(\d+) to-(\w+)-(\d+)/g, 'from-$1 dark:from-$1-900 to-$3 dark:to-$3-900').replace(/from-(\w+)-(\d+)/g, 'from-$1-900')} flex items-center justify-center mb-3 sm:mb-4 shadow-md group-hover:scale-105 transition-transform shrink-0`}>
+                                <div className={clsx(
+                                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-linear-to-r flex items-center justify-center mb-3 sm:mb-4 shadow-md group-hover:scale-105 transition-transform shrink-0",
+                                    action.name === 'User Management' ? 'from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700' :
+                                    action.name === 'Rate Cards' ? 'from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700' :
+                                    'from-teal-500 to-teal-600 dark:from-teal-600 dark:to-teal-700'
+                                )}>
                                     <Icon name={action.icon} size={20} className="text-white sm:hidden" />
                                     <Icon name={action.icon} size={24} className="text-white hidden sm:block" />
                                 </div>
