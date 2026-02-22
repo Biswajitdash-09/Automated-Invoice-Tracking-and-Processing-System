@@ -121,10 +121,10 @@ export default function UserManagementPage() {
     };
 
     const roleColors = {
-        [ROLES.ADMIN]: 'bg-purple-50 text-purple-700 border-purple-100',
-        [ROLES.PROJECT_MANAGER]: 'bg-orange-50 text-orange-700 border-orange-100',
-        [ROLES.FINANCE_USER]: 'bg-teal-50 text-teal-700 border-teal-100',
-        [ROLES.VENDOR]: 'bg-amber-50 text-amber-700 border-amber-100'
+        [ROLES.ADMIN]: 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800',
+        [ROLES.PROJECT_MANAGER]: 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-100 dark:border-orange-800',
+        [ROLES.FINANCE_USER]: 'bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 border-teal-100 dark:border-teal-800',
+        [ROLES.VENDOR]: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800'
     };
 
     return (
@@ -147,44 +147,44 @@ export default function UserManagementPage() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-sm flex items-center justify-between">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-4 border border-white/20 dark:border-slate-600/20 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Users</p>
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-800">{users.length}</h3>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Total Users</p>
+                        <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200">{users.length}</h3>
                     </div>
-                    <div className="p-2 sm:p-3 bg-blue-50 text-blue-600 rounded-xl">
+                    <div className="p-2 sm:p-3 bg-sky-50 dark:bg-sky-700 text-sky-600 dark:text-sky-300 rounded-xl">
                         <Icon name="Users" size={20} />
                     </div>
                 </div>
-                <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-sm flex items-center justify-between">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-4 border border-white/20 dark:border-slate-600/20 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Active</p>
-                        <h3 className="text-xl sm:text-2xl font-bold text-green-600">{users.filter(u => u.isActive !== false).length}</h3>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Active</p>
+                        <h3 className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-200">{users.filter(u => u.isActive !== false).length}</h3>
                     </div>
-                    <div className="p-2 sm:p-3 bg-green-50 text-green-600 rounded-xl">
+                    <div className="p-2 sm:p-3 bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300 rounded-xl">
                         <Icon name="CheckCircle" size={20} />
                     </div>
                 </div>
-                <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-sm flex items-center justify-between xs:col-span-2 md:col-span-1">
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-4 border border-white/20 dark:border-slate-600/20 shadow-sm flex items-center justify-between xs:col-span-2 md:col-span-1">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Inactive</p>
-                        <h3 className="text-xl sm:text-2xl font-bold text-red-500">{users.filter(u => u.isActive === false).length}</h3>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Inactive</p>
+                        <h3 className="text-xl sm:text-2xl font-bold text-red-600 dark:text-rose-300">{users.filter(u => u.isActive === false).length}</h3>
                     </div>
-                    <div className="p-2 sm:p-3 bg-red-50 text-red-500 rounded-xl">
+                    <div className="p-2 sm:p-3 bg-rose-50 dark:bg-rose-900 text-rose-600 dark:text-rose-300 rounded-xl">
                         <Icon name="XCircle" size={20} />
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-lg p-3 sm:p-4 mb-6">
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-600/20 shadow-lg p-3 sm:p-4 mb-6">
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <div className="flex-1 relative">
-                        <Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                         <input
                             type="text"
                             placeholder="Search name or email..."
-                            className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50"
+                            className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 dark:bg-slate-800/50"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -192,7 +192,7 @@ export default function UserManagementPage() {
                     <select
                         value={filterRole}
                         onChange={(e) => setFilterRole(e.target.value)}
-                        className="px-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 font-medium shrink-0"
+                        className="px-4 py-2 text-xs sm:text-sm rounded-xl border border-gray-100 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white/50 dark:bg-slate-800/50 font-medium shrink-0"
                     >
                         <option value="ALL">All Roles</option>
                         {ROLES_LIST.map(role => (
@@ -203,42 +203,42 @@ export default function UserManagementPage() {
             </div>
 
             {/* Users Table */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/20 shadow-xl overflow-hidden">
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-600/20 shadow-xl overflow-hidden">
                 {loading ? (
                     <div className="p-12 text-center">
                         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-gray-500">Loading users...</p>
+                        <p className="text-slate-500 dark:text-slate-400">Loading users...</p>
                     </div>
                 ) : filteredUsers.length === 0 ? (
                     <div className="p-12 text-center">
-                        <Icon name="Users" size={48} className="mx-auto text-gray-300 mb-4" />
-                        <p className="text-gray-500">No users found</p>
+                        <Icon name="Users" size={48} className="mx-auto text-slate-300 dark:text-slate-500 mb-4" />
+                        <p className="text-slate-500 dark:text-slate-400">No users found</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-gray-100 bg-gray-50/50">
-                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">User</th>
-                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 hidden sm:table-cell">Role</th>
-                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 hidden md:table-cell">Scope</th>
-                                    <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
+                                <tr className="border-b border-gray-100 dark:border-slate-600 bg-gray-50/50 dark:bg-slate-800/50">
+                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">User</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hidden sm:table-cell">Role</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Status</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hidden md:table-cell">Scope</th>
+                                    <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-gray-100 dark:divide-slate-600">
                                 {filteredUsers.map((user) => (
-                                    <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <tr key={user.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-linear-to-r from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-linear from-slate-100 dark:from-slate-700 to-slate-200 dark:to-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-sm">
                                                     {user.name?.charAt(0) || "?"}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <div className="font-bold text-gray-900 text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">{user.name}</div>
-                                                    <div className="text-[10px] sm:text-xs text-gray-500 truncate max-w-[120px] sm:max-w-none">{user.email}</div>
+                                                    <div className="font-bold text-slate-900 dark:text-slate-50 text-xs sm:text-sm truncate max-w-[120px] sm:max-w:none">{user.name}</div>
+                                                    <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate max-w-[120px] sm:max-w:none">{user.email}</div>
                                                     <div className="sm:hidden mt-0.5">
-                                                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${roleColors[user.role] || 'bg-gray-50 text-gray-600 border-gray-100'}`}>
+                                                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${roleColors[user.role] || 'bg-gray-50 dark:bg-slate-800/50 text-gray-600 dark:text-slate-400 border-gray-100 dark:border-slate-600'}`}>
                                                             {user.role}
                                                         </span>
                                                     </div>
@@ -246,7 +246,7 @@ export default function UserManagementPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${roleColors[user.role] || 'bg-gray-50 text-gray-600 border-gray-100'}`}>
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${roleColors[user.role] || 'bg-gray-50 dark:bg-slate-800/50 text-gray-600 dark:text-slate-400 border-gray-100 dark:border-slate-600'}`}>
                                                 {user.role}
                                             </span>
                                         </td>
@@ -254,11 +254,11 @@ export default function UserManagementPage() {
                                             <button
                                                 onClick={() => handleToggleStatus(user)}
                                                 className={`flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-xs font-bold border transition-colors ${user.isActive !== false
-                                                    ? 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100'
-                                                    : 'bg-red-50 text-red-700 border-red-100 hover:bg-red-100'
+                                                    ? 'bg-emerald-50 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-800'
+                                                    : 'bg-rose-50 dark:bg-rose-900 text-rose-700 dark:text-rose-300 border-rose-100 dark:border-rose-700 hover:bg-rose-100 dark:hover:bg-rose-800'
                                                     }`}
                                             >
-                                                <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${user.isActive !== false ? 'bg-green-500' : 'bg-red-400'}`}></div>
+                                                <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${user.isActive !== false ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-rose-400 dark:bg-rose-300'}`}></div>
                                                 {user.isActive !== false ? 'Active' : 'Off'}
                                             </button>
                                         </td>
@@ -266,29 +266,29 @@ export default function UserManagementPage() {
                                             {user.assignedProjects?.length > 0 && (
                                                 <div className="flex flex-wrap gap-1">
                                                     {user.assignedProjects.map(p => (
-                                                        <span key={p} className="px-2 py-0.5 bg-gray-100 rounded text-[10px] font-bold text-gray-600 border border-gray-200">{p}</span>
+                                                        <span key={p} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-600">{p}</span>
                                                     ))}
                                                 </div>
                                             )}
                                             {user.vendorId && (
-                                                <span className="text-[10px] font-bold text-gray-500">Vendor: {user.vendorCode || user.vendorId}</span>
+                                                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Vendor: {user.vendorCode || user.vendorId}</span>
                                             )}
                                             {!user.assignedProjects?.length && !user.vendorId && (
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Global</span>
+                                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Global</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => handleEdit(user)}
-                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    className="p-2 text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-sky-300 hover:bg-blue-50 dark:hover:bg-sky-900 rounded-lg transition-colors"
                                                     title="Edit"
                                                 >
                                                     <Icon name="Edit2" size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(user.id)}
-                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    className="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-rose-300 hover:bg-red-50 dark:hover:bg-rose-900 rounded-lg transition-colors"
                                                     title="Delete"
                                                 >
                                                     <Icon name="Trash2" size={16} />
@@ -303,50 +303,50 @@ export default function UserManagementPage() {
                 )}
             </div>
 
-            <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
+            <div className="mt-6 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
                 <span>Showing {filteredUsers.length} of {users.length} users</span>
             </div>
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 dark:bg-white/20 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold">{editingUser ? 'Edit User' : 'Add User'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-gray-100 rounded-lg">
-                                <Icon name="X" size={20} className="text-gray-400" />
+                            <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+                                <Icon name="X" size={20} className="text-gray-400 dark:text-slate-500" />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
                                 <input
                                     type="email"
                                     required
                                     disabled={!!editingUser}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-gray-50 disabled:text-gray-500"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-gray-50 dark:disabled:bg-slate-800/50 disabled:text-gray-500 dark:disabled:text-slate-400"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                 />
                             </div>
                             {!editingUser && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
                                     <input
                                         type="password"
                                         required
                                         minLength={8}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         value={formData.password}
                                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                                         placeholder="Minimum 8 characters"
@@ -354,9 +354,9 @@ export default function UserManagementPage() {
                                 </div>
                             )}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Role</label>
                                 <select
-                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20"
                                     value={formData.role}
                                     onChange={e => setFormData({ ...formData, role: e.target.value })}
                                 >
@@ -368,24 +368,24 @@ export default function UserManagementPage() {
 
                             {formData.role === ROLES.PROJECT_MANAGER && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Projects</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Assigned Projects</label>
                                     <input
                                         type="text"
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         value={formData.assignedProjects}
                                         onChange={e => setFormData({ ...formData, assignedProjects: e.target.value })}
                                         placeholder="Project A, Project B"
                                     />
-                                    <p className="text-xs text-gray-400 mt-1">Comma-separated project names</p>
+                                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Comma-separated project names</p>
                                 </div>
                             )}
 
                             {formData.role === ROLES.VENDOR && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Vendor ID</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Vendor ID</label>
                                     <input
                                         type="text"
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         value={formData.vendorId}
                                         onChange={e => setFormData({ ...formData, vendorId: e.target.value })}
                                         placeholder="v-001"
@@ -394,14 +394,14 @@ export default function UserManagementPage() {
                             )}
 
                             {editingUser && (
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                    <span className="text-sm font-medium text-gray-700">Active Status</span>
+                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Active Status</span>
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                                        className={`w-12 h-6 rounded-full transition-colors relative ${formData.isActive ? 'bg-green-500' : 'bg-gray-300'}`}
+                                        className={`w-12 h-6 rounded-full transition-colors relative ${formData.isActive ? 'bg-emerald-500 dark:bg-emerald-600' : 'bg-slate-600 dark:bg-emerald-700'}`}
                                     >
-                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow ${formData.isActive ? 'left-7' : 'left-1'}`} />
+                                        <div className={`absolute top-1 w-4 h-4 bg-white dark:bg-slate-200 rounded-full transition-transform shadow ${formData.isActive ? 'left-7' : 'left-1'}`} />
                                     </button>
                                 </div>
                             )}
@@ -410,7 +410,7 @@ export default function UserManagementPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 px-4 py-2.5 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors border border-gray-200"
+                                    className="flex-1 px-4 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors border border-gray-200 dark:border-slate-600"
                                 >
                                     Cancel
                                 </button>

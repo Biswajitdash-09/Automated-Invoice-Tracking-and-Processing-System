@@ -51,16 +51,16 @@ export default function LandingPage() {
             <div className="p-3 bg-linear-to-tr from-primary to-accent rounded-xl shadow-lg mr-4">
               <Icon name="Zap" className="text-white w-8 h-8" />
             </div>
-            <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-linear-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300 tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-linear-to-r from-slate-800 to-slate-600 dark:from-sky-800 dark:to-sky-100 tracking-tight">
               InvoiceFlow
             </h1>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-700 dark:text-gray-200 mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-700 dark:text-slate-200 mb-6">
             Intelligent Invoice Processing
           </h2>
 
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
             Experience the future of financial workflows. seamless digitization,
             AI-powered extraction, and 3-way matching.
           </p>

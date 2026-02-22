@@ -51,7 +51,7 @@ export default function SignupPage() {
                         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-accent">
                             Create Account
                         </h1>
-                        <p className="text-gray-500 mt-2">Join InvoiceFlow today</p>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2">Join InvoiceFlow today</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
@@ -62,48 +62,48 @@ export default function SignupPage() {
                         )}
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-900 ml-1">Full Name</label>
+                            <label className="text-sm font-semibold text-slate-900 dark:text-slate-50 ml-1">Full Name</label>
                             <div className="relative">
-                                <Icon name="User" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                                <Icon name="User" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="input w-full pl-11 bg-white/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-500"
+                                    className="input w-full pl-11 bg-white/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-600 focus:bg-white focus:bg-slate-800 focus:ring-2 focus:ring-primary/20 rounded-xl transition-all text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400"
                                     placeholder="John Doe"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-900 ml-1">Email</label>
+                            <label className="text-sm font-semibold text-slate-900 dark:text-slate-50 ml-1">Email</label>
                             <div className="relative">
-                                <Icon name="Mail" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                                <Icon name="Mail" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="input w-full pl-11 bg-white/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-500"
+                                    className="input w-full pl-11 bg-white/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-600 focus:bg-white focus:bg-slate-800 focus:ring-2 focus:ring-primary/20 rounded-xl transition-all text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400"
                                     placeholder="name@company.com"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-900 ml-1">Password</label>
+                            <label className="text-sm font-semibold text-slate-900 dark:text-slate-50 ml-1">Password</label>
                             <div className="relative">
-                                <Icon name="Lock" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                                <Icon name="Lock" size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="input w-full pl-11 pr-11 bg-white/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/20 rounded-xl transition-all text-gray-900 placeholder:text-gray-500"
+                                    className="input w-full pl-11 pr-11 bg-white/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-600 focus:bg-white focus:bg-slate-800 focus:ring-2 focus:ring-primary/20 rounded-xl transition-all text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400"
                                     placeholder="Create a strong password"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword((prev) => !prev)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                                     aria-label={showPassword ? "Hide password" : "Show password"}
                                     tabIndex={-1}
                                 >
@@ -131,7 +131,7 @@ export default function SignupPage() {
                     </form>
 
                     <div className="mt-8 text-center">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                             Already have an account?{" "}
                             <Link href="/login" className="text-primary font-bold hover:underline">
                                 Sign in

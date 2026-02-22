@@ -94,15 +94,15 @@ const AuditTrail = ({ invoice }) => {
   if (!invoice) return null;
 
   return (
-    <div className="bg-white/40 backdrop-blur-md rounded-2xl p-6 border border-white/50 shadow-sm">
-      <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2">
+    <div className="bg-white/40 dark:bg-slate-800/40 backdrop-blur-md rounded-2xl p-6 border border-white/50 dark:border-slate-700/50 shadow-sm">
+      <h3 className="font-bold text-gray-800 dark:text-slate-100 mb-6 flex items-center gap-2">
         <Icon name="History" size={20} className="text-primary" />
         Audit Trail
       </h3>
 
       <div className="relative pl-4 space-y-8">
         {/* Continuous Line */}
-        <div className="absolute top-2 left-[27px] w-0.5 h-[calc(100%-40px)] bg-gray-200 -z-10"></div>
+        <div className="absolute top-2 left-[27px] w-0.5 h-[calc(100%-40px)] bg-gray-200 dark:bg-slate-700 -z-10"></div>
 
         {timeline.map((step, index) => (
           <motion.div
@@ -115,8 +115,8 @@ const AuditTrail = ({ invoice }) => {
             {/* Icon Node */}
             <div
               className={clsx(
-                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 ring-4 ring-white z-10 transition-colors duration-300",
-                step.status === "current" ? "bg-white border-2 animate-pulse" : step.bgColor,
+                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 ring-4 ring-white dark:ring-slate-900 z-10 transition-colors duration-300",
+                step.status === "current" ? "bg-white dark:bg-slate-800 border-2 animate-pulse" : step.bgColor,
                 step.status === "current" ? step.borderColor : "border-transparent",
                 step.color
               )}
@@ -130,16 +130,16 @@ const AuditTrail = ({ invoice }) => {
                 <h4
                   className={clsx(
                     "font-bold text-sm",
-                    step.status === "current" ? "text-gray-900" : "text-gray-700"
+                    step.status === "current" ? "text-gray-900 dark:text-white" : "text-gray-700 dark:text-slate-300"
                   )}
                 >
                   {step.title}
                 </h4>
-                <span className="text-[10px] font-mono text-gray-400 bg-white/50 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-mono text-gray-400 dark:text-slate-500 bg-white/50 dark:bg-slate-900/50 px-1.5 py-0.5 rounded">
                   {step.date}
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mt-0.5">{step.description}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{step.description}</p>
             </div>
           </motion.div>
         ))}

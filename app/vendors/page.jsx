@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Icon from "@/components/Icon";
-import { getAllInvoices, getVendorDashboardData, ingestInvoice } from "@/lib/api";
+import { getVendorDashboardData } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { getNormalizedRole, ROLES } from "@/constants/roles";
 import { INVOICE_STATUS } from "@/lib/invoice-workflow";
@@ -57,9 +57,7 @@ function VendorPortalContent() {
 
     // PM Selection State — PM list = all signed-up project managers
     const [pms, setPms] = useState([]);
-    const [financeUsers, setFinanceUsers] = useState([]);
     const [selectedPM, setSelectedPM] = useState("");
-    const [selectedFinanceUser, setSelectedFinanceUser] = useState("");
     const [vendorProfile, setVendorProfile] = useState(null); // { vendorCode, name } for display
 
     // OCR auto-fill state
@@ -235,26 +233,26 @@ function VendorPortalContent() {
             case "PAID":
             case "VERIFIED":
             case "APPROVED":
-                return "text-emerald-600 bg-emerald-50 border-emerald-100";
+                return "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800";
             case "MATCH_DISCREPANCY":
-                return "text-amber-600 bg-amber-50 border-amber-100";
+                return "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-800";
             case "REJECTED":
-                return "text-rose-600 bg-rose-50 border-rose-100";
+                return "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-100 dark:border-rose-800";
             case "DIGITIZING":
             case "RECEIVED":
-                return "text-amber-600 bg-amber-50 border-amber-100 animate-pulse";
+                return "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-800 animate-pulse";
             case INVOICE_STATUS.MORE_INFO_NEEDED:
             case "INFO_REQUESTED":
-                return "text-amber-600 bg-amber-50 border-amber-100";
+                return "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-800";
             default:
-                return "text-slate-500 bg-slate-50 border-slate-100";
+                return "text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800";
         }
     };
 
     const getStepStyle = (cfg) => {
-        if (cfg.color === 'emerald') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-        if (cfg.color === 'rose') return 'bg-rose-50 text-rose-600 border-rose-100';
-        return 'bg-amber-50 text-amber-600 border-amber-100';
+        if (cfg.color === 'emerald') return 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800';
+        if (cfg.color === 'rose') return 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-800';
+        return 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-800';
     };
 
     const getStatusDisplay = (approval) => {
@@ -403,7 +401,7 @@ function VendorPortalContent() {
                             <button
                                 type="button"
                                 onClick={handleDownloadCSV}
-                                className="w-10 h-10 sm:w-11 sm:h-11 bg-white border border-slate-200 rounded-xl sm:rounded-2xl text-slate-600 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center"
+                                className="w-10 h-10 sm:w-11 sm:h-11 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center justify-center"
                                 title="Export CSV"
                             >
                                 <Icon name="Download" size={18} />
@@ -421,24 +419,24 @@ function VendorPortalContent() {
                     { label: "Processing", value: stats.pending, icon: "Clock", color: "amber", sub: "Awaiting Verification" },
                     { label: "Total Volume", value: new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(stats.amount), icon: "DollarSign", color: "blue", sub: "Cumulative Billing", isPrice: true }
                 ].map((stat, i) => (
-                    <div key={i} className="bg-white/80 p-5 sm:p-6 rounded-2xl sm:rounded-[2.5rem] border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group backdrop-blur-sm">
+                    <div key={i} className="bg-white/80 dark:bg-slate-800/80 p-5 sm:p-6 rounded-2xl sm:rounded-[2.5rem] border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group backdrop-blur-sm">
                         <div className="flex items-center gap-3 mb-3 sm:mb-4">
                             <div className={clsx(
                                 "w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm",
-                                stat.color === 'teal' ? 'bg-teal-50 text-teal-600' :
-                                    stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
-                                        stat.color === 'amber' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
+                                stat.color === 'teal' ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400' :
+                                    stat.color === 'emerald' ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400' :
+                                        stat.color === 'amber' ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400' : 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400'
                             )}>
                                 <Icon name={stat.icon} size={22} />
                             </div>
-                            <span className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest leading-tight">{stat.label}</span>
+                            <span className="text-[10px] sm:text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-tight">{stat.label}</span>
                         </div>
-                        <p className={clsx("font-black text-slate-800 tracking-tight", stat.isPrice ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl")}>{stat.value}</p>
+                        <p className={clsx("font-black text-slate-800 dark:text-slate-100 tracking-tight", stat.isPrice ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl")}>{stat.value}</p>
                         <div className={clsx(
                             "mt-4 flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold w-fit px-3 py-1.5 rounded-full border shadow-sm",
-                            stat.color === 'teal' ? 'bg-teal-50/50 text-teal-600 border-teal-100' :
-                                stat.color === 'emerald' ? 'bg-emerald-50/50 text-emerald-600 border-emerald-100' :
-                                    stat.color === 'amber' ? 'bg-amber-50/50 text-amber-600 border-amber-100' : 'bg-blue-50/50 text-blue-600 border-blue-100'
+                            stat.color === 'teal' ? 'bg-teal-50/50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-800' :
+                                stat.color === 'emerald' ? 'bg-emerald-50/50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' :
+                                    stat.color === 'amber' ? 'bg-amber-50/50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-800' : 'bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800'
                         )}>
                             {stat.sub}
                         </div>
@@ -453,22 +451,22 @@ function VendorPortalContent() {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="bg-amber-50 border-2 border-amber-200 p-6 rounded-4xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl shadow-amber-500/5"
+                        className="bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-200 dark:border-amber-800 p-6 rounded-4xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl shadow-amber-500/5"
                     >
                         <div className="flex items-center gap-5">
                             <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20 animate-bounce">
                                 <Icon name="AlertTriangle" size={28} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-800 tracking-tight">Attention Required: {unreadRecheckCount} Invoice{unreadRecheckCount > 1 ? 's' : ''}</h3>
-                                <p className="text-sm font-bold text-amber-700 mt-1 uppercase tracking-widest flex items-center gap-2">
+                                <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Attention Required: {unreadRecheckCount} Invoice{unreadRecheckCount > 1 ? 's' : ''}</h3>
+                                <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mt-1 uppercase tracking-widest flex items-center gap-2">
                                     <Icon name="MessageSquare" size={14} /> PM has requested re-verification of your documents
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={() => router.push('/vendors/rechecks')}
-                            className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all active:scale-95 flex items-center justify-center gap-3"
+                            className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 dark:hover:bg-white transition-all active:scale-95 flex items-center justify-center gap-3"
                         >
                             <Icon name="AlertCircle" size={16} /> View Re-checks
                         </button>
@@ -478,23 +476,23 @@ function VendorPortalContent() {
 
             <div className="flex flex-col gap-10">
                 <div className="space-y-10">
-                    <div className="bg-white rounded-2xl sm:rounded-[3rem] shadow-2xl shadow-slate-200/40 border border-slate-100 overflow-hidden flex flex-col min-h-[500px]">
-                        <div className="p-6 sm:p-10 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-end justify-between bg-white/50 backdrop-blur-xl gap-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[3rem] shadow-2xl shadow-slate-200/40 dark:shadow-slate-800/40 border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col min-h-[500px]">
+                        <div className="p-6 sm:p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-end justify-between bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl gap-4">
                             <div>
-                                <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 sm:gap-4">
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-[1.25rem] bg-slate-50 text-slate-400 flex items-center justify-center shadow-inner">
+                                <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3 sm:gap-4">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-[1.25rem] bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center shadow-inner">
                                         <Icon name="History" size={22} />
                                     </div>
                                     Submission History
                                 </h2>
-                                <p className="text-[10px] sm:text-xs text-slate-400 mt-2 sm:mt-3 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                                    <span className="hidden xs:block w-8 h-px bg-slate-200" />
+                                <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 mt-2 sm:mt-3 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <span className="hidden xs:block w-8 h-px bg-slate-200 dark:bg-slate-800" />
                                     Monitoring {allSubmissions.length} Ledger Records
                                 </p>
                             </div>
-                            <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-emerald-100 shadow-sm">
+                            <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl border border-emerald-100 dark:border-emerald-800 shadow-sm">
                                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse ring-4 ring-emerald-500/20" />
-                                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-700">Live Transmission Active</span>
+                                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Live Transmission Active</span>
                             </div>
                         </div>
 
@@ -502,22 +500,22 @@ function VendorPortalContent() {
                             {/* Desktop Table View */}
                             <table className="hidden md:table w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] border-b border-slate-100 bg-slate-50/30">
+                                    <tr className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.25em] border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30">
                                         <th className="px-10 py-6">Invoice Reference</th>
                                         <th className="px-6 py-6">Approval Status</th>
                                         <th className="px-6 py-6">Financial Value</th>
                                         <th className="px-10 py-6 text-right">Vault Access</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                     {allSubmissions.length === 0 ? (
                                         <tr>
                                             <td colSpan={4} className="px-10 py-32 text-center">
-                                                <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner">
-                                                    <Icon name="Inbox" size={48} className="text-slate-200" />
+                                                <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner">
+                                                    <Icon name="Inbox" size={48} className="text-slate-200 dark:text-slate-700" />
                                                 </div>
-                                                <p className="text-xl font-black text-slate-300 uppercase tracking-widest">Digital Vault Empty</p>
-                                                <p className="text-sm font-medium text-slate-400 mt-3">Ready for your first submission</p>
+                                                <p className="text-xl font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest">Digital Vault Empty</p>
+                                                <p className="text-sm font-medium text-slate-400 dark:text-slate-500 mt-3">Ready for your first submission</p>
                                             </td>
                                         </tr>
                                     ) : (
@@ -553,22 +551,22 @@ function VendorPortalContent() {
                                                     whileInView={{ opacity: 1, x: 0 }}
                                                     viewport={{ once: true }}
                                                     transition={{ delay: Math.min(idx * 0.05, 0.5) }}
-                                                    className="group hover:bg-slate-50/80 transition-all duration-300 cursor-pointer"
+                                                    className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all duration-300 cursor-pointer"
                                                     onClick={(e) => handleViewDocument(e, inv.id)}
                                                 >
                                                     <td className="px-8 py-7 sm:px-10">
                                                         <div className="flex items-center gap-5 sm:gap-6">
-                                                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 shadow-sm border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-6 transition-all duration-500">
+                                                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-sm border border-indigo-100 dark:border-indigo-800 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-6 transition-all duration-500">
                                                                 <Icon name="FileText" size={26} />
                                                             </div>
                                                             <div className="min-w-0 flex-1">
-                                                                <p className="font-black text-slate-800 text-base sm:text-lg truncate max-w-[200px] lg:max-w-[300px]" title={inv.originalName}>
+                                                                <p className="font-black text-slate-800 dark:text-slate-200 text-base sm:text-lg truncate max-w-[200px] lg:max-w-[300px]" title={inv.originalName}>
                                                                     {inv.originalName || "DOCUMENT_ID_" + inv.id.slice(-6)}
                                                                 </p>
                                                                 <div className="flex items-center gap-3 mt-2">
-                                                                    <span className="text-[10px] sm:text-xs text-indigo-600 font-mono font-black bg-indigo-50/50 px-2 py-0.5 rounded-md border border-indigo-100/50">{inv.invoiceNumber || inv.id.slice(0, 8)}</span>
-                                                                    <span className="text-slate-300 text-[10px] font-black opacity-30">//</span>
-                                                                    <span className="text-[10px] sm:text-xs text-slate-400 font-black uppercase tracking-widest">{inv.date || new Date(inv.receivedAt).toLocaleDateString()}</span>
+                                                                    <span className="text-[10px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-mono font-black bg-indigo-50/50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-md border border-indigo-100/50 dark:border-indigo-800/50">{inv.invoiceNumber || inv.id.slice(0, 8)}</span>
+                                                                    <span className="text-slate-300 dark:text-slate-600 text-[10px] font-black opacity-30">//</span>
+                                                                    <span className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">{inv.date || new Date(inv.receivedAt).toLocaleDateString()}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -595,17 +593,17 @@ function VendorPortalContent() {
                                                     </td>
                                                     <td className="px-6 py-7">
                                                         <div className="space-y-1.5">
-                                                            <p className="text-xl font-black text-slate-800 tracking-tight">
+                                                            <p className="text-xl font-black text-slate-800 dark:text-slate-200 tracking-tight">
                                                                 {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(inv.amount || 0)}
                                                             </p>
-                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest opacity-60">Value In Ledger</p>
+                                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest opacity-60">Value In Ledger</p>
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-7 sm:px-10 text-right">
                                                         <div className="flex items-center justify-end gap-2.5">
                                                             <button
                                                                 onClick={(e) => handleViewDocument(e, inv.id)}
-                                                                className="w-11 h-11 inline-flex items-center justify-center text-teal-600 bg-teal-50 border border-teal-200 hover:bg-teal-600 hover:text-white rounded-xl shadow-sm transition-all duration-300 hover:scale-110 active:scale-95 text-[9px] font-black uppercase tracking-wider"
+                                                                className="w-11 h-11 inline-flex items-center justify-center text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800 hover:bg-teal-600 hover:text-white rounded-xl shadow-sm transition-all duration-300 hover:scale-110 active:scale-95 text-[9px] font-black uppercase tracking-wider"
                                                                 title={`View Invoice: ${inv.originalName}`}
                                                             >
                                                                 INV
@@ -614,8 +612,8 @@ function VendorPortalContent() {
                                                                 const isRfp = doc.type === 'ANNEX';
                                                                 const label = isRfp ? 'RFP' : 'COM';
                                                                 const btnStyle = isRfp
-                                                                    ? 'text-indigo-600 bg-indigo-50 border-indigo-200 hover:bg-indigo-600 hover:text-white'
-                                                                    : 'text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-600 hover:text-white';
+                                                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-600 hover:text-white'
+                                                                    : 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 hover:bg-amber-600 hover:text-white';
                                                                 return (
                                                                     <button
                                                                         key={doc.documentId}
@@ -649,20 +647,20 @@ function VendorPortalContent() {
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
                                             transition={{ delay: idx * 0.05 }}
-                                            className="bg-white/90 backdrop-blur-sm rounded-[2rem] p-6 border border-slate-200/60 shadow-sm active:scale-95 transition-all"
+                                            className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-4xl p-6 border border-slate-200/60 dark:border-slate-800/60 shadow-sm active:scale-95 transition-all"
                                             onClick={(e) => handleViewDocument(e, inv.id)}
                                         >
                                             <div className="flex items-start justify-between mb-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-sm border border-indigo-100">
+                                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-sm border border-indigo-100 dark:border-indigo-800">
                                                         <Icon name="FileText" size={20} />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-black text-slate-800 text-sm truncate max-w-[150px]">{inv.originalName || "INV_" + inv.id.slice(-6)}</h4>
-                                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{inv.date || new Date(inv.receivedAt).toLocaleDateString()}</p>
+                                                        <h4 className="font-black text-slate-800 dark:text-slate-200 text-sm truncate max-w-[150px]">{inv.originalName || "INV_" + inv.id.slice(-6)}</h4>
+                                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest mt-0.5">{inv.date || new Date(inv.receivedAt).toLocaleDateString()}</p>
                                                     </div>
                                                 </div>
-                                                <p className="text-lg font-black text-slate-800 tracking-tight">
+                                                <p className="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight">
                                                     {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(inv.amount || 0)}
                                                 </p>
                                             </div>
@@ -693,7 +691,7 @@ function VendorPortalContent() {
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={(e) => handleViewDocument(e, inv.id)}
-                                                    className="flex-1 h-12 bg-teal-50 text-teal-700 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-teal-100 flex items-center justify-center gap-2"
+                                                    className="flex-1 h-12 bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-400 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-teal-100 dark:border-teal-800 flex items-center justify-center gap-2"
                                                 >
                                                     View Invoice
                                                 </button>
@@ -704,7 +702,7 @@ function VendorPortalContent() {
                                                             onClick={(e) => handleViewAdditionalDoc(e, doc)}
                                                             className={clsx(
                                                                 "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-[10px] border shadow-sm",
-                                                                doc.type === 'ANNEX' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-amber-50 text-amber-600 border-amber-100'
+                                                                doc.type === 'ANNEX' ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800' : 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-800'
                                                             )}
                                                             title={`View ${doc.type === 'ANNEX' ? 'RFP' : 'Commercial'}`}
                                                         >
@@ -725,8 +723,8 @@ function VendorPortalContent() {
                                                 </div>
                                                 {/* Mobile Tooltip/Message Indicator */}
                                                 {pmDisplay.label === 'Re-check' && inv.pmApproval?.notes && (
-                                                    <div className="col-span-2 mt-2 p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-800">
-                                                        <span className="font-bold block mb-1 flex items-center gap-1"><Icon name="MessageSquare" size={12} /> PM Request:</span>
+                                                    <div className="col-span-2 mt-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800 rounded-xl text-xs text-amber-800 dark:text-amber-300">
+                                                        <span className="font-bold mb-1 flex items-center gap-1"><Icon name="MessageSquare" size={12} /> PM Request:</span>
                                                         {inv.pmApproval.notes}
                                                     </div>
                                                 )}
@@ -748,7 +746,7 @@ function VendorPortalContent() {
                                                     {inv.status.replace("_", " ")}
                                                 </span>
                                                 <div className="text-right">
-                                                    <p className="text-base font-black text-slate-800">
+                                                    <p className="text-base font-black text-slate-800 dark:text-slate-200">
                                                         {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(inv.amount || 0)}
                                                     </p>
                                                 </div>
@@ -765,7 +763,7 @@ function VendorPortalContent() {
                     <ActiveRates rateCards={rateCards} loading={loading} />
 
                     {/* Quick Guide card if needed */}
-                    <div className="bg-slate-900 rounded-4xl p-8 text-white relative overflow-hidden shadow-xl">
+                    <div className="bg-slate-900 dark:bg-slate-950 rounded-4xl p-8 text-white relative overflow-hidden shadow-xl border border-white/5 dark:border-white/10">
                         <div className="absolute top-0 right-0 p-6 opacity-10">
                             <Icon name="LifeBuoy" size={100} />
                         </div>
@@ -794,7 +792,7 @@ function VendorPortalContent() {
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative bg-white w-full max-w-4xl rounded-3xl sm:rounded-4xl shadow-2xl overflow-hidden z-151 flex flex-col md:flex-row max-h-[95vh] sm:max-h-[90vh] border border-white mx-auto"
+                            className="relative bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl sm:rounded-4xl shadow-2xl overflow-hidden z-151 flex flex-col md:flex-row max-h-[95vh] sm:max-h-[90vh] border border-white dark:border-slate-800 mx-auto"
                         >
                             <div className="hidden lg:flex lg:w-[35%] bg-teal-600 p-10 flex-col justify-between text-white relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-8 opacity-10 scale-150 rotate-12">
@@ -825,15 +823,15 @@ function VendorPortalContent() {
                                 </div>
                             </div>
 
-                            <div className="flex-1 p-6 sm:p-12 overflow-y-auto custom-scrollbar bg-slate-50/30">
+                            <div className="flex-1 p-6 sm:p-12 overflow-y-auto custom-scrollbar bg-slate-50/30 dark:bg-slate-950/30">
                                 <div className="flex items-center justify-between mb-8 sm:mb-10">
                                     <div>
-                                        <h3 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Invoice Details</h3>
+                                        <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Invoice Details</h3>
                                         <div className="h-1 w-12 bg-teal-600 mt-2 rounded-full" />
                                     </div>
                                     <button
                                         onClick={() => setIsSubmissionModalOpen(false)}
-                                        className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors"
+                                        className="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors"
                                     >
                                         <Icon name="X" size={20} />
                                     </button>
@@ -873,15 +871,15 @@ function VendorPortalContent() {
                                         setCommercialFileName('');
                                         resetOcrFields();
                                         handleUploadComplete();
-                                    } catch (error) {
+                                    } catch {
                                         toast.error("Failed to submit invoice. Please try again.", { id: toastId });
                                     } finally { setLoading(false); }
                                 }} className="space-y-6">
                                     <div className="space-y-5">
                                         {/* Invoice File (PDF) - Moved to top */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Invoice (PDF) <span className="text-rose-500">*</span></label>
-                                            <div className="relative group/modalfile border-2 border-dashed border-slate-200 rounded-2xl hover:border-teal-500 hover:bg-teal-50/30 transition-all p-8 flex flex-col items-center justify-center gap-3">
+                                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1">Invoice (PDF) <span className="text-rose-500">*</span></label>
+                                            <div className="relative group/modalfile border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl hover:border-teal-500 hover:bg-teal-50/30 dark:hover:bg-teal-900/10 transition-all p-8 flex flex-col items-center justify-center gap-3">
                                                 <input
                                                     type="file"
                                                     name="file"
@@ -892,7 +890,7 @@ function VendorPortalContent() {
                                                 />
                                                 <div className={clsx(
                                                     "w-12 h-12 rounded-xl flex items-center justify-center transition-all shadow-sm",
-                                                    selectedFile ? "bg-teal-500 text-white" : ocrLoading ? "bg-amber-500 text-white animate-pulse" : "bg-slate-50 text-slate-400 group-hover/modalfile:text-teal-600 group-hover/modalfile:bg-white"
+                                                    selectedFile ? "bg-teal-500 text-white" : ocrLoading ? "bg-amber-500 text-white animate-pulse" : "bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 group-hover/modalfile:text-teal-600 dark:group-hover/modalfile:text-teal-400 group-hover/modalfile:bg-white dark:group-hover/modalfile:bg-slate-800"
                                                 )}>
                                                     <Icon name={ocrLoading ? "Loader" : selectedFile ? "FileCheck" : "FileUp"} size={24} />
                                                 </div>
@@ -906,8 +904,8 @@ function VendorPortalContent() {
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest">Select Invoice PDF</p>
-                                                            <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-tight">PDF Only (Max 10MB) • Fields will auto-fill via OCR</p>
+                                                            <p className="text-[11px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Select Invoice PDF</p>
+                                                            <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-tight">PDF Only (Max 10MB) • Fields will auto-fill via OCR</p>
                                                         </>
                                                     )}
                                                 </div>
@@ -915,9 +913,9 @@ function VendorPortalContent() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Assign to Project Manager <span className="text-rose-500">*</span></label>
+                                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1">Assign to Project Manager <span className="text-rose-500">*</span></label>
                                             <select
-                                                className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer"
+                                                className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer"
                                                 value={selectedPM}
                                                 onChange={(e) => setSelectedPM(e.target.value)}
                                                 required
@@ -931,43 +929,43 @@ function VendorPortalContent() {
 
                                         {/* OCR Loading Overlay */}
                                         {ocrLoading && (
-                                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 rounded-3xl flex flex-col items-center justify-center gap-3">
+                                            <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm z-20 rounded-3xl flex flex-col items-center justify-center gap-3">
                                                 <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-                                                <p className="text-[11px] font-black text-teal-600 uppercase tracking-widest">Extracting Invoice Data...</p>
-                                                <p className="text-[9px] text-slate-400 font-bold">Powered by Mindee OCR</p>
+                                                <p className="text-[11px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Extracting Invoice Data...</p>
+                                                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold">Powered by Mindee OCR</p>
                                             </div>
                                         )}
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Invoice No. <span className="text-rose-500">*</span></label>
-                                                <input type="text" name="invoiceNumber" value={ocrInvoiceNumber} onChange={(e) => setOcrInvoiceNumber(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300" placeholder={ocrLoading ? 'Extracting...' : 'e.g. #7721'} required />
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Invoice No. <span className="text-rose-500">*</span></label>
+                                                <input type="text" name="invoiceNumber" value={ocrInvoiceNumber} onChange={(e) => setOcrInvoiceNumber(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder={ocrLoading ? 'Extracting...' : 'e.g. #7721'} required />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Invoice Date <span className="text-rose-500">*</span></label>
-                                                <input type="date" name="invoiceDate" value={ocrInvoiceDate} onChange={(e) => setOcrInvoiceDate(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all" required />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Basic Amount <span className="text-rose-500">*</span></label>
-                                                <input type="number" name="basicAmount" step="0.01" value={ocrBasicAmount} onChange={(e) => setOcrBasicAmount(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-mono" placeholder={ocrLoading ? 'Extracting...' : '0.00'} required />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Total Amount (₹) <span className="text-rose-500">*</span></label>
-                                                <input type="number" name="amount" step="0.01" value={ocrTotalAmount} onChange={(e) => setOcrTotalAmount(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-mono" placeholder={ocrLoading ? 'Extracting...' : '0.00'} required />
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Invoice Date <span className="text-rose-500">*</span></label>
+                                                <input type="date" name="invoiceDate" value={ocrInvoiceDate} onChange={(e) => setOcrInvoiceDate(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all shadow-color-slate-900/50" required />
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Taxes <span className="text-rose-500">*</span></label>
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Basic Amount <span className="text-rose-500">*</span></label>
+                                                <input type="number" name="basicAmount" step="0.01" value={ocrBasicAmount} onChange={(e) => setOcrBasicAmount(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-mono placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder={ocrLoading ? 'Extracting...' : '0.00'} required />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Total Amount (₹) <span className="text-rose-500">*</span></label>
+                                                <input type="number" name="amount" step="0.01" value={ocrTotalAmount} onChange={(e) => setOcrTotalAmount(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all font-mono placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder={ocrLoading ? 'Extracting...' : '0.00'} required />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">Taxes <span className="text-rose-500">*</span></label>
                                                 <select
                                                     name="taxType"
                                                     value={ocrTaxType}
                                                     onChange={(e) => setOcrTaxType(e.target.value)}
-                                                    className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer"
+                                                    className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer"
                                                     required
                                                 >
                                                     <option value="">Select Tax Type</option>
@@ -976,8 +974,8 @@ function VendorPortalContent() {
                                                 </select>
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">HSN Code <span className="text-rose-500">*</span></label>
-                                                <input type="text" name="hsnCode" value={ocrHsnCode} onChange={(e) => setOcrHsnCode(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300" placeholder={ocrLoading ? 'Extracting...' : 'e.g. 998314'} required />
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1 min-h-[16px] flex items-end">HSN Code <span className="text-rose-500">*</span></label>
+                                                <input type="text" name="hsnCode" value={ocrHsnCode} onChange={(e) => setOcrHsnCode(e.target.value)} className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder={ocrLoading ? 'Extracting...' : 'e.g. 998314'} required />
                                             </div>
                                         </div>
 
@@ -999,7 +997,7 @@ function VendorPortalContent() {
                                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">RFP Document</label>
                                                 <div className={clsx(
                                                     "relative border-2 rounded-2xl transition-all p-4 flex items-center gap-4",
-                                                    rfpFileName ? "border-emerald-300 bg-emerald-50/50" : "border-dashed border-slate-200 hover:border-indigo-400"
+                                                    rfpFileName ? "border-emerald-300 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-900/10" : "border-dashed border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500"
                                                 )}>
                                                     <input
                                                         type="file"
@@ -1010,20 +1008,20 @@ function VendorPortalContent() {
                                                     />
                                                     <div className={clsx(
                                                         "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                                                        rfpFileName ? "bg-emerald-500 text-white" : "bg-indigo-50 text-indigo-500"
+                                                        rfpFileName ? "bg-emerald-500 text-white" : "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 dark:text-indigo-400"
                                                     )}>
                                                         <Icon name={rfpFileName ? "CheckCircle" : "FileText"} size={18} />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
                                                         {rfpFileName ? (
                                                             <>
-                                                                <p className="text-[11px] font-black text-emerald-600 truncate">{rfpFileName}</p>
-                                                                <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-tight">Uploaded ✓</p>
+                                                                <p className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 truncate">{rfpFileName}</p>
+                                                                <p className="text-[9px] text-emerald-500 dark:text-emerald-500 font-bold uppercase tracking-tight">Uploaded ✓</p>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <p className="text-[11px] font-bold text-slate-600">Upload RFP</p>
-                                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">PDF, Word, Excel</p>
+                                                                <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Upload RFP</p>
+                                                                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-tight">PDF, Word, Excel</p>
                                                             </>
                                                         )}
                                                     </div>
@@ -1032,10 +1030,10 @@ function VendorPortalContent() {
 
                                             {/* Commercial / Timesheet */}
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Commercial / Timesheet</label>
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-1">Commercial / Timesheet</label>
                                                 <div className={clsx(
                                                     "relative border-2 rounded-2xl transition-all p-4 flex items-center gap-4",
-                                                    commercialFileName ? "border-emerald-300 bg-emerald-50/50" : "border-dashed border-slate-200 hover:border-amber-400"
+                                                    commercialFileName ? "border-emerald-300 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-900/10" : "border-dashed border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500"
                                                 )}>
                                                     <input
                                                         type="file"
@@ -1046,20 +1044,20 @@ function VendorPortalContent() {
                                                     />
                                                     <div className={clsx(
                                                         "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                                                        commercialFileName ? "bg-emerald-500 text-white" : "bg-amber-50 text-amber-500"
+                                                        commercialFileName ? "bg-emerald-500 text-white" : "bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400"
                                                     )}>
                                                         <Icon name={commercialFileName ? "CheckCircle" : "Clock"} size={18} />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
                                                         {commercialFileName ? (
                                                             <>
-                                                                <p className="text-[11px] font-black text-emerald-600 truncate">{commercialFileName}</p>
-                                                                <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-tight">Uploaded ✓</p>
+                                                                <p className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 truncate">{commercialFileName}</p>
+                                                                <p className="text-[9px] text-emerald-500 dark:text-emerald-500 font-bold uppercase tracking-tight">Uploaded ✓</p>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <p className="text-[11px] font-bold text-slate-600">Upload Commercial / Timesheet</p>
-                                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">PDF, Excel</p>
+                                                                <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Upload Commercial / Timesheet</p>
+                                                                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-tight">PDF, Excel</p>
                                                             </>
                                                         )}
                                                     </div>
@@ -1073,19 +1071,20 @@ function VendorPortalContent() {
                                         <div className="text-amber-600 text-[11px] font-bold uppercase leading-relaxed">
                                             DECLARATION & CONFIRMATION
                                         </div>
-                                        <div className="border border-slate-200 bg-slate-50/80 rounded-2xl p-6 flex items-center gap-3">
+                                        <div className="border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/50 rounded-2xl p-6 flex items-center gap-3">
                                             <input
                                                 type="checkbox"
                                                 name="disclaimerAccepted"
                                                 value="true"
                                                 required
                                                 onChange={(e) => setDisclaimerChecked(e.target.checked)}
+                                                className="accent-teal-600"
                                             />
-                                            <div className="text-slate-600 text-xs font-medium leading-relaxed">
+                                            <div className="text-slate-600 dark:text-slate-400 text-xs font-medium leading-relaxed">
                                                 Disclaimer- I have verified all the information as per agreed terms with Maruti Suzuki India Limited. The Invoice, RFP Proposal/Timesheet is strictly as per agreement.
                                             </div>
-                                            <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                                                <Icon name={disclaimerChecked ? "CheckCircle" : "Warning"} size={18} />
+                                            <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm">
+                                                <Icon name={disclaimerChecked ? "CheckCircle" : "Warning"} size={18} className={disclaimerChecked ? "text-emerald-500" : "text-amber-500"} />
                                             </div>
                                         </div>
                                     </div>
@@ -1094,13 +1093,13 @@ function VendorPortalContent() {
                                         <button
                                             type="button"
                                             onClick={() => setIsSubmissionModalOpen(false)}
-                                            className="flex-1 h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                                            className="flex-1 h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                                         >
                                             Discard
                                         </button>
                                         <button
                                             type="submit"
-                                            className="flex-[2] h-12 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-teal-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:grayscale"
+                                            className="flex-2 h-12 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-teal-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:grayscale"
                                             disabled={loading || !disclaimerChecked}
                                         >
                                             {loading ? <span className="loading loading-spinner loading-xs"></span> : <Icon name="Send" size={16} />}
@@ -1129,42 +1128,42 @@ function VendorPortalContent() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="relative bg-white w-full max-w-5xl rounded-3xl sm:rounded-[3rem] shadow-2xl overflow-hidden z- flex flex-col max-h-[90vh] border border-white"
+                            className="relative bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl sm:rounded-[3rem] shadow-2xl overflow-hidden z- flex flex-col max-h-[90vh] border border-white dark:border-slate-800"
                         >
-                            <div className="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 bg-slate-50/50 gap-4">
+                            <div className="flex flex-col sm:flex-row items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 gap-4">
                                 <div className="flex items-center gap-4 w-full sm:w-auto">
-                                    <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-lg shadow-teal-200 shrink-0">
+                                    <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-lg shadow-teal-200 dark:shadow-teal-900/40 shrink-0">
                                         <Icon name="FileText" size={20} />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <h3 className="font-black text-slate-800 text-sm truncate max-w-[200px] sm:max-w-md">
+                                        <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm truncate max-w-[200px] sm:max-w-md">
                                             {viewerDocName || allSubmissions.find((i) => i.id === viewerInvoiceId)?.originalName || `Invoice ${viewerInvoiceId}`}
                                         </h3>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Secure Document Access</p>
+                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Secure Document Access</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
                                     <a
                                         href={viewerDocUrl || `/api/invoices/${viewerInvoiceId}/file`}
                                         download
-                                        className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                                        className="h-9 sm:h-10 px-3 sm:px-4 flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
                                     >
                                         <Icon name="Download" size={14} /> <span className="hidden xs:inline">Download</span>
                                     </a>
                                     <button
                                         type="button"
                                         onClick={() => { setViewerInvoiceId(null); setViewerDocUrl(null); setViewerDocName(null); }}
-                                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-slate-200 flex items-center justify-center text-slate-400 transition-colors bg-slate-100"
+                                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 transition-colors bg-slate-100 dark:bg-slate-800"
                                     >
                                         <Icon name="X" size={18} />
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex-1 bg-slate-100 relative min-h-[60vh] max-h-[80vh] overflow-y-auto">
+                            <div className="flex-1 bg-slate-100 dark:bg-slate-950 relative min-h-[60vh] max-h-[80vh] overflow-y-auto">
                                 {viewerLoading && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 z-10">
                                         <span className="loading loading-spinner loading-lg text-teal-600 mb-4" />
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Retreiving Vault Record...</p>
+                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Retreiving Vault Record...</p>
                                     </div>
                                 )}
                                 {(() => {
